@@ -48,7 +48,7 @@ function formatAgo(createdAt: Date): string {
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 }
 
-function fallbackActivity(status = 200): NextResponse {
+function fallbackActivity(checkedAt: string, status = 200): NextResponse {
   return jsonResponse(
     {
       ago: 'Recently',
@@ -56,7 +56,7 @@ function fallbackActivity(status = 200): NextResponse {
       repo: GITHUB_REPOSITORY,
       sha: 'unknown',
       message: 'Activity feed temporarily unavailable',
-      checkedAt: new Date().toISOString(),
+      checkedAt,
     },
     status
   );
@@ -149,16 +149,6 @@ export async function GET(): Promise<NextResponse> {
       checkedAt,
     });
   } catch {
-    return jsonResponse(
-      {
-        ago: 'Recently',
-        type: 'StatusEvent',
-        repo: GITHUB_REPOSITORY,
-        sha: 'unknown',
-        message: 'Activity feed temporarily unavailable',
-        checkedAt,
-      },
-      200
-    );
+    return fallbackActivity(checkedAt);
   }
 }

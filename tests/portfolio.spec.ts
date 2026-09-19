@@ -5,8 +5,6 @@
 import { CONTACT_EMAIL } from '@/lib/config';
 import { expect, test, type Page } from '@playwright/test';
 
-const COMMAND_PALETTE_SHORTCUT = process.platform === 'darwin' ? 'Meta+k' : 'Control+k';
-
 async function goto(page: Page) {
   await page.goto('/');
   await expect(page.locator('#hero-title')).toBeVisible();

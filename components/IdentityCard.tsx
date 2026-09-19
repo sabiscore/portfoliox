@@ -52,7 +52,8 @@ export default function IdentityCard({ className = '' }: IdentityCardProps): JSX
                 src="/headshot.webp"
                 alt="Portrait of Oscar Ndugbu"
                 fill
-                priority
+                loading="lazy"
+                fetchPriority="low"
                 sizes="(max-width: 640px) 116px, 190px"
                 className="identity-card-portrait object-cover object-center opacity-95"
               />

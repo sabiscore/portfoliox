@@ -96,7 +96,7 @@ test.describe('Hero', () => {
     await expect(headshot).toBeAttached();
   });
 
-  test('hero bio contains reliability-first positioning', async ({ page }) => {
+  test('hero bio contains backend, platform, and AI infrastructure positioning', async ({ page }) => {
     const hero = page.locator('section#hero[aria-labelledby="hero-title"]');
     await expect(hero.locator('p.hero-body-text')).toContainText(
       /Backend, platform, and AI infrastructure/i
@@ -173,8 +173,8 @@ test.describe('Projects', () => {
     await goto(page);
   });
 
-  test('section heading "Built to survive real constraints." is visible', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Built to survive/i })).toBeVisible();
+  test('section heading "Built around real constraints." is visible', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Built around\s+real constraints\./i })).toBeVisible();
   });
 
   test('no meta-commentary headings', async ({ page }) => {
@@ -486,7 +486,7 @@ test.describe('Footer', () => {
 
   test('trust strip copy is correct', async ({ page }) => {
     await expect(page.locator('footer')).toContainText(
-      'Backend · Platform · AI infrastructure · Reliability'
+      'Backend · Platform · AI infrastructure · Production reliability'
     );
   });
 

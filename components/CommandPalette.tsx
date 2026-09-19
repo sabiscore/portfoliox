@@ -474,17 +474,14 @@ export function CommandPalette() {
           //     rgba(0,0,0,0.72) is visually equivalent at this coverage level.
           //   - aria-hidden="true": the backdrop is not a dialog — it's a dismiss target.
           //     The inner panel below carries role="dialog" and the actual semantics.
-          <m.div
+          <div
             className="fixed inset-0 z-[500] bg-[rgba(0,0,0,0.72)]"
-            initial={reducedMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reducedMotion ? {} : { opacity: 0 }}
             onClick={close}
             aria-hidden="true"
           >
             {/* FIX v22 [ARIA-1]: role="dialog" lives here — the panel is the dialog.
                 The outer overlay div above is the dismissible backdrop (aria-hidden). */}
-            <m.div
+            <div
               ref={panelRef}
               className={[
                 'glass-full absolute overflow-hidden',
@@ -495,11 +492,6 @@ export function CommandPalette() {
               role="dialog"
               aria-modal="true"
               aria-label="Command palette"
-              variants={panelVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              transition={panelTransition}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drag handle — enlarged tap target on mobile */}

@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { useTheme } from '@/components/ThemeProvider';
+import { STATIC_PALETTE_ITEMS } from '@/constants/palette';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 import { springs } from '@/lib/motionVariants';
 
@@ -33,6 +34,9 @@ const PANEL_VARIANTS_MOBILE = {
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 72 },
 };
+
+const YAP_ENGINE_PALETTE_ITEM = STATIC_PALETTE_ITEMS.find((item) => item.id === 'proj-yap-engine');
+const YAP_ENGINE_CASE_STUDY_HREF = YAP_ENGINE_PALETTE_ITEM?.href ?? '/work/yap-engine';
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -173,6 +177,19 @@ export function CommandPalette() {
           close();
         },
       },
+      ...(YAP_ENGINE_PALETTE_ITEM?.href
+        ? [
+            {
+              id: YAP_ENGINE_PALETTE_ITEM.id,
+              group: 'Case Studies',
+              label: `${YAP_ENGINE_PALETTE_ITEM.label} case study`,
+              action: () => {
+                router.push(YAP_ENGINE_CASE_STUDY_HREF);
+                close();
+              },
+            } satisfies CommandItem,
+          ]
+        : []),
       {
         id: 'action-writing',
         group: 'Actions',

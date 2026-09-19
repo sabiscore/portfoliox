@@ -671,6 +671,25 @@ test.describe('Command Palette — V1.0 Easter Eggs', () => {
       test.skip();
     }
   });
+
+  test('The Yap Engine command opens its case study', async ({ page }) => {
+    await page.keyboard.press('Control+k');
+    await page.waitForTimeout(200);
+
+    const dialog = page.getByRole('dialog', { name: /command palette/i });
+    const isOpen = await dialog.isVisible().catch(() => false);
+
+    if (!isOpen) {
+      test.skip();
+    }
+
+    await page.getByRole('textbox', { name: /command search/i }).fill('yap');
+    const command = page.getByRole('button', { name: 'The Yap Engine case study' });
+
+    await expect(command).toBeVisible();
+    await command.click();
+    await expect(page).toHaveURL(/\/work\/yap-engine$/);
+  });
 });
 
 test.describe('Performance — CLS', () => {

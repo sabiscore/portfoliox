@@ -1,11 +1,15 @@
+import dynamic from 'next/dynamic';
 import type { JSX } from 'react';
 
-import IdentityCard from './IdentityCard';
-import { LiveActivityBar } from './Liveactivitybar';
 import SquircleDefs from './SquircleDefs';
 import { HERO } from '@/lib/portfolio-data';
 
 const HERO_ARIA_LABEL = `${HERO.h1} ${HERO.subHeadline}`;
+
+const IdentityCard = dynamic(() => import('./IdentityCard'));
+const LiveActivityBar = dynamic(
+  () => import('./Liveactivitybar').then((mod) => ({ default: mod.LiveActivityBar }))
+);
 
 export function HeroSection(): JSX.Element {
   return (

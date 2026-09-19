@@ -51,7 +51,7 @@ function IdentityCardSkeleton({ className = '' }: Readonly<IdentityCardPlacehold
     <div
       aria-hidden="true"
       className={[
-        'mx-auto w-full max-w-[25rem] rounded-[2rem] border border-white/10 bg-white/[0.055] p-2.5 shadow-2xl shadow-sky-950/35 backdrop-blur-2xl',
+        'mx-auto w-full max-w-[25rem] rounded-[2rem] border border-white/10 bg-white/[0.055] p-2.5 shadow-2xl shadow-sky-950/35 sm:backdrop-blur-2xl',
         className,
       ].join(' ')}
     >
@@ -78,6 +78,8 @@ function IdentityCardSkeleton({ className = '' }: Readonly<IdentityCardPlacehold
             </div>
           ))}
         </div>
+
+        <div className="mt-4 hidden h-4 w-56 animate-pulse rounded bg-white/10 sm:block" />
       </div>
     </div>
   );

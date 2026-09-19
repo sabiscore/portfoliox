@@ -198,7 +198,7 @@ export default function IdentityCard({
         <div className="relative p-3.5 sm:p-5">
           <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:gap-3">
             <p className="min-w-0 rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.2em] text-sky-100/90 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.28em]">
-              How I work
+              Operating model
             </p>
 
             <span className="shrink-0 rounded-full border border-orange-300/20 bg-orange-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.18em] text-orange-100/85 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.24em]">
@@ -241,7 +241,7 @@ export default function IdentityCard({
               </div>
 
               <p className="text-xs leading-5 text-white/62 sm:text-sm sm:leading-6">
-                I build backend, platform, and AI systems that make failure visible, recovery deliberate, and operations easier to understand.
+                Backend, platform, and AI systems designed to make failure visible, recovery deliberate, and operations easier to understand.
               </p>
 
               <div className="flex flex-wrap gap-1.5 sm:gap-2">

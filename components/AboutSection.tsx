@@ -89,7 +89,7 @@ export function AboutSection() {
                   </>
                 }
                 description={
-                  'More than a decade in federal data systems shaped how I build software today: start with the constraint, make failure visible, and design recovery before it is needed.'
+                  'More than a decade in federal data systems shaped this approach to software: start with the constraint, make failure visible, and design recovery before it is needed.'
                 }
                 eyebrowVariant={itemVariants}
                 titleVariant={headingVariant}
@@ -106,7 +106,7 @@ export function AboutSection() {
                 variants={itemVariants}
                 className="about-narrative-p text-color-text-primary mt-7 max-w-[var(--max-width-prose)] text-base leading-8 opacity-[0.82]"
               >
-                UBEC taught me to design for incomplete inputs and partial results without hiding what is missing. That discipline now carries into every system: make failure visible, make recovery deliberate, and leave enough context for the next engineer to operate the system with confidence.
+                Work at UBEC reinforced a discipline for incomplete inputs and partial results without hiding what is missing. That discipline now carries into every system: make failure visible, make recovery deliberate, and leave enough context for the next engineer to operate the system with confidence.
               </m.p>
 
               <m.p
@@ -120,7 +120,7 @@ export function AboutSection() {
                 variants={itemVariants}
                 className="about-narrative-p text-color-text-primary mt-5 max-w-[var(--max-width-prose)] text-base leading-8 opacity-[0.65]"
               >
-                The resume gives the professional history; public repositories show the engineering record. Where evidence is private, I label it that way rather than turning an internal observation into a public metric.
+                The resume gives the professional history; public repositories show the engineering record. Where evidence is private, that boundary stays explicit rather than turning an internal observation into a public metric.
               </m.p>
             </div>
 
@@ -158,7 +158,7 @@ export function AboutSection() {
               className="glass-surface border-l-color-film-teal mt-8 rounded-[var(--radius-lg)] border-l-2 p-5 sm:p-6"
             >
               <p className="text-color-film-teal mb-2 font-mono text-[10px] font-semibold tracking-widest uppercase">
-                How I Engineer · Non-Negotiable Standards
+                Engineering Standards · Non-Negotiable
               </p>
               <div className="flex flex-col gap-4" role="list">
                 {[

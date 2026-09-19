@@ -24,7 +24,7 @@ export const HERO = {
   title: 'Staff Backend and Platform Engineer',
   kicker: 'Staff Backend and Platform Engineer',
   h1: 'The system has to work at 2am.',
-  subHeadline: 'I build systems that stay understandable when the pressure is real.',
+  subHeadline: 'Systems that stay understandable when the pressure is real.',
   body: 'Backend, platform, and AI infrastructure that make failure visible, recovery deliberate, and day-to-day operations easier to trust.',
   availability: 'OPEN TO STAFF BACKEND AND PLATFORM OPPORTUNITIES',
   availabilityLastUpdated: '2026-08-22',

@@ -6868,9 +6868,11 @@ html.lenis body {
    Desktop-only enhancement uses a cheap transform/opacity transition instead
    of pointer-driven Framer Motion and full-screen procedural SVG effects. */
 .site-grain {
-  background-image: url('/noise.png');
-  background-repeat: repeat;
-  background-size: 128px 128px;
+  background-image:
+    radial-gradient(circle at 17% 23%, rgba(255, 255, 255, 0.8) 0 0.6px, transparent 0.8px),
+    radial-gradient(circle at 71% 64%, rgba(255, 255, 255, 0.55) 0 0.5px, transparent 0.75px),
+    radial-gradient(circle at 43% 82%, rgba(255, 255, 255, 0.45) 0 0.5px, transparent 0.75px);
+  background-size: 67px 71px, 83px 79px, 97px 89px;
   opacity: 0.025;
 }
 

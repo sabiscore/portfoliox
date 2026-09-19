@@ -456,8 +456,7 @@ export function CommandPalette() {
 
   return (
     <>
-      <AnimatePresence>
-        {open && (
+      {open && (
           // FIX v22 [COMPOSITOR-1, ARIA-1]:
           //   - No backdropFilter — was triggering on-demand GPU layer promotion on mount.
           //     rgba(0,0,0,0.72) is visually equivalent at this coverage level.
@@ -610,7 +609,6 @@ export function CommandPalette() {
             </div>
           </div>
         )}
-      </AnimatePresence>
 
       {/* Persistent quick-actions FAB.
           Keeps one global affordance while exposing a fast-contact action.

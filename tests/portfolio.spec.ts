@@ -42,10 +42,9 @@ async function openCommandPalette(page: Page) {
 
     const openedFromQuickActions = await waitForPaletteVisible();
     if (!openedFromQuickActions) {
-    // The palette is intentionally code-split and mounted after explicit intent.
-    // On a cold mobile run the first synthetic event can race the deferred
-    // component's effect registration, so retry the intent until the dialog
-    // actually appears instead of treating the lazy boundary as deterministic.
+      // On slower CI boots, the global open event can still race client effect
+      // registration. Retry dispatching until the palette is observable so this
+      // helper remains resilient across hydration timing variance.
       const deadline = Date.now() + 5_000;
       while (Date.now() < deadline) {
         await page.evaluate(() => {

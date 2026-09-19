@@ -1,10 +1,33 @@
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+
+const GITHUB_REPOSITORY = 'Scardubu/oscar-portfolio-main';
+const GITHUB_COMMITS_URL = `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits?per_page=1`;
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'private, no-store, no-cache, max-age=0, must-revalidate',
+  'CDN-Cache-Control': 'no-store',
+  'Vercel-CDN-Cache-Control': 'no-store',
+  'Surrogate-Control': 'no-store',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
+function jsonResponse(
+  data: Record<string, string>,
+  status = 200
+): NextResponse {
+  return NextResponse.json(data, {
+    status,
+    headers: NO_STORE_HEADERS,
+  });
+}
 
 function formatAgo(createdAt: Date): string {
-  const diffMinutes = Math.floor((Date.now() - createdAt.getTime()) / 60_000);
+  const diffMilliseconds = Date.now() - createdAt.getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMilliseconds / 60_000));
 
   if (diffMinutes < 2) {
     return 'Just now';
@@ -21,74 +44,121 @@ function formatAgo(createdAt: Date): string {
   }
 
   const diffDays = Math.floor(diffHours / 24);
+
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 }
 
-function fallbackActivity(status = 200) {
-  return NextResponse.json(
+function fallbackActivity(status = 200): NextResponse {
+  return jsonResponse(
     {
       ago: 'Recently',
-      type: 'PushEvent',
-      repo: 'oscar-portfolio-main',
+      type: 'StatusEvent',
+      repo: GITHUB_REPOSITORY,
       sha: 'unknown',
-      message: 'Building in production',
+      message: 'Activity feed temporarily unavailable',
+      checkedAt: new Date().toISOString(),
     },
-    { status }
+    status
   );
 }
 
 function trimCommitMessage(message: string): string {
   const line = message.split('\n')[0]?.trim() ?? '';
-  if (!line) return 'Building in production';
-  if (line.length <= 60) return line;
+
+  if (!line) {
+    return 'Building in production';
+  }
+
+  if (line.length <= 60) {
+    return line;
+  }
+
   return `${line.slice(0, 57)}...`;
 }
 
-export async function GET() {
+interface GitHubCommit {
+  sha: string;
+  commit: {
+    message: string;
+    author: {
+      date: string;
+    } | null;
+    committer?: {
+      date: string;
+    } | null;
+  };
+}
+
+export async function GET(): Promise<NextResponse> {
+  const checkedAt = new Date().toISOString();
+
   try {
-    const res = await fetch('https://api.github.com/repos/Scardubu/oscar-portfolio-main/commits?per_page=1', {
+    const response = await fetch(GITHUB_COMMITS_URL, {
+      cache: 'no-store',
       headers: {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'scardubu.dev-activity-feed',
         ...(process.env.GITHUB_TOKEN
-          ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+          ? {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            }
           : {}),
       },
-      next: { revalidate: 3600 },
     });
 
-    if (!res.ok) {
-      throw new Error(`GitHub API ${res.status}`);
+    if (!response.ok) {
+      throw new Error(`GitHub API ${response.status}`);
     }
 
-    const commits = (await res.json()) as Array<{
-      sha: string;
-      commit: {
-        message: string;
-        author: { date: string };
-      };
-    }>;
+    const commits = (await response.json()) as GitHubCommit[];
 
     if (!commits.length) {
-      return fallbackActivity();
+      return jsonResponse({
+        ago: 'Recently',
+        type: 'StatusEvent',
+        repo: GITHUB_REPOSITORY,
+        sha: 'unknown',
+        message: 'No recent activity found',
+        checkedAt,
+      });
     }
 
     const commit = commits[0];
-    const createdAt = new Date(commit.commit.author.date);
-    const ago = formatAgo(createdAt);
 
-    return NextResponse.json(
-      {
-        ago,
-        type: 'PushEvent',
-        repo: 'Scardubu/oscar-portfolio-main',
-        sha: commit.sha.slice(0, 7),
-        message: trimCommitMessage(commit.commit.message),
-        createdAt: commit.commit.author.date,
-      },
-      { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' } }
-    );
+    const commitDate =
+      commit.commit.author?.date ??
+      commit.commit.committer?.date;
+
+    if (!commitDate) {
+      throw new Error('Latest GitHub commit has no usable timestamp');
+    }
+
+    const createdAt = new Date(commitDate);
+
+    if (Number.isNaN(createdAt.getTime())) {
+      throw new Error('Latest GitHub commit has an invalid timestamp');
+    }
+
+    return jsonResponse({
+      ago: formatAgo(createdAt),
+      type: 'PushEvent',
+      repo: GITHUB_REPOSITORY,
+      sha: commit.sha.slice(0, 7),
+      message: trimCommitMessage(commit.commit.message),
+      checkedAt,
+    });
   } catch {
-    return fallbackActivity();
+    return jsonResponse(
+      {
+        ago: 'Recently',
+        type: 'StatusEvent',
+        repo: GITHUB_REPOSITORY,
+        sha: 'unknown',
+        message: 'Activity feed temporarily unavailable',
+        checkedAt,
+      },
+      200
+    );
   }
 }

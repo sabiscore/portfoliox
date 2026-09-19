@@ -82,14 +82,14 @@ export function MotionProvider({ children }: Readonly<{ children: ReactNode }>) 
         idleCallback = true;
         idleId = window.requestIdleCallback(() => startLoading(), { timeout: 900 });
       } else {
-        idleId = window.setTimeout(startLoading, 600);
+        idleId = globalThis.setTimeout(startLoading, 600);
       }
 
       return () => {
         if (idleCallback) {
           window.cancelIdleCallback(idleId);
         } else {
-          window.clearTimeout(idleId);
+          globalThis.clearTimeout(idleId);
         }
         active = false;
         removeIntentListeners();

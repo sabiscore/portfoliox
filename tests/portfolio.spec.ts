@@ -707,6 +707,18 @@ test.describe('Command Palette — V1.0 Easter Eggs', () => {
     await expect(page).toHaveURL(/\/work\/yap-engine$/);
   });
 
+  test('The TaxBridge command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('TaxBridge');
+
+    const taxBridgeCommand = page.getByRole('button', { name: /TaxBridge case study/i });
+    await expect(taxBridgeCommand).toBeVisible();
+
+    await taxBridgeCommand.click();
+    await expect(page).toHaveURL(/\/work\/taxbridge$/);
+  });
+
 });
 
 test.describe('Performance — CLS', () => {

@@ -257,22 +257,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
 
       <body className={cn('relative min-h-[100dvh] overflow-x-clip antialiased')}>
-        <div
-          className="site-grain pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
-          aria-hidden="true"
-        >
-          <svg className="absolute h-full w-full" xmlns="http://www.w3.org/2000/svg">
-            <filter id="scar-grain-noise">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.8"
-                numOctaves="3"
-                stitchTiles="stitch"
-              />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#scar-grain-noise)" />
-          </svg>
-        </div>
+        <div className="site-grain pointer-events-none fixed inset-0 z-0" aria-hidden="true" />
 
         <a href="#main-content" className="skip-nav">
           Skip to main content
@@ -299,31 +284,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <clipPath id="squircle-id" clipPathUnits="objectBoundingBox">
               <path d="M 0.500 0.000 C 0.817 0.000 0.870 0.030 0.920 0.080 C 0.977 0.136 1.000 0.183 1.000 0.500 C 1.000 0.817 0.977 0.864 0.920 0.920 C 0.870 0.970 0.817 1.000 0.500 1.000 C 0.183 1.000 0.130 0.970 0.080 0.920 C 0.023 0.864 0.000 0.817 0.000 0.500 C 0.000 0.183 0.023 0.136 0.080 0.080 C 0.130 0.030 0.183 0.000 0.500 0.000 Z" />
             </clipPath>
-            <filter id="luxury-duotone-cinema" colorInterpolationFilters="sRGB">
-              <feColorMatrix
-                type="matrix"
-                values="0.2126 0.7152 0.0722 0 0
-                        0.2126 0.7152 0.0722 0 0
-                        0.2126 0.7152 0.0722 0 0
-                        0      0      0      1 0"
-                result="grayscale"
-              />
-              <feComponentTransfer in="grayscale" result="duotone">
-                <feFuncR type="table" tableValues="0.0118 1.0000" />
-                <feFuncG type="table" tableValues="0.1098 0.5843" />
-                <feFuncB type="table" tableValues="0.1412 0.2510" />
-              </feComponentTransfer>
-              <feColorMatrix
-                type="matrix"
-                values="1 0 0 0 0
-                        0 1 0 0 0
-                        0 0 1 0 0
-                        0 0 0 0.15 0"
-                in="SourceGraphic"
-                result="faint-original"
-              />
-              <feComposite operator="over" in="faint-original" in2="duotone" />
-            </filter>
           </defs>
         </svg>
 

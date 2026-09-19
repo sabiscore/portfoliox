@@ -156,6 +156,52 @@ export const PROJECTS: readonly Project[] = [
     caseStudy: '/work/swarmxq',
   },
   {
+    slug: 'yap-engine',
+    title: 'The Yap Engine',
+    type: 'AI Video Platform · Agent Orchestration',
+    status: 'case-study',
+    featured: true,
+    tagline:
+      'Pressure-aware short-form video generation powered by an autonomous agent runtime, from a raw topic to a publish-ready creative package.',
+    description:
+      'The Yap Engine is a short-form video generation platform powered by SwarmXQ. It turns a topic or creative brief into structured intent, a hook-led script, storyboard scenes, voice, captions, deterministic media assembly, and a certified export path while the runtime governs local-model memory pressure, retries, queue state, and graceful degradation.',
+    chosen: 'A pressure-aware multi-stage pipeline with task-specific local model routing',
+    over: 'A single general-purpose model call followed by ad-hoc media scripting',
+    because:
+      'Video generation crosses distinct reasoning, creative, and media stages. Separating those stages makes model selection, resource pressure, recovery, and output validation explicit instead of hiding them inside one opaque generation request.',
+    constraint:
+      'CPU-only generation on constrained hardware must remain observable and recoverable while multiple AI and media stages compete for memory, model residency, queue capacity, and external services.',
+    outcomes: [
+      'brief-to-video creative pipeline',
+      'task-specific local-model routing',
+      'checkpointed and resumable jobs',
+      'pressure-aware graceful degradation',
+    ],
+    ledger: {
+      constraint:
+        'Short-form video generation must survive constrained CPU/RAM resources and partial failures without turning a long-running job into an opaque restart.',
+      decision:
+        'Stage the pipeline from intent through finalization, route work to task-specific local models, and enforce explicit queue, timeout, and resource-pressure boundaries.',
+      outcome:
+        'Creative work has visible stage boundaries, recoverable job state, and deliberate degradation paths across inference and media generation.',
+      evidence: 'Public source · architecture case study.',
+    },
+    stack: [
+      'Python 3.11+',
+      'Fastify 5',
+      'TypeScript',
+      'Ollama',
+      'Next.js 16',
+      'React 19',
+      'Redis 7',
+      'BullMQ',
+      'FFmpeg',
+      'Kokoro TTS',
+    ],
+    githubUrl: 'https://github.com/sabiscore/the-yap-engine',
+    caseStudy: '/work/yap-engine',
+  },
+  {
     slug: 'hashablanca',
     title: 'Hashablanca',
     type: 'Blockchain · ZK Privacy',

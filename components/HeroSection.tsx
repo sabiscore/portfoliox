@@ -12,7 +12,7 @@ export function HeroSection(): JSX.Element {
     <section
       id="hero"
       aria-labelledby="hero-title"
-      className="relative isolate overflow-hidden bg-[color:var(--brand-bg)] px-5 pt-24 pb-14 text-white sm:px-8 sm:py-24 lg:min-h-screen lg:px-12"
+      className="relative isolate overflow-x-clip overflow-y-visible bg-[color:var(--brand-bg)] px-5 pt-24 pb-14 text-white min-h-0! sm:px-8 sm:py-24 lg:min-h-dvh! lg:px-12"
     >
       <SquircleDefs />
 
@@ -21,7 +21,7 @@ export function HeroSection(): JSX.Element {
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.18),transparent_32%),radial-gradient(circle_at_84%_20%,rgba(251,146,60,0.14),transparent_30%),linear-gradient(180deg,rgba(2,6,23,1),rgba(15,23,42,0.94))]"
       />
 
-      <div className="hero-grid-shell mx-auto grid max-w-7xl items-center gap-9 sm:gap-12 lg:min-h-[calc(100vh-12rem)] lg:grid-cols-[1.04fr_0.96fr]">
+      <div className="hero-grid-shell mx-auto grid max-w-7xl items-center gap-9 sm:gap-12 lg:min-h-[calc(100dvh-12rem)] lg:grid-cols-[1.04fr_0.96fr]">
         <div className="hero-grid-child max-w-3xl">
           <div className="mb-6 sm:mb-8">
             <p className="text-xl font-semibold tracking-[-0.025em] text-white sm:text-2xl">

@@ -1,0 +1,83 @@
+---
+title: 'The Yap Engine'
+summary: 'Pressure-aware short-form video generation powered by SwarmXQ — from a raw brief through scripting, storyboard, voice, captions, deterministic assembly, and export.'
+tags:
+  - 'Python'
+  - 'Fastify 5'
+  - 'TypeScript'
+  - 'Ollama'
+  - 'Next.js 16'
+  - 'React 19'
+  - 'Redis 7'
+  - 'BullMQ'
+  - 'FFmpeg'
+  - 'Kokoro TTS'
+---
+
+## Problem shape
+
+Short-form video generation is not one model call. A useful output crosses intent classification, creative planning, scripting, storyboard generation, voice, visual assembly, caption timing, quality checks, and export.
+
+The failure surface grows with every stage. Local LLM inference also competes for memory with Python orchestration, queue workers, media tooling, and the dashboard. On constrained CPU hardware, a pipeline that assumes unlimited model residency or parallel rendering can turn one creative request into an out-of-memory failure or an unrecoverable long-running job.
+
+## Approach
+
+The Yap Engine treats video generation as a staged production pipeline powered by the SwarmXQ runtime:
+
+`intent classification → planning → scripting → storyboard → render assembly → finalization`
+
+Each stage has a defined contract, timeout boundary, model responsibility, and failure path. Task-specific local models are routed through Ollama rather than asking one general-purpose model to own the entire workflow.
+
+The creative pipeline produces structured artifacts before media assembly. That makes the intermediate decisions inspectable: the hook, narrative structure, script, shot plan, voice choice, visual prompts, captions, and final package can be validated independently.
+
+The runtime also treats resource pressure as part of the application contract. Model residency is governed for constrained hosts, heavyweight inference is serialized when required, and degraded paths are explicit instead of silently continuing with unsafe assumptions.
+
+## Key decisions
+
+**Stage-specific orchestration over a monolithic generation call**
+
+A single prompt can produce impressive demos, but it hides where quality or reliability failed. The staged pipeline makes each transition observable and testable, so creative logic can evolve without rewriting the render layer.
+
+**Pressure-aware local inference over unrestricted parallelism**
+
+The target environment is CPU-only and resource constrained. The runtime therefore uses model routing, memory-pressure checks, bounded concurrency, timeout budgets, and eviction policies to keep inference within the available hardware envelope.
+
+**Deterministic media assembly over an opaque render step**
+
+The render layer uses explicit FFmpeg assembly with optional ComfyUI or Modal GPU paths. This keeps the baseline reproducible while allowing richer visual generation when the environment supports it.
+
+**Recoverable jobs over disposable requests**
+
+Video generation is long-running work. Queue state, client request identifiers, job progress, cancellation, and reconnection semantics are treated as first-class concerns so a disconnected client does not imply a lost generation job.
+
+## Constraint
+
+The system must produce useful creative work on CPU-only hardware while sharing memory between local models, orchestration services, queue state, and media processing.
+
+That constraint drives the architecture: one heavyweight model at a time on constrained profiles, bounded video concurrency, explicit stage timeouts, pressure-aware admission, and graceful degradation when optional services such as advanced visual generation are unavailable.
+
+## Evidence-backed performance and impact
+
+The repository contains concrete engineering measurements and verification artifacts, but they should not be conflated with a production throughput benchmark.
+
+- **18.00 s golden-path export** — the documented production-pack validation produced an 18.00-second H.264 video artifact at 720×1280 / 30 fps with AAC 48 kHz stereo, verified with FFprobe.
+- **100–140 s cold model-load window** — the runtime documents this CPU cold-load envelope for the Pilot model and prewarms it during startup so model loading is moved off the request path. This is a documented operational envelope, not a universal latency SLA.
+- **21-stage resumable workflow** — the Creative Factory pipeline defines 21 ordered stages with checkpoints and restart hydration, making long-running generation measurable and recoverable at stage boundaries.
+- **248 automated API/dashboard tests** — the V6.2.50 project record reports 248 tests as the authoritative Vitest runner count at that milestone, with the recorded quality-gate state marked all green.
+- **Benchmark protocol is explicit** — the repository's benchmarking guidance requires a controlled environment and at least 30 iterations, reporting median, p95, p99, and standard deviation. That means unrecorded throughput or latency figures are deliberately excluded from this case study rather than estimated.
+
+## Delivery signal
+
+The Yap Engine turns the portfolio's existing SwarmXQ orchestration work into a concrete production workflow: a brief enters as structured intent and leaves as a validated short-form video package.
+
+The important engineering result is not a single generation model. It is the control plane around the models — stage contracts, resource governance, queue semantics, recovery, deterministic assembly, and an operator-facing dashboard that makes long-running AI work understandable.
+
+The strongest measurable signals currently available are therefore **artifact validation, stage count, test coverage, and documented runtime envelopes** rather than a claimed requests-per-second or end-to-end generation SLA.
+
+## Evidence
+
+- **Public source** — the complete runtime, API, dashboard, workflow definitions, and operational documentation are inspectable in the repository.
+- **Artifact verification** — the golden-path export is documented as 18.00 seconds and FFprobe-verified.
+- **Operational measurement** — the repository documents a 100–140 second CPU cold-load window and implements startup prewarming around it.
+- **Reliability evidence** — the V6.2.50 project record reports 248 Vitest tests and an all-green quality-gate result.
+- **Measurement discipline** — the repository explicitly requires controlled benchmark conditions and repeated samples before reporting latency/throughput improvements.

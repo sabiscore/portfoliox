@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { useTheme } from '@/components/ThemeProvider';
+import { PROJECT_PALETTE_COMMANDS } from '@/constants/palette';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 import { springs } from '@/lib/motionVariants';
 
@@ -146,33 +147,18 @@ export function CommandPalette() {
         label: 'Contact',
         action: () => scrollTo('section-contact'),
       },
-      {
-        id: 'cs-taxbridge',
-        group: 'Case Studies',
-        label: 'TaxBridge case study',
-        action: () => {
-          router.push('/work/taxbridge');
-          close();
-        },
-      },
-      {
-        id: 'cs-sabiscore',
-        group: 'Case Studies',
-        label: 'SabiScore case study',
-        action: () => {
-          router.push('/work/sabiscore');
-          close();
-        },
-      },
-      {
-        id: 'cs-hashablanca',
-        group: 'Case Studies',
-        label: 'Hashablanca case study',
-        action: () => {
-          router.push('/work/hashablanca');
-          close();
-        },
-      },
+      ...PROJECT_PALETTE_COMMANDS.map(
+        (command) =>
+          ({
+            id: command.id,
+            group: command.group,
+            label: command.label,
+            action: () => {
+              router.push(command.href);
+              close();
+            },
+          }) satisfies CommandItem
+      ),
       {
         id: 'action-writing',
         group: 'Actions',

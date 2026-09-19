@@ -67,13 +67,17 @@ describe('Milestone 2 Empirical Verification: Touch Targets & Mobile Geometry', 
 
   it('verifies IdentityCard geometry limits at 375px viewport', () => {
     const identityContent = readFileSync(resolve(rootDir, 'components/IdentityCard.tsx'), 'utf-8');
+    const identityCardStylesContent = readFileSync(
+      resolve(rootDir, 'components/identityCardStyles.ts'),
+      'utf-8'
+    );
     
     // Portrait column width: 7.25rem = 116px (<= 130px)
-    expect(identityContent).toContain('grid-cols-[7.25rem_minmax(0,1fr)]');
+    expect(identityCardStylesContent).toContain('grid-cols-[7.25rem_minmax(0,1fr)]');
     // Aspect ratio 4/5 on portrait
-    expect(identityContent).toContain('aspect-[4/5]');
+    expect(identityCardStylesContent).toContain('aspect-[4/5]');
     // Max width 25rem = 400px
-    expect(identityContent).toContain('max-w-[25rem]');
+    expect(identityCardStylesContent).toContain('max-w-[25rem]');
     // Test ID presence
     expect(identityContent).toContain('data-testid="hero-identity-card"');
     expect(identityContent).toContain('data-testid="identity-portrait"');

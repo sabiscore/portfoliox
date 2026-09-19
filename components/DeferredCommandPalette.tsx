@@ -20,10 +20,15 @@ export function DeferredCommandPalette() {
 
   useEffect(() => {
     const commandWindow = window as CommandPaletteWindow;
+    let cleanupDeferredMount = () => {};
+
+    const mountPalette = () => {
+      setShouldMount(true);
+    };
 
     const requestMount = () => {
       commandWindow.__commandPaletteRequested = true;
-      setShouldMount(true);
+      mountPalette();
     };
 
     const onGlobalOpen = () => {
@@ -37,13 +42,43 @@ export function DeferredCommandPalette() {
     };
 
     if (commandWindow.__commandPaletteRequested) {
-      setShouldMount(true);
+      mountPalette();
+    } else if (window.matchMedia('(pointer: coarse)').matches) {
+      const scheduleMount = () => {
+        if (typeof window.requestIdleCallback === 'function') {
+          const handle = window.requestIdleCallback(mountPalette, { timeout: 1200 });
+
+          cleanupDeferredMount = () => {
+            window.cancelIdleCallback?.(handle);
+          };
+          return;
+        }
+
+        const timer = window.setTimeout(mountPalette, 480);
+        cleanupDeferredMount = () => {
+          window.clearTimeout(timer);
+        };
+      };
+
+      if (document.readyState === 'complete') {
+        scheduleMount();
+      } else {
+        const onLoad = () => {
+          scheduleMount();
+        };
+
+        window.addEventListener('load', onLoad, { once: true });
+        cleanupDeferredMount = () => {
+          window.removeEventListener('load', onLoad);
+        };
+      }
     }
 
     globalThis.addEventListener('command-palette:open', onGlobalOpen);
     document.addEventListener('keydown', onKeyDown, { capture: true });
 
     return () => {
+      cleanupDeferredMount();
       globalThis.removeEventListener('command-palette:open', onGlobalOpen);
       document.removeEventListener('keydown', onKeyDown, { capture: true });
     };

@@ -1,7 +1,9 @@
 import type { JSX } from 'react';
 
-import IdentityCard from './IdentityCard';
-import { LiveActivityBar } from './Liveactivitybar';
+import {
+  DeferredHeroIdentityCard,
+  DeferredLiveActivityBar,
+} from './DeferredHeroEnhancements';
 import SquircleDefs from './SquircleDefs';
 import { HERO } from '@/lib/portfolio-data';
 
@@ -64,11 +66,11 @@ export function HeroSection(): JSX.Element {
           </div>
 
           <div className="live-bar-wrapper-hero max-w-full">
-            <LiveActivityBar />
+            <DeferredLiveActivityBar />
           </div>
         </div>
 
-        <IdentityCard className="hero-grid-child" />
+        <DeferredHeroIdentityCard className="hero-grid-child" />
       </div>
     </section>
   );

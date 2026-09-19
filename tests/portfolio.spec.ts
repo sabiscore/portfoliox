@@ -5,9 +5,42 @@
 import { CONTACT_EMAIL } from '@/lib/config';
 import { expect, test, type Page } from '@playwright/test';
 
+const COMMAND_PALETTE_SHORTCUT = process.platform === 'darwin' ? 'Meta+k' : 'Control+k';
+
 async function goto(page: Page) {
   await page.goto('/');
   await expect(page.locator('h1')).toBeVisible();
+}
+
+async function openCommandPalette(page: Page) {
+  const dialog = page.getByRole('dialog', { name: /command palette/i });
+  const search = page.getByRole('textbox', { name: /command search/i });
+
+  await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
+  const openedFromShortcut = await Promise.any([
+    dialog.waitFor({ state: 'visible', timeout: 1_200 }),
+    search.waitFor({ state: 'visible', timeout: 1_200 }),
+  ])
+    .then(() => true)
+    .catch(() => false);
+
+  if (openedFromShortcut) {
+    await expect(search).toBeVisible();
+    return { dialog, search };
+  }
+
+  const quickActionsToggle = page.getByRole('button', { name: /open quick actions/i });
+  await expect(quickActionsToggle).toBeVisible();
+  await quickActionsToggle.click();
+
+  const quickOpenPaletteButton = page.getByRole('button', { name: /open command palette/i });
+  await expect(quickOpenPaletteButton).toBeVisible();
+  await quickOpenPaletteButton.click();
+
+  await expect(dialog).toBeVisible();
+  await expect(search).toBeVisible();
+
+  return { dialog, search };
 }
 
 async function visibleNavLink(page: Page, name: string) {
@@ -654,23 +687,50 @@ test.describe('Command Palette — V1.0 Easter Eggs', () => {
   });
 
   test('/why-lagos command is accessible via command palette', async ({ page }) => {
-    await page.keyboard.press('Control+k');
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('/why-lagos');
     await page.waitForTimeout(200);
-
-    const palette = page
-      .locator('[role="dialog"][aria-label*="command"]')
-      .or(page.locator('[role="combobox"]').first());
-    const isPaletteOpen = await palette.isVisible().catch(() => false);
-
-    if (isPaletteOpen) {
-      await page.keyboard.type('/why-lagos');
-      await page.waitForTimeout(200);
-      await expect(page.getByText(/why.lagos|Why Lagos/i)).toBeVisible();
-      await page.keyboard.press('Escape');
-    } else {
-      test.skip();
-    }
+    await expect(page.getByText(/why.lagos|Why Lagos/i)).toBeVisible();
+    await page.keyboard.press('Escape');
   });
+
+  test('The Yap Engine command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('Yap Engine');
+
+    const yapEngineCommand = page.getByRole('button', { name: /The Yap Engine case study/i });
+    await expect(yapEngineCommand).toBeVisible();
+
+    await yapEngineCommand.click();
+    await expect(page).toHaveURL(/\/work\/yap-engine$/);
+  });
+
+  test('The TaxBridge command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('TaxBridge');
+
+    const taxBridgeCommand = page.getByRole('button', { name: /TaxBridge case study/i });
+    await expect(taxBridgeCommand).toBeVisible();
+
+    await taxBridgeCommand.click();
+    await expect(page).toHaveURL(/\/work\/taxbridge$/);
+  });
+
+  test('The SabiScore command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('SabiScore');
+
+    const sabiScoreCommand = page.getByRole('button', { name: /SabiScore case study/i });
+    await expect(sabiScoreCommand).toBeVisible();
+
+    await sabiScoreCommand.click();
+    await expect(page).toHaveURL(/\/work\/sabiscore$/);
+  });
+
 });
 
 test.describe('Performance — CLS', () => {

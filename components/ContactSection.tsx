@@ -140,7 +140,9 @@ function ContactForm() {
     if (firstInvalidField) {
       setFieldErrors(validationErrors);
       const field = e.currentTarget.elements.namedItem(firstInvalidField);
-      if (field instanceof HTMLElement) field.focus();
+      if (field instanceof HTMLElement) {
+        window.requestAnimationFrame(() => field.focus());
+      }
       return;
     }
 

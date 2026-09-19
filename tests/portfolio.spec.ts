@@ -5,9 +5,34 @@
 import { CONTACT_EMAIL } from '@/lib/config';
 import { expect, test, type Page } from '@playwright/test';
 
+const COMMAND_PALETTE_SHORTCUT = process.platform === 'darwin' ? 'Meta+k' : 'Control+k';
+
 async function goto(page: Page) {
   await page.goto('/');
   await expect(page.locator('h1')).toBeVisible();
+}
+
+async function openCommandPalette(page: Page) {
+  const dialog = page.getByRole('dialog', { name: /command palette/i });
+  const search = page.getByRole('textbox', { name: /command search/i });
+
+  await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
+  const openedFromShortcut = await Promise.any([
+    dialog.waitFor({ state: 'visible', timeout: 1_200 }),
+    search.waitFor({ state: 'visible', timeout: 1_200 }),
+  ])
+    .then(() => true)
+    .catch(() => false);
+
+  if (!openedFromShortcut) {
+    await page.evaluate(() => {
+      globalThis.dispatchEvent(new Event('command-palette:open'));
+    });
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+  }
+
+  await expect(search).toBeVisible();
+  return { dialog, search };
 }
 
 async function visibleNavLink(page: Page, name: string) {
@@ -280,7 +305,7 @@ test.describe('About', () => {
     await page.locator('#section-about').scrollIntoViewIfNeeded();
     await expect(
       page.getByRole('heading', {
-        name: /Systems built for the long run\s+Decisions made explicit/i,
+        name: /Systems built for the long run\.\s+Decisions made explicit\./i,
       })
     ).toBeVisible();
   });

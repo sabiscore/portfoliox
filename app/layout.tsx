@@ -32,11 +32,11 @@ const syne = Syne({
 const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-dm-sans',
-  // The hero body can also become the mobile LCP candidate. `optional` avoids
-  // a late repaint, while disabling preload keeps this non-essential face from
-  // competing with critical CSS and application chunks before first paint.
-  display: 'optional',
-  preload: false,
+  // The hero H1 uses the body/sans face on mobile and is the measured LCP
+  // element. Preload only this critical face and use swap so the browser can
+  // paint immediately with the fallback and replace it when DM Sans arrives.
+  display: 'swap',
+  preload: true,
   fallback: ['Inter', 'Avenir Next', 'Segoe UI', 'system-ui', 'sans-serif'],
 });
 

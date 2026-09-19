@@ -71,7 +71,24 @@ export function MotionProvider({ children }: Readonly<{ children: ReactNode }>) 
     }
 
     if (finePointerQuery.matches && !reducedMotionQuery.matches) {
-      startLoading();
+      // Framer's animation feature bundle is non-critical for the initial
+      // render. Give the hero a clean paint window, while keeping interaction
+      // listeners able to promote the bundle immediately when the visitor
+      // actually interacts.
+      const idle =
+        'requestIdleCallback' in window
+          ? window.requestIdleCallback(() => startLoading(), { timeout: 900 })
+          : window.setTimeout(startLoading, 600);
+
+      return () => {
+        if ('cancelIdleCallback' in window && typeof idle === 'number') {
+          window.cancelIdleCallback(idle);
+        } else {
+          window.clearTimeout(idle);
+        }
+        active = false;
+        removeIntentListeners();
+      };
     } else {
       window.addEventListener('scroll', loadOnIntent, { passive: true, once: true });
       window.addEventListener('pointerdown', loadOnIntent, { passive: true, once: true });

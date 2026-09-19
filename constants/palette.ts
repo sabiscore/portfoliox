@@ -116,3 +116,9 @@ export function getProjectPaletteCommand(itemId: string): ProjectPaletteCommand 
     href: item.href,
   };
 }
+
+export const PROJECT_PALETTE_COMMANDS = STATIC_PALETTE_ITEMS.flatMap((item) => {
+  const command = getProjectPaletteCommand(item.id);
+
+  return command ? [command] : [];
+});

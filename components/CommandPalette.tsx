@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { useTheme } from '@/components/ThemeProvider';
-import { getProjectPaletteCommand } from '@/constants/palette';
+import { PROJECT_PALETTE_COMMANDS } from '@/constants/palette';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 import { springs } from '@/lib/motionVariants';
 
@@ -34,8 +34,6 @@ const PANEL_VARIANTS_MOBILE = {
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 72 },
 };
-
-const YAP_ENGINE_COMMAND = getProjectPaletteCommand('proj-yap-engine');
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -149,46 +147,18 @@ export function CommandPalette() {
         label: 'Contact',
         action: () => scrollTo('section-contact'),
       },
-      {
-        id: 'cs-taxbridge',
-        group: 'Case Studies',
-        label: 'TaxBridge case study',
-        action: () => {
-          router.push('/work/taxbridge');
-          close();
-        },
-      },
-      {
-        id: 'cs-sabiscore',
-        group: 'Case Studies',
-        label: 'SabiScore case study',
-        action: () => {
-          router.push('/work/sabiscore');
-          close();
-        },
-      },
-      {
-        id: 'cs-hashablanca',
-        group: 'Case Studies',
-        label: 'Hashablanca case study',
-        action: () => {
-          router.push('/work/hashablanca');
-          close();
-        },
-      },
-      ...(YAP_ENGINE_COMMAND
-        ? [
-            {
-              id: YAP_ENGINE_COMMAND.id,
-              group: YAP_ENGINE_COMMAND.group,
-              label: YAP_ENGINE_COMMAND.label,
-              action: () => {
-                router.push(YAP_ENGINE_COMMAND.href);
-                close();
-              },
-            } satisfies CommandItem,
-          ]
-        : []),
+      ...PROJECT_PALETTE_COMMANDS.map(
+        (command) =>
+          ({
+            id: command.id,
+            group: command.group,
+            label: command.label,
+            action: () => {
+              router.push(command.href);
+              close();
+            },
+          }) satisfies CommandItem
+      ),
       {
         id: 'action-writing',
         group: 'Actions',

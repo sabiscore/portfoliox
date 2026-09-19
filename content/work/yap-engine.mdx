@@ -56,14 +56,28 @@ The system must produce useful creative work on CPU-only hardware while sharing 
 
 That constraint drives the architecture: one heavyweight model at a time on constrained profiles, bounded video concurrency, explicit stage timeouts, pressure-aware admission, and graceful degradation when optional services such as advanced visual generation are unavailable.
 
+## Evidence-backed performance and impact
+
+The repository contains concrete engineering measurements and verification artifacts, but they should not be conflated with a production throughput benchmark.
+
+- **18.00 s golden-path export** — the documented production-pack validation produced an 18.00-second H.264 video artifact at 720×1280 / 30 fps with AAC 48 kHz stereo, verified with FFprobe.
+- **100–140 s cold model-load window** — the runtime documents this CPU cold-load envelope for the Pilot model and prewarms it during startup so model loading is moved off the request path. This is a documented operational envelope, not a universal latency SLA.
+- **21-stage resumable workflow** — the Creative Factory pipeline defines 21 ordered stages with checkpoints and restart hydration, making long-running generation measurable and recoverable at stage boundaries.
+- **248 automated API/dashboard tests** — the V6.2.50 project record reports 248 tests as the authoritative Vitest runner count at that milestone, with the recorded quality-gate state marked all green.
+- **Benchmark protocol is explicit** — the repository's benchmarking guidance requires a controlled environment and at least 30 iterations, reporting median, p95, p99, and standard deviation. That means unrecorded throughput or latency figures are deliberately excluded from this case study rather than estimated.
+
 ## Delivery signal
 
 The Yap Engine turns the portfolio's existing SwarmXQ orchestration work into a concrete production workflow: a brief enters as structured intent and leaves as a validated short-form video package.
 
 The important engineering result is not a single generation model. It is the control plane around the models — stage contracts, resource governance, queue semantics, recovery, deterministic assembly, and an operator-facing dashboard that makes long-running AI work understandable.
 
+The strongest measurable signals currently available are therefore **artifact validation, stage count, test coverage, and documented runtime envelopes** rather than a claimed requests-per-second or end-to-end generation SLA.
+
 ## Evidence
 
 - **Public source** — the complete runtime, API, dashboard, workflow definitions, and operational documentation are inspectable in the repository.
-- **Architecture** — the repository documents the six-stage video pipeline, pressure-aware runtime controls, queue semantics, and render backends.
-- **Bounded claims** — no private latency, throughput, or quality percentage is presented here without a public measurement artifact.
+- **Artifact verification** — the golden-path export is documented as 18.00 seconds and FFprobe-verified.
+- **Operational measurement** — the repository documents a 100–140 second CPU cold-load window and implements startup prewarming around it.
+- **Reliability evidence** — the V6.2.50 project record reports 248 Vitest tests and an all-green quality-gate result.
+- **Measurement discipline** — the repository explicitly requires controlled benchmark conditions and repeated samples before reporting latency/throughput improvements.

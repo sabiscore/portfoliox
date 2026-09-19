@@ -72,7 +72,9 @@ export function CommandPalette() {
   }, []);
 
   const openPaletteFromQuickAction = useCallback(() => {
-    globalThis.dispatchEvent(new Event('command-palette:open'));
+    // The quick-actions control already owns the palette state. Open directly
+    // here instead of round-tripping through the global event bus; the event
+    // remains reserved for the global Cmd/Ctrl+K path and external triggers.
     setOpen(true);
   }, []);
 

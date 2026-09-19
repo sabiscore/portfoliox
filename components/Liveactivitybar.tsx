@@ -1,8 +1,9 @@
 'use client';
+
 // CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
 // Major Reset • Lagos → Global • Production Conviction Architecture
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface ActivityData {
   ago: string;
@@ -10,13 +11,16 @@ interface ActivityData {
   repo: string;
   sha?: string;
   message?: string;
+  checkedAt?: string;
 }
+
+const ACTIVITY_REFRESH_INTERVAL = 300_000;
 
 const FALLBACK_LOADING: ActivityData = {
   ago: 'Recently',
   type: 'PushEvent',
   repo: 'scardubu.dev',
-  message: 'Loading latest activity',
+  message: 'Checking latest activity',
 };
 
 const FALLBACK_UNAVAILABLE: ActivityData = {
@@ -37,6 +41,24 @@ function typeLabel(type: string): string {
   return map[type] ?? 'Recent activity';
 }
 
+function formatLastChecked(timestamp: number | null): string {
+  if (!timestamp) {
+    return 'Checking';
+  }
+
+  const date = new Date(timestamp);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Recently';
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
 function ActivitySkeleton() {
   return (
     <div className="flex h-6 items-center gap-2" aria-hidden="true">
@@ -49,31 +71,80 @@ function ActivitySkeleton() {
 export function LiveActivityBar() {
   const [activity, setActivity] = useState<ActivityData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastChecked, setLastChecked] = useState<number | null>(null);
 
   useEffect(() => {
-    const ctrl = new AbortController();
+    let disposed = false;
+    let controller: AbortController | null = null;
 
-    fetch('/api/activity', { signal: ctrl.signal })
-      .then((r) => {
-        if (!r.ok) throw new Error(`${r.status}`);
-        return r.json() as Promise<ActivityData>;
-      })
-      .then((data) => {
-        if (!ctrl.signal.aborted) setActivity(data);
-      })
-      .catch(() => {
-        if (!ctrl.signal.aborted) setActivity(FALLBACK_UNAVAILABLE);
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted) setLoading(false);
-      });
+    const loadActivity = async () => {
+      controller?.abort();
 
-    return () => ctrl.abort();
+      const nextController = new AbortController();
+      controller = nextController;
+
+      try {
+        const response = await fetch('/api/activity', {
+          cache: 'no-store',
+          signal: nextController.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Activity request failed with ${response.status}`);
+        }
+
+        const data = (await response.json()) as ActivityData;
+
+        if (!disposed && !nextController.signal.aborted) {
+          setActivity(data);
+        }
+      } catch {
+        if (!disposed && !nextController.signal.aborted) {
+          setActivity(FALLBACK_UNAVAILABLE);
+        }
+      } finally {
+        if (!disposed && !nextController.signal.aborted) {
+          setLastChecked(Date.now());
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadActivity();
+
+    const refreshTimer = window.setInterval(() => {
+      void loadActivity();
+    }, ACTIVITY_REFRESH_INTERVAL);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void loadActivity();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      disposed = true;
+      controller?.abort();
+      window.clearInterval(refreshTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const safeActivity = activity ?? FALLBACK_LOADING;
-  const label = safeActivity.message ?? typeLabel(safeActivity.type);
-  const announcement = `${label}. ${safeActivity.ago}.`;
+
+  const label = useMemo(
+    () => safeActivity.message ?? typeLabel(safeActivity.type),
+    [safeActivity.message, safeActivity.type]
+  );
+
+  const lastCheckedLabel = formatLastChecked(lastChecked);
+
+  const announcement =
+    lastChecked === null
+      ? `${label}. Checking latest GitHub activity.`
+      : `${label}. Last checked at ${lastCheckedLabel}.`;
 
   return (
     <div
@@ -82,7 +153,7 @@ export function LiveActivityBar() {
       aria-atomic="true"
       aria-busy={loading ? 'true' : 'false'}
       aria-label="Recent GitHub activity"
-      className="live-bar-text flex h-6 items-center gap-2 overflow-hidden"
+      className="live-bar-text flex min-h-6 items-center gap-2 overflow-hidden"
     >
       <span className="sr-only">{announcement}</span>
 
@@ -91,7 +162,7 @@ export function LiveActivityBar() {
           <ActivitySkeleton />
         </div>
       ) : (
-        <div className="flex h-6 min-w-0 flex-1 items-center gap-2" aria-hidden="true">
+        <div className="flex min-h-6 min-w-0 flex-1 items-center gap-2" aria-hidden="true">
           <span className="size-1.5 shrink-0 rounded-full bg-[var(--color-film-teal)]" />
 
           <span className="text-color-text-muted hidden shrink-0 font-mono text-[10px] tracking-wider uppercase sm:inline">
@@ -111,12 +182,16 @@ export function LiveActivityBar() {
             {label}
           </span>
 
-          <span aria-hidden="true" className="text-color-border">
+          <span aria-hidden="true" className="text-color-border shrink-0">
             ·
           </span>
 
-          <span className="text-color-text-muted shrink-0 font-mono text-[11px]">
-            {safeActivity.ago}
+          <span className="text-color-text-muted hidden shrink-0 font-mono text-[10px] sm:inline">
+            checked {lastCheckedLabel}
+          </span>
+
+          <span className="text-color-text-muted shrink-0 font-mono text-[10px] sm:hidden">
+            {lastCheckedLabel}
           </span>
         </div>
       )}

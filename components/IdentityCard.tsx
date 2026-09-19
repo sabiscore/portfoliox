@@ -29,7 +29,7 @@ const PORTRAIT_SOURCES = [
 const STACK_SIGNALS = ['Backend · Platform', 'AI infrastructure'] as const;
 
 const TRUST_SIGNALS = [
-  { label: 'Focus', value: 'Distributed systems · platform reliability' },
+  { label: 'Focus', value: 'Backend · platform reliability' },
   { label: 'Proof', value: 'TaxBridge · SabiScore · SwarmXQ' },
   { label: 'Method', value: 'Constraint → decision → outcome → evidence' },
 ] as const;
@@ -198,7 +198,7 @@ export default function IdentityCard({
         <div className="relative p-3.5 sm:p-5">
           <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:gap-3">
             <p className="min-w-0 rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.2em] text-sky-100/90 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.28em]">
-              Operating profile
+              How I work
             </p>
 
             <span className="shrink-0 rounded-full border border-orange-300/20 bg-orange-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.18em] text-orange-100/85 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.24em]">
@@ -241,7 +241,7 @@ export default function IdentityCard({
               </div>
 
               <p className="text-xs leading-5 text-white/62 sm:text-sm sm:leading-6">
-                Decision-led engineering for systems that must remain observable, recoverable, and understandable under pressure.
+                I build backend, platform, and AI systems that make failure visible, recovery deliberate, and operations easier to understand.
               </p>
 
               <div className="flex flex-wrap gap-1.5 sm:gap-2">

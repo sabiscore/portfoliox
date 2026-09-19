@@ -9,59 +9,23 @@ const COMMAND_PALETTE_SHORTCUT = process.platform === 'darwin' ? 'Meta+k' : 'Con
 
 async function goto(page: Page) {
   await page.goto('/');
-  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('#hero-title')).toBeVisible();
 }
 
 async function openCommandPalette(page: Page) {
   const dialog = page.getByRole('dialog', { name: /command palette/i });
   const search = page.getByRole('textbox', { name: /command search/i });
-  const waitForPaletteVisible = () =>
-    Promise.any([
-      dialog.waitFor({ state: 'visible', timeout: 1_200 }),
-      search.waitFor({ state: 'visible', timeout: 1_200 }),
-    ])
-      .then(() => true)
-      .catch(() => false);
+  const quickActionsToggle = page
+    .getByRole('button', { name: /open quick actions|collapse quick actions/i })
+    .first();
+
+  // The palette is intentionally code-split, so wait for its persistent trigger
+  // to mount before sending the first keyboard event. This removes the cold-load
+  // race where Cmd/Ctrl+K can arrive before the deferred client chunk hydrates.
+  await quickActionsToggle.waitFor({ state: 'visible', timeout: 10_000 });
 
   await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
-  const openedFromShortcut = await waitForPaletteVisible();
-
-  if (!openedFromShortcut) {
-    const quickActionsToggle = page
-      .getByRole('button', { name: /open quick actions|collapse quick actions/i })
-      .first();
-    if (await quickActionsToggle.isVisible().catch(() => false)) {
-      const expanded = (await quickActionsToggle.getAttribute('aria-expanded')) === 'true';
-      if (!expanded) await quickActionsToggle.click();
-
-      const openPaletteButton = page.getByRole('button', { name: /open command palette/i }).first();
-      if (await openPaletteButton.isVisible().catch(() => false)) {
-        await openPaletteButton.click();
-      }
-    }
-
-    const openedFromQuickActions = await waitForPaletteVisible();
-    if (!openedFromQuickActions) {
-      // On slower CI boots, the global open event can still race client effect
-      // registration. Retry dispatching until the palette is observable so this
-      // helper remains resilient across hydration timing variance.
-      const deadline = Date.now() + 5_000;
-      while (Date.now() < deadline) {
-        await page.evaluate(() => {
-          globalThis.dispatchEvent(new Event('command-palette:open'));
-        });
-
-        try {
-          await dialog.waitFor({ state: 'visible', timeout: 750 });
-          break;
-        } catch {
-          // Keep retrying until the deferred palette listener is mounted.
-        }
-      }
-    }
-
-    await expect(dialog).toBeVisible({ timeout: 1_000 });
-  }
+  await expect(dialog).toBeVisible({ timeout: 2_000 });
 
   await expect(search).toBeVisible();
   return { dialog, search };
@@ -423,6 +387,7 @@ test.describe('Contact', () => {
 
   test('contact form exposes field errors before sending an incomplete brief', async ({ page }) => {
     const form = page.locator('form[aria-label="Contact Oscar Ndugbu"]');
+    await expect(form).toBeVisible({ timeout: 10_000 });
     await form.scrollIntoViewIfNeeded();
 
     await form.locator('button[type="submit"]').click();
@@ -435,9 +400,10 @@ test.describe('Contact', () => {
   });
 
   test('focused brief guidance is visible', async ({ page }) => {
+    const brief = page.getByText('A useful first brief', { exact: true });
+    await expect(brief).toBeVisible({ timeout: 10_000 });
+    await brief.scrollIntoViewIfNeeded();
     const section = page.locator('section#section-contact[aria-labelledby="contact-heading"]');
-    await section.scrollIntoViewIfNeeded();
-    await expect(section.getByText('A useful first brief', { exact: true })).toBeVisible();
     await expect(section.getByText('Problem', { exact: true })).toBeVisible();
     await expect(section.getByText('Stakes', { exact: true })).toBeVisible();
     await expect(section.getByText('Timeline', { exact: true }).first()).toBeVisible();

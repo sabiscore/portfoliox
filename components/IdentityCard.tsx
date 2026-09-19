@@ -224,6 +224,7 @@ export default function IdentityCard({
                   src={portraitSrc}
                   alt="Portrait of Oscar Ndugbu"
                   fill
+                  priority
                   sizes="(max-width: 640px) 116px, 190px"
                   className="object-cover object-center opacity-95 transition duration-700 motion-safe:group-hover:scale-[1.035]"
                   onError={handlePortraitError}

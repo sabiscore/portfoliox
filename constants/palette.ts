@@ -110,7 +110,7 @@ export function getProjectPaletteCommand(itemId: string): ProjectPaletteCommand 
   }
 
   return {
-    id: item.id,
+    id: `cs-${item.id}`,
     label: `${item.label} case study`,
     group: 'Case Studies',
     href: item.href,

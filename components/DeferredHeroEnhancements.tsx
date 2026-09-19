@@ -29,19 +29,41 @@ type IdentityCardPlaceholderProps = {
   className?: string;
 };
 
-function deferMount(callback: () => void) {
-  if (typeof window.requestIdleCallback === 'function') {
-    const handle = window.requestIdleCallback(callback, { timeout: 300 });
+function deferMount(callback: () => void, timeout: number) {
+  let cleanupScheduledMount = () => {};
+
+  const scheduleMount = () => {
+    if (typeof window.requestIdleCallback === 'function') {
+      const handle = window.requestIdleCallback(callback, { timeout });
+
+      cleanupScheduledMount = () => {
+        window.cancelIdleCallback?.(handle);
+      };
+      return;
+    }
+
+    const timer = window.setTimeout(callback, Math.min(timeout, 480));
+    cleanupScheduledMount = () => {
+      window.clearTimeout(timer);
+    };
+  };
+
+  if (document.readyState === 'complete') {
+    scheduleMount();
 
     return () => {
-      window.cancelIdleCallback?.(handle);
+      cleanupScheduledMount();
     };
   }
 
-  const timer = window.setTimeout(callback, 120);
+  const onLoad = () => {
+    scheduleMount();
+  };
 
+  window.addEventListener('load', onLoad, { once: true });
   return () => {
-    window.clearTimeout(timer);
+    window.removeEventListener('load', onLoad);
+    cleanupScheduledMount();
   };
 }
 
@@ -105,7 +127,7 @@ export function DeferredHeroIdentityCard({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    return deferMount(() => setMounted(true));
+    setMounted(true);
   }, []);
 
   if (!mounted) {
@@ -119,7 +141,7 @@ export function DeferredLiveActivityBar() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    return deferMount(() => setMounted(true));
+    return deferMount(() => setMounted(true), 1400);
   }, []);
 
   if (!mounted) {

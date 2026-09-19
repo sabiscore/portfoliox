@@ -12,7 +12,7 @@ describe('command palette Yap Engine wiring', () => {
 
   it('builds a visible Yap Engine case-study command', () => {
     expect(getProjectPaletteCommand('proj-yap-engine')).toEqual({
-      id: 'proj-yap-engine',
+      id: 'cs-proj-yap-engine',
       label: 'The Yap Engine case study',
       group: 'Case Studies',
       href: '/work/yap-engine',

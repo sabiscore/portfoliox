@@ -1,15 +1,13 @@
-import dynamic from 'next/dynamic';
 import type { JSX } from 'react';
 
+import {
+  DeferredHeroIdentityCard,
+  DeferredLiveActivityBar,
+} from './DeferredHeroEnhancements';
 import SquircleDefs from './SquircleDefs';
 import { HERO } from '@/lib/portfolio-data';
 
 const HERO_ARIA_LABEL = `${HERO.h1} ${HERO.subHeadline}`;
-
-const IdentityCard = dynamic(() => import('./IdentityCard'));
-const LiveActivityBar = dynamic(
-  () => import('./Liveactivitybar').then((mod) => ({ default: mod.LiveActivityBar }))
-);
 
 export function HeroSection(): JSX.Element {
   return (
@@ -68,11 +66,11 @@ export function HeroSection(): JSX.Element {
           </div>
 
           <div className="live-bar-wrapper-hero max-w-full">
-            <LiveActivityBar />
+            <DeferredLiveActivityBar />
           </div>
         </div>
 
-        <IdentityCard className="hero-grid-child" />
+        <DeferredHeroIdentityCard className="hero-grid-child" />
       </div>
     </section>
   );

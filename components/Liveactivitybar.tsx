@@ -1,8 +1,5 @@
 'use client';
 
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-
 import { useEffect, useMemo, useState } from 'react';
 
 interface ActivityData {
@@ -23,12 +20,15 @@ const FALLBACK_LOADING: ActivityData = {
   message: 'Checking latest activity',
 };
 
-const FALLBACK_UNAVAILABLE: ActivityData = {
-  ago: 'Recently',
-  type: 'StatusEvent',
-  repo: 'scardubu.dev',
-  message: 'Activity feed temporarily unavailable',
-};
+function unavailableActivity(): ActivityData {
+  return {
+    ago: 'Recently',
+    type: 'StatusEvent',
+    repo: 'scardubu.dev',
+    message: 'Activity feed temporarily unavailable',
+    checkedAt: new Date().toISOString(),
+  };
+}
 
 function typeLabel(type: string): string {
   const map: Record<string, string> = {
@@ -41,12 +41,12 @@ function typeLabel(type: string): string {
   return map[type] ?? 'Recent activity';
 }
 
-function formatLastChecked(timestamp: number | null): string {
-  if (!timestamp) {
+function formatLastChecked(checkedAt: string | undefined): string {
+  if (!checkedAt) {
     return 'Checking';
   }
 
-  const date = new Date(timestamp);
+  const date = new Date(checkedAt);
 
   if (Number.isNaN(date.getTime())) {
     return 'Recently';
@@ -71,7 +71,6 @@ function ActivitySkeleton() {
 export function LiveActivityBar() {
   const [activity, setActivity] = useState<ActivityData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastChecked, setLastChecked] = useState<number | null>(null);
 
   useEffect(() => {
     let disposed = false;
@@ -100,11 +99,10 @@ export function LiveActivityBar() {
         }
       } catch {
         if (!disposed && !nextController.signal.aborted) {
-          setActivity(FALLBACK_UNAVAILABLE);
+          setActivity(unavailableActivity());
         }
       } finally {
         if (!disposed && !nextController.signal.aborted) {
-          setLastChecked(Date.now());
           setLoading(false);
         }
       }
@@ -139,10 +137,10 @@ export function LiveActivityBar() {
     [safeActivity.message, safeActivity.type]
   );
 
-  const lastCheckedLabel = formatLastChecked(lastChecked);
+  const lastCheckedLabel = formatLastChecked(safeActivity.checkedAt);
 
   const announcement =
-    lastChecked === null
+    safeActivity.checkedAt === undefined
       ? `${label}. Checking latest GitHub activity.`
       : `${label}. Last checked at ${lastCheckedLabel}.`;
 

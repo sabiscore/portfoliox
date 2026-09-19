@@ -54,6 +54,13 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
     keywords: ['ml', 'machine learning', 'xgboost', 'observability'],
   },
   {
+    id: 'proj-yap-engine',
+    label: 'The Yap Engine',
+    category: 'PROJECTS',
+    href: '#yap-engine',
+    keywords: ['ai', 'video', 'agents', 'orchestration', 'swarmxq', 'ollama', 'ffmpeg'],
+  },
+  {
     id: 'proj-hashablanca',
     label: 'Hashablanca',
     category: 'PROJECTS',

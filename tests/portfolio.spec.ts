@@ -719,6 +719,18 @@ test.describe('Command Palette — V1.0 Easter Eggs', () => {
     await expect(page).toHaveURL(/\/work\/taxbridge$/);
   });
 
+  test('The SabiScore command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('SabiScore');
+
+    const sabiScoreCommand = page.getByRole('button', { name: /SabiScore case study/i });
+    await expect(sabiScoreCommand).toBeVisible();
+
+    await sabiScoreCommand.click();
+    await expect(page).toHaveURL(/\/work\/sabiscore$/);
+  });
+
 });
 
 test.describe('Performance — CLS', () => {

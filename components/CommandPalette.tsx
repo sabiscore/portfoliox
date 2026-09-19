@@ -23,17 +23,6 @@ interface CommandItem {
 
 type CommandPaletteWindow = Window & { __commandPaletteRequested?: boolean };
 
-const PANEL_VARIANTS_DESKTOP = {
-  hidden: { opacity: 0, y: -12, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -8, scale: 0.98 },
-};
-
-const PANEL_VARIANTS_MOBILE = {
-  hidden: { opacity: 0, y: 72 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 72 },
-};
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -462,8 +451,6 @@ export function CommandPalette() {
     return map;
   }, [filtered]);
 
-  const panelVariants = isMobile ? PANEL_VARIANTS_MOBILE : PANEL_VARIANTS_DESKTOP;
-  const panelTransition = reducedMotion ? { duration: 0 } : springs.smooth;
 
   return (
     <>

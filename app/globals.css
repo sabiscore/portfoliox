@@ -6888,6 +6888,10 @@ html.lenis body {
   .identity-card-motion:hover {
     transform: translate3d(0, -3px, 0);
   }
+
+  .identity-card-motion:hover .identity-card-portrait {
+    transform: scale(1.035);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

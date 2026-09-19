@@ -25,10 +25,25 @@ async function openCommandPalette(page: Page) {
     .catch(() => false);
 
   if (!openedFromShortcut) {
-    await page.evaluate(() => {
-      globalThis.dispatchEvent(new Event('command-palette:open'));
-    });
-    await expect(dialog).toBeVisible({ timeout: 5_000 });
+    // The palette is intentionally code-split and mounted after explicit intent.
+    // On a cold mobile run the first synthetic event can race the deferred
+    // component's effect registration, so retry the intent until the dialog
+    // actually appears instead of treating the lazy boundary as deterministic.
+    const deadline = Date.now() + 5_000;
+    while (Date.now() < deadline) {
+      await page.evaluate(() => {
+        globalThis.dispatchEvent(new Event('command-palette:open'));
+      });
+
+      try {
+        await dialog.waitFor({ state: 'visible', timeout: 750 });
+        break;
+      } catch {
+        // Keep retrying until the deferred palette listener is mounted.
+      }
+    }
+
+    await expect(dialog).toBeVisible({ timeout: 1_000 });
   }
 
   await expect(search).toBeVisible();

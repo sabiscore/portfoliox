@@ -3,6 +3,17 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
+import {
+  IDENTITY_CARD_CONTENT_CLASSNAME,
+  IDENTITY_CARD_FRAME_CLASSNAME,
+  IDENTITY_CARD_META_ROW_CLASSNAME,
+  IDENTITY_CARD_PORTRAIT_CLASSNAME,
+  IDENTITY_CARD_PROFILE_GRID_CLASSNAME,
+  IDENTITY_CARD_SURFACE_CLASSNAME,
+  IDENTITY_CARD_TRUST_SIGNAL_CLASSNAME,
+  IDENTITY_CARD_TRUST_SIGNALS_GRID_CLASSNAME,
+} from '@/components/identityCardStyles';
+
 const IdentityCard = dynamic(() => import('./IdentityCard'), {
   loading: () => <IdentityCardSkeleton />,
 });
@@ -51,35 +62,38 @@ function IdentityCardSkeleton({ className = '' }: Readonly<IdentityCardPlacehold
     <div
       aria-hidden="true"
       className={[
-        'mx-auto w-full max-w-sm rounded-[var(--radius-xl)] border border-white/10 bg-white/[0.055] p-3 shadow-2xl shadow-sky-950/35 sm:backdrop-blur-2xl',
+        IDENTITY_CARD_FRAME_CLASSNAME,
+        'sm:backdrop-blur-2xl',
         className,
       ].join(' ')}
     >
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-white/10 bg-slate-950/72 p-4 sm:p-5">
-        <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:gap-3">
-          <div className="h-7 w-32 animate-pulse rounded-full bg-white/10" />
-          <div className="h-7 w-16 animate-pulse rounded-full bg-white/10" />
-        </div>
-
-        <div className="grid items-center gap-4 sm:grid-cols-2 sm:items-end sm:gap-5">
-          <div className="aspect-[4/5] w-28 rounded-[var(--radius-md)] bg-white/10 sm:w-full sm:rounded-[var(--radius-lg)]" />
-          <div className="space-y-3">
-            <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
-            <div className="h-10 w-full animate-pulse rounded bg-white/10" />
-            <div className="h-16 w-full animate-pulse rounded bg-white/10" />
+      <div className={IDENTITY_CARD_SURFACE_CLASSNAME}>
+        <div className={IDENTITY_CARD_CONTENT_CLASSNAME}>
+          <div className={IDENTITY_CARD_META_ROW_CLASSNAME}>
+            <div className="h-7 w-32 animate-pulse rounded-full bg-white/10" />
+            <div className="h-7 w-16 animate-pulse rounded-full bg-white/10" />
           </div>
-        </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-1.5 sm:mt-5 sm:gap-2">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="rounded-xl bg-white/8 px-2 py-2 sm:px-3 sm:py-3">
-              <div className="h-3 w-10 animate-pulse rounded bg-white/10" />
-              <div className="mt-2 h-8 w-full animate-pulse rounded bg-white/10" />
+          <div className={IDENTITY_CARD_PROFILE_GRID_CLASSNAME}>
+            <div className={`${IDENTITY_CARD_PORTRAIT_CLASSNAME} bg-white/10`} />
+            <div className="space-y-3">
+              <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
+              <div className="h-10 w-full animate-pulse rounded bg-white/10" />
+              <div className="h-16 w-full animate-pulse rounded bg-white/10" />
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="mt-4 hidden h-4 w-56 animate-pulse rounded bg-white/10 sm:block" />
+          <div className={IDENTITY_CARD_TRUST_SIGNALS_GRID_CLASSNAME}>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className={`${IDENTITY_CARD_TRUST_SIGNAL_CLASSNAME} bg-white/8`}>
+                <div className="h-3 w-10 animate-pulse rounded bg-white/10" />
+                <div className="mt-2 h-8 w-full animate-pulse rounded bg-white/10" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 hidden h-4 w-56 animate-pulse rounded bg-white/10 sm:block" />
+        </div>
       </div>
     </div>
   );

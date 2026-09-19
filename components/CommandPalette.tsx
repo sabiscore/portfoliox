@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { useTheme } from '@/components/ThemeProvider';
-import { STATIC_PALETTE_ITEMS } from '@/constants/palette';
+import { getProjectPaletteCommand } from '@/constants/palette';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 import { springs } from '@/lib/motionVariants';
 
@@ -35,8 +35,7 @@ const PANEL_VARIANTS_MOBILE = {
   exit: { opacity: 0, y: 72 },
 };
 
-const YAP_ENGINE_PALETTE_ITEM = STATIC_PALETTE_ITEMS.find((item) => item.id === 'proj-yap-engine');
-const YAP_ENGINE_CASE_STUDY_HREF = YAP_ENGINE_PALETTE_ITEM?.href ?? '/work/yap-engine';
+const YAP_ENGINE_COMMAND = getProjectPaletteCommand('proj-yap-engine');
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -177,14 +176,14 @@ export function CommandPalette() {
           close();
         },
       },
-      ...(YAP_ENGINE_PALETTE_ITEM?.href
+      ...(YAP_ENGINE_COMMAND
         ? [
             {
-              id: YAP_ENGINE_PALETTE_ITEM.id,
-              group: 'Case Studies',
-              label: `${YAP_ENGINE_PALETTE_ITEM.label} case study`,
+              id: YAP_ENGINE_COMMAND.id,
+              group: YAP_ENGINE_COMMAND.group,
+              label: YAP_ENGINE_COMMAND.label,
               action: () => {
-                router.push(YAP_ENGINE_CASE_STUDY_HREF);
+                router.push(YAP_ENGINE_COMMAND.href);
                 close();
               },
             } satisfies CommandItem,

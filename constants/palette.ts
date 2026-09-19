@@ -10,6 +10,13 @@ export interface PaletteItem {
   keywords: string[];
 }
 
+export interface ProjectPaletteCommand {
+  id: string;
+  label: string;
+  group: 'Case Studies';
+  href: string;
+}
+
 export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
   {
     id: 'nav-projects',
@@ -89,3 +96,23 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
     keywords: ['hire', 'profile'],
   },
 ];
+
+export function getProjectPaletteCommand(itemId: string): ProjectPaletteCommand | null {
+  const item = STATIC_PALETTE_ITEMS.find(
+    (paletteItem): paletteItem is PaletteItem & { href: string } =>
+      paletteItem.id === itemId &&
+      paletteItem.category === 'PROJECTS' &&
+      typeof paletteItem.href === 'string'
+  );
+
+  if (!item) {
+    return null;
+  }
+
+  return {
+    id: item.id,
+    label: `${item.label} case study`,
+    group: 'Case Studies',
+    href: item.href,
+  };
+}

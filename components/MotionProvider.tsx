@@ -75,16 +75,21 @@ export function MotionProvider({ children }: Readonly<{ children: ReactNode }>) 
       // render. Give the hero a clean paint window, while keeping interaction
       // listeners able to promote the bundle immediately when the visitor
       // actually interacts.
-      const idle =
-        'requestIdleCallback' in window
-          ? window.requestIdleCallback(() => startLoading(), { timeout: 900 })
-          : window.setTimeout(startLoading, 600);
+      let idleId: number;
+      let idleCallback = false;
+
+      if ('requestIdleCallback' in window) {
+        idleCallback = true;
+        idleId = window.requestIdleCallback(() => startLoading(), { timeout: 900 });
+      } else {
+        idleId = window.setTimeout(startLoading, 600);
+      }
 
       return () => {
-        if ('cancelIdleCallback' in window && typeof idle === 'number') {
-          window.cancelIdleCallback(idle);
+        if (idleCallback) {
+          window.cancelIdleCallback(idleId);
         } else {
-          window.clearTimeout(idle);
+          window.clearTimeout(idleId);
         }
         active = false;
         removeIntentListeners();
@@ -105,7 +110,7 @@ export function MotionProvider({ children }: Readonly<{ children: ReactNode }>) 
   }, []);
 
   return (
-    <LazyMotion features={features} strict>
+    <LazyMotion features={features}>
       {children}
     </LazyMotion>
   );

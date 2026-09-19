@@ -124,16 +124,6 @@ function IdentityCardSkeleton({ className = '' }: Readonly<IdentityCardPlacehold
 export function DeferredHeroIdentityCard({
   className,
 }: Readonly<IdentityCardPlaceholderProps>) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <IdentityCardSkeleton className={className} />;
-  }
-
   return <IdentityCard className={className} />;
 }
 

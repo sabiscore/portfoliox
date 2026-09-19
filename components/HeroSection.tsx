@@ -1,9 +1,8 @@
 import type { JSX } from 'react';
 
-import {
-  DeferredHeroIdentityCard,
-  DeferredLiveActivityBar,
-} from './DeferredHeroEnhancements';
+import IdentityCard from './IdentityCard';
+import { DeferredLiveActivityBar } from './DeferredHeroEnhancements';
+import { IdentityCardMotion } from './IdentityCardMotion';
 import SquircleDefs from './SquircleDefs';
 import { HERO } from '@/lib/portfolio-data';
 
@@ -20,7 +19,7 @@ export function HeroSection(): JSX.Element {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.18),transparent_32%),radial-gradient(circle_at_84%_20%,rgba(251,146,60,0.14),transparent_30%),linear-gradient(180deg,rgba(2,6,23,1),rgba(15,23,42,0.94))]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(2,6,23,1),rgba(15,23,42,0.94))]"
       />
 
       <div className="hero-grid-shell mx-auto grid max-w-7xl items-center gap-9 sm:gap-12 lg:min-h-[calc(100dvh-12rem)] lg:grid-cols-[1.04fr_0.96fr]">
@@ -70,7 +69,9 @@ export function HeroSection(): JSX.Element {
           </div>
         </div>
 
-        <DeferredHeroIdentityCard className="hero-grid-child" />
+        <IdentityCardMotion className="hero-grid-child">
+          <IdentityCard />
+        </IdentityCardMotion>
       </div>
     </section>
   );

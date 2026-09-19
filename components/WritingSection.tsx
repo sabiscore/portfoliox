@@ -49,7 +49,7 @@ export function WritingSection({ posts }: Readonly<{ posts: WritingPost[] }>) {
             eyebrowNumber="05"
             eyebrowLabel="Writing"
             headingId="writing-heading"
-            title={<>Writing that ships decisions.</>}
+            title={<>Writing that makes engineering decisions clear.</>}
             // V1.3: Consequence-first rewrite. Opens with what both audiences get
             // ('how the systems are actually built'), then signals technical content
             // (architecture, ML). Em dash rhythm preserved — consistent voice marker.

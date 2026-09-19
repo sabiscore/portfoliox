@@ -618,8 +618,8 @@ export function CommandPalette() {
                   />
                 )}
               </div>
-            </m.div>
-          </m.div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
 

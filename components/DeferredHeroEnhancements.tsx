@@ -88,7 +88,9 @@ export function DeferredHeroIdentityCard({
 }: Readonly<IdentityCardPlaceholderProps>) {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => deferMount(() => setMounted(true)), []);
+  useEffect(() => {
+    return deferMount(() => setMounted(true));
+  }, []);
 
   if (!mounted) {
     return <IdentityCardSkeleton className={className} />;
@@ -100,7 +102,9 @@ export function DeferredHeroIdentityCard({
 export function DeferredLiveActivityBar() {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => deferMount(() => setMounted(true)), []);
+  useEffect(() => {
+    return deferMount(() => setMounted(true));
+  }, []);
 
   if (!mounted) {
     return <LiveActivityBarSkeleton />;

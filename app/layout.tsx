@@ -56,11 +56,11 @@ const siteUrl =
   (deploymentHost ? `https://${deploymentHost}` : 'http://localhost:3000');
 
 const shouldLoadVercelInsights = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
-const siteTitle = `${PROFILE.name} — ${PROFILE.role} · AI Infrastructure · Fintech Systems`;
+const siteTitle = `${PROFILE.name} — ${PROFILE.role} · AI Infrastructure · Fintech Engineering`;
 const siteDescription =
-  'Staff backend and platform engineer in Lagos. Decision records across fintech workflows, ensemble ML inference, resilient queues, and AI infrastructure. Systems that hold at 2am.';
+  'Staff backend and platform engineer in Lagos. Case studies across fintech workflows, ML inference, distributed systems, and AI infrastructure — with the architecture decisions and evidence behind the work.';
 const socialDescription =
-  'Staff Backend and Platform Engineer building reliability-first AI, fintech, and infrastructure systems from Lagos.';
+  'Staff Backend and Platform Engineer building reliable AI, fintech, and infrastructure systems from Lagos.';
 const socialImagePath = '/og';
 
 export const metadata: Metadata = {
@@ -155,7 +155,7 @@ const schemaGraph = {
       url: siteUrl,
       jobTitle: PROFILE.role,
       description:
-        'Staff backend and platform engineer based in Lagos, Nigeria. Specialises in backend infrastructure, AI systems, production reliability, React Native, and SRE.',
+        'Staff backend and platform engineer based in Lagos, Nigeria. Builds backend infrastructure, AI systems, fintech workflows, and production reliability tooling.',
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': siteUrl,
@@ -215,7 +215,7 @@ const schemaGraph = {
       alternateName: 'scardubu.dev',
       url: siteUrl,
       description:
-        'Portfolio and operational registry for Oscar Ndugbu — staff backend and platform engineer specialising in AI infrastructure, fintech systems, and production reliability.',
+        'Portfolio and engineering record for Oscar Ndugbu — staff backend and platform engineer focused on AI infrastructure, fintech systems, and production reliability.',
       inLanguage: 'en-US',
       author: { '@id': `${siteUrl}/#person` },
       copyrightHolder: { '@id': `${siteUrl}/#person` },

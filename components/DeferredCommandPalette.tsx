@@ -18,7 +18,7 @@ export function DeferredCommandPalette() {
   const [shouldMount, setShouldMount] = useState(false);
 
   useEffect(() => {
-    const timer = globalThis.setTimeout(() => setShouldMount(true), 600);
+    const timer = globalThis.setTimeout(() => setShouldMount(true), 1200);
     return () => globalThis.clearTimeout(timer);
   }, []);
 

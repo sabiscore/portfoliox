@@ -15,12 +15,15 @@ async function goto(page: Page) {
 async function openCommandPalette(page: Page) {
   const dialog = page.getByRole('dialog', { name: /command palette/i });
   const search = page.getByRole('textbox', { name: /command search/i });
-  const palette = dialog.or(search).first();
 
   await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
-  await page.waitForTimeout(200);
+  const openedFromShortcut = await Promise.any([
+    dialog.waitFor({ state: 'visible', timeout: 1_200 }),
+    search.waitFor({ state: 'visible', timeout: 1_200 }),
+  ])
+    .then(() => true)
+    .catch(() => false);
 
-  const openedFromShortcut = await palette.isVisible().catch(() => false);
   if (openedFromShortcut) {
     await expect(search).toBeVisible();
     return { dialog, search };

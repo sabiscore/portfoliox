@@ -10,10 +10,6 @@ const LiveActivityBar = dynamic(
   }
 );
 
-type IdentityCardPlaceholderProps = {
-  className?: string;
-};
-
 function deferMount(callback: () => void, timeout: number) {
   let cleanupScheduledMount = () => {};
 

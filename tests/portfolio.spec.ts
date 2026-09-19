@@ -280,7 +280,7 @@ test.describe('About', () => {
     await page.locator('#section-about').scrollIntoViewIfNeeded();
     await expect(
       page.getByRole('heading', {
-        name: /Long-horizon systems|Explicit decisions/i,
+        name: /Systems built for the long run|Decisions made explicit/i,
       })
     ).toBeVisible();
   });

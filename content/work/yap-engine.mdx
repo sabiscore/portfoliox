@@ -1,0 +1,69 @@
+---
+title: 'The Yap Engine'
+summary: 'Pressure-aware short-form video generation powered by SwarmXQ — from a raw brief through scripting, storyboard, voice, captions, deterministic assembly, and export.'
+tags:
+  - 'Python'
+  - 'Fastify 5'
+  - 'TypeScript'
+  - 'Ollama'
+  - 'Next.js 16'
+  - 'React 19'
+  - 'Redis 7'
+  - 'BullMQ'
+  - 'FFmpeg'
+  - 'Kokoro TTS'
+---
+
+## Problem shape
+
+Short-form video generation is not one model call. A useful output crosses intent classification, creative planning, scripting, storyboard generation, voice, visual assembly, caption timing, quality checks, and export.
+
+The failure surface grows with every stage. Local LLM inference also competes for memory with Python orchestration, queue workers, media tooling, and the dashboard. On constrained CPU hardware, a pipeline that assumes unlimited model residency or parallel rendering can turn one creative request into an out-of-memory failure or an unrecoverable long-running job.
+
+## Approach
+
+The Yap Engine treats video generation as a staged production pipeline powered by the SwarmXQ runtime:
+
+`intent classification → planning → scripting → storyboard → render assembly → finalization`
+
+Each stage has a defined contract, timeout boundary, model responsibility, and failure path. Task-specific local models are routed through Ollama rather than asking one general-purpose model to own the entire workflow.
+
+The creative pipeline produces structured artifacts before media assembly. That makes the intermediate decisions inspectable: the hook, narrative structure, script, shot plan, voice choice, visual prompts, captions, and final package can be validated independently.
+
+The runtime also treats resource pressure as part of the application contract. Model residency is governed for constrained hosts, heavyweight inference is serialized when required, and degraded paths are explicit instead of silently continuing with unsafe assumptions.
+
+## Key decisions
+
+**Stage-specific orchestration over a monolithic generation call**
+
+A single prompt can produce impressive demos, but it hides where quality or reliability failed. The staged pipeline makes each transition observable and testable, so creative logic can evolve without rewriting the render layer.
+
+**Pressure-aware local inference over unrestricted parallelism**
+
+The target environment is CPU-only and resource constrained. The runtime therefore uses model routing, memory-pressure checks, bounded concurrency, timeout budgets, and eviction policies to keep inference within the available hardware envelope.
+
+**Deterministic media assembly over an opaque render step**
+
+The render layer uses explicit FFmpeg assembly with optional ComfyUI or Modal GPU paths. This keeps the baseline reproducible while allowing richer visual generation when the environment supports it.
+
+**Recoverable jobs over disposable requests**
+
+Video generation is long-running work. Queue state, client request identifiers, job progress, cancellation, and reconnection semantics are treated as first-class concerns so a disconnected client does not imply a lost generation job.
+
+## Constraint
+
+The system must produce useful creative work on CPU-only hardware while sharing memory between local models, orchestration services, queue state, and media processing.
+
+That constraint drives the architecture: one heavyweight model at a time on constrained profiles, bounded video concurrency, explicit stage timeouts, pressure-aware admission, and graceful degradation when optional services such as advanced visual generation are unavailable.
+
+## Delivery signal
+
+The Yap Engine turns the portfolio's existing SwarmXQ orchestration work into a concrete production workflow: a brief enters as structured intent and leaves as a validated short-form video package.
+
+The important engineering result is not a single generation model. It is the control plane around the models — stage contracts, resource governance, queue semantics, recovery, deterministic assembly, and an operator-facing dashboard that makes long-running AI work understandable.
+
+## Evidence
+
+- **Public source** — the complete runtime, API, dashboard, workflow definitions, and operational documentation are inspectable in the repository.
+- **Architecture** — the repository documents the six-stage video pipeline, pressure-aware runtime controls, queue semantics, and render backends.
+- **Bounded claims** — no private latency, throughput, or quality percentage is presented here without a public measurement artifact.

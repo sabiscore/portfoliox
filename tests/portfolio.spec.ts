@@ -19,31 +19,21 @@ async function openCommandPalette(page: Page) {
     .getByRole('button', { name: /open quick actions|collapse quick actions/i })
     .first();
 
-  // The palette is intentionally code-split, so wait for its persistent trigger
-  // to mount before sending the first keyboard event. This removes the cold-load
-  // race where Cmd/Ctrl+K can arrive before the deferred client chunk hydrates.
-  await quickActionsToggle.waitFor({ state: 'visible', timeout: 10_000 });
+  // Mobile browsers may reserve Control+K for browser/OS shortcuts. The
+  // command-palette tests verify palette behavior, so open it through the
+  // application's accessible quick-actions control instead of depending on
+  // platform keyboard delivery.
+  await expect(quickActionsToggle).toBeVisible({ timeout: 10_000 });
+  await quickActionsToggle.click();
+  await expect(quickActionsToggle).toHaveAttribute('aria-expanded', 'true', {
+    timeout: 5_000,
+  });
 
-  await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
+  const quickOpenPaletteButton = page.getByRole('button', { name: /open command palette/i });
+  await expect(quickOpenPaletteButton).toBeVisible({ timeout: 5_000 });
+  await quickOpenPaletteButton.click();
 
-  // Mobile Chromium/WebKit can reserve or suppress Control+K before it reaches
-  // the page. The persistent quick-actions control exposes the same palette
-  // through a real user interaction, so use it only when the shortcut produced
-  // no dialog. This keeps the test deterministic without weakening the command
-  // palette assertions themselves.
-  const openedFromShortcut = await dialog
-    .waitFor({ state: 'visible', timeout: 1_200 })
-    .then(() => true)
-    .catch(() => false);
-
-  if (!openedFromShortcut) {
-    await quickActionsToggle.click();
-    const quickOpenPaletteButton = page.getByRole('button', { name: /open command palette/i });
-    await expect(quickOpenPaletteButton).toBeVisible({ timeout: 2_000 });
-    await quickOpenPaletteButton.click();
-  }
-
-  await expect(dialog).toBeVisible({ timeout: 2_000 });
+  await expect(dialog).toBeVisible({ timeout: 5_000 });
   await expect(search).toBeVisible();
   return { dialog, search };
 }

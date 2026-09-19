@@ -5,6 +5,8 @@
 import { CONTACT_EMAIL } from '@/lib/config';
 import { expect, test, type Page } from '@playwright/test';
 
+const COMMAND_PALETTE_SHORTCUT = process.platform === 'darwin' ? 'Meta+k' : 'Control+k';
+
 async function goto(page: Page) {
   await page.goto('/');
   await expect(page.locator('h1')).toBeVisible();
@@ -15,7 +17,7 @@ async function openCommandPalette(page: Page) {
   const search = page.getByRole('textbox', { name: /command search/i });
   const palette = dialog.or(search).first();
 
-  await page.keyboard.press('Control+k');
+  await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
   await page.waitForTimeout(200);
 
   const openedFromShortcut = await palette.isVisible().catch(() => false);

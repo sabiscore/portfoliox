@@ -54,7 +54,7 @@ export default function IdentityCard({ className = '' }: IdentityCardProps): JSX
                 fill
                 priority
                 sizes="(max-width: 640px) 116px, 190px"
-                className="object-cover object-center opacity-95 transition duration-700 motion-safe:group-hover:scale-[1.035]"
+                className="identity-card-portrait object-cover object-center opacity-95"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_46%,rgba(2,6,23,0.68))]" />
             </div>

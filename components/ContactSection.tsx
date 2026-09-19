@@ -543,7 +543,7 @@ export function ContactSection() {
               ))}
             </ol>
             <p className="text-color-text-muted mt-5 font-mono text-[10px] leading-5 tracking-wide uppercase">
-              Backend · Platform · AI infrastructure · Reliability
+              Backend · Platform · AI infrastructure · Production reliability
             </p>
           </m.aside>
         </m.div>

@@ -3,6 +3,16 @@
 
 import Image from 'next/image';
 import {
+  IDENTITY_CARD_CONTENT_CLASSNAME,
+  IDENTITY_CARD_FRAME_CLASSNAME,
+  IDENTITY_CARD_META_ROW_CLASSNAME,
+  IDENTITY_CARD_PORTRAIT_CLASSNAME,
+  IDENTITY_CARD_PROFILE_GRID_CLASSNAME,
+  IDENTITY_CARD_SURFACE_CLASSNAME,
+  IDENTITY_CARD_TRUST_SIGNAL_CLASSNAME,
+  IDENTITY_CARD_TRUST_SIGNALS_GRID_CLASSNAME,
+} from '@/components/identityCardStyles';
+import {
   m,
   useMotionTemplate,
   useMotionValue,
@@ -172,8 +182,7 @@ export default function IdentityCard({
       aria-label="Oscar Ndugbu identity card"
       data-testid="hero-identity-card"
       className={[
-        'group relative mx-auto w-full max-w-[25rem] rounded-[2rem]',
-        'border border-white/10 bg-white/[0.055] p-2.5 shadow-2xl shadow-sky-950/35 sm:p-3',
+        IDENTITY_CARD_FRAME_CLASSNAME,
         'backdrop-blur-2xl [perspective:1200px] transform-gpu',
         className,
       ].join(' ')}
@@ -192,11 +201,11 @@ export default function IdentityCard({
         style={{ background: glareBackground }}
       />
 
-      <div className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-slate-950/72">
+      <div className={IDENTITY_CARD_SURFACE_CLASSNAME}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_90%_12%,rgba(251,146,60,0.16),transparent_30%)]" />
 
-        <div className="relative p-3.5 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:gap-3">
+        <div className={IDENTITY_CARD_CONTENT_CLASSNAME}>
+          <div className={IDENTITY_CARD_META_ROW_CLASSNAME}>
             <p className="min-w-0 rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.2em] text-sky-100/90 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.28em]">
               Operating model
             </p>
@@ -206,11 +215,8 @@ export default function IdentityCard({
             </span>
           </div>
 
-          <div className="grid grid-cols-[7.25rem_minmax(0,1fr)] items-center gap-4 sm:grid-cols-[0.82fr_1fr] sm:items-end sm:gap-5">
-            <div
-              className="relative aspect-[4/5] overflow-hidden rounded-[1.15rem] border border-white/10 bg-slate-900 shadow-2xl shadow-black/35 sm:rounded-[1.35rem]"
-              data-testid="identity-portrait"
-            >
+          <div className={IDENTITY_CARD_PROFILE_GRID_CLASSNAME}>
+            <div className={IDENTITY_CARD_PORTRAIT_CLASSNAME} data-testid="identity-portrait">
               {portraitFailed ? (
                 <PortraitFallback />
               ) : (
@@ -218,6 +224,7 @@ export default function IdentityCard({
                   src={portraitSrc}
                   alt="Portrait of Oscar Ndugbu"
                   fill
+                  priority
                   sizes="(max-width: 640px) 116px, 190px"
                   className="object-cover object-center opacity-95 transition duration-700 motion-safe:group-hover:scale-[1.035]"
                   onError={handlePortraitError}
@@ -257,12 +264,9 @@ export default function IdentityCard({
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-1.5 sm:mt-5 sm:gap-2">
+          <div className={IDENTITY_CARD_TRUST_SIGNALS_GRID_CLASSNAME}>
             {TRUST_SIGNALS.map((signal) => (
-              <div
-                key={signal.label}
-                className="rounded-xl border border-white/8 bg-white/[0.045] px-2 py-2 sm:px-3 sm:py-2.5"
-              >
+              <div key={signal.label} className={IDENTITY_CARD_TRUST_SIGNAL_CLASSNAME}>
                 <p className="font-mono text-[0.48rem] tracking-[0.12em] text-sky-200/75 uppercase sm:text-[0.55rem] sm:tracking-[0.16em]">
                   {signal.label}
                 </p>

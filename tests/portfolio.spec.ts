@@ -679,23 +679,50 @@ test.describe('Command Palette — V1.0 Easter Eggs', () => {
   });
 
   test('/why-lagos command is accessible via command palette', async ({ page }) => {
-    await page.keyboard.press('Control+k');
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('/why-lagos');
     await page.waitForTimeout(200);
-
-    const palette = page
-      .locator('[role="dialog"][aria-label*="command"]')
-      .or(page.locator('[role="combobox"]').first());
-    const isPaletteOpen = await palette.isVisible().catch(() => false);
-
-    if (isPaletteOpen) {
-      await page.keyboard.type('/why-lagos');
-      await page.waitForTimeout(200);
-      await expect(page.getByText(/why.lagos|Why Lagos/i)).toBeVisible();
-      await page.keyboard.press('Escape');
-    } else {
-      test.skip();
-    }
+    await expect(page.getByText(/why.lagos|Why Lagos/i)).toBeVisible();
+    await page.keyboard.press('Escape');
   });
+
+  test('The Yap Engine command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('Yap Engine');
+
+    const yapEngineCommand = page.getByRole('button', { name: /The Yap Engine case study/i });
+    await expect(yapEngineCommand).toBeVisible();
+
+    await yapEngineCommand.click();
+    await expect(page).toHaveURL(/\/work\/yap-engine$/);
+  });
+
+  test('The TaxBridge command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('TaxBridge');
+
+    const taxBridgeCommand = page.getByRole('button', { name: /TaxBridge case study/i });
+    await expect(taxBridgeCommand).toBeVisible();
+
+    await taxBridgeCommand.click();
+    await expect(page).toHaveURL(/\/work\/taxbridge$/);
+  });
+
+  test('The SabiScore command navigates to its case study route', async ({ page }) => {
+    const { search } = await openCommandPalette(page);
+
+    await search.fill('SabiScore');
+
+    const sabiScoreCommand = page.getByRole('button', { name: /SabiScore case study/i });
+    await expect(sabiScoreCommand).toBeVisible();
+
+    await sabiScoreCommand.click();
+    await expect(page).toHaveURL(/\/work\/sabiscore$/);
+  });
+
 });
 
 test.describe('Performance — CLS', () => {

@@ -10,6 +10,13 @@ export interface PaletteItem {
   keywords: string[];
 }
 
+export interface ProjectPaletteCommand {
+  id: string;
+  label: string;
+  group: 'Case Studies';
+  href: string;
+}
+
 export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
   {
     id: 'nav-projects',
@@ -43,28 +50,28 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
     id: 'proj-taxbridge',
     label: 'TaxBridge',
     category: 'PROJECTS',
-    href: '#taxbridge',
+    href: '/work/taxbridge',
     keywords: ['fintech', 'compliance', 'tax', 'fastify'],
   },
   {
     id: 'proj-sabiscore',
     label: 'SabiScore',
     category: 'PROJECTS',
-    href: '#sabiscore',
+    href: '/work/sabiscore',
     keywords: ['ml', 'machine learning', 'xgboost', 'observability'],
   },
   {
     id: 'proj-yap-engine',
     label: 'The Yap Engine',
     category: 'PROJECTS',
-    href: '#yap-engine',
+    href: '/work/yap-engine',
     keywords: ['ai', 'video', 'agents', 'orchestration', 'swarmxq', 'ollama', 'ffmpeg'],
   },
   {
     id: 'proj-hashablanca',
     label: 'Hashablanca',
     category: 'PROJECTS',
-    href: '#hashablanca',
+    href: '/work/hashablanca',
     keywords: ['blockchain', 'zk', 'privacy', 'encryption'],
   },
   {
@@ -89,3 +96,29 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
     keywords: ['hire', 'profile'],
   },
 ];
+
+export function getProjectPaletteCommand(itemId: string): ProjectPaletteCommand | null {
+  const item = STATIC_PALETTE_ITEMS.find(
+    (paletteItem): paletteItem is PaletteItem & { href: string } =>
+      paletteItem.id === itemId &&
+      paletteItem.category === 'PROJECTS' &&
+      typeof paletteItem.href === 'string'
+  );
+
+  if (!item) {
+    return null;
+  }
+
+  return {
+    id: `cs-${item.id}`,
+    label: `${item.label} case study`,
+    group: 'Case Studies',
+    href: item.href,
+  };
+}
+
+export const PROJECT_PALETTE_COMMANDS = STATIC_PALETTE_ITEMS.flatMap((item) => {
+  const command = getProjectPaletteCommand(item.id);
+
+  return command ? [command] : [];
+});

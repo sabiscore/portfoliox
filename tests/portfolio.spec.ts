@@ -7,7 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function goto(page: Page) {
   await page.goto('/');
-  await expect(page.locator('section#hero').getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.getByTestId('hero-heading')).toBeVisible();
 }
 
 async function openCommandPalette(page: Page) {
@@ -120,7 +120,7 @@ test.describe('Hero', () => {
   });
 
   test('h1 aria-label is the positioning headline', async ({ page }) => {
-    await expect(page.locator('h1[aria-label*="The system has to work at 2am"]')).toBeAttached();
+    await expect(page.getByTestId('hero-heading')).toBeAttached();
   });
 
   test('headshot image has descriptive alt text', async ({ page }) => {
@@ -136,7 +136,7 @@ test.describe('Hero', () => {
   });
 
   test('headline "The system has to work at 2am." is visible', async ({ page }) => {
-    await expect(page.locator('h1')).toHaveAttribute('aria-label', /The system has to work at 2am/);
+    await expect(page.getByTestId('hero-heading')).toHaveAttribute('aria-label', /The system has to work at 2am/);
   });
 
   test('no first-person identity claims', async ({ page }) => {

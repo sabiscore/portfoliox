@@ -1,7 +1,6 @@
-/* eslint-disable no-restricted-syntax */
-'use client';
-
 import Image from 'next/image';
+import type { JSX } from 'react';
+
 import {
   IDENTITY_CARD_CONTENT_CLASSNAME,
   IDENTITY_CARD_FRAME_CLASSNAME,
@@ -12,202 +11,34 @@ import {
   IDENTITY_CARD_TRUST_SIGNAL_CLASSNAME,
   IDENTITY_CARD_TRUST_SIGNALS_GRID_CLASSNAME,
 } from '@/components/identityCardStyles';
-import {
-  m,
-  useMotionTemplate,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-  useTransform,
-} from 'framer-motion';
-import type { CSSProperties, JSX, PointerEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
 import { PROFILE } from '@/lib/portfolio-data';
 
 type IdentityCardProps = {
   className?: string;
-  reducedMotion?: boolean;
 };
-
-const PORTRAIT_SOURCES = [
-  '/headshot.webp',
-  '/images/oscar-headshot.jpg',
-  '/images/scar-headshot.jpeg',
-] as const;
 
 const STACK_SIGNALS = ['Backend · Platform', 'AI infrastructure'] as const;
 
 const TRUST_SIGNALS = [
-  { label: 'Focus', value: 'Distributed systems · platform reliability' },
+  { label: 'Focus', value: 'Backend · platform reliability' },
   { label: 'Proof', value: 'TaxBridge · SabiScore · SwarmXQ' },
   { label: 'Method', value: 'Constraint → decision → outcome → evidence' },
 ] as const;
 
-function PortraitFallback(): JSX.Element {
+export default function IdentityCard({ className = '' }: IdentityCardProps): JSX.Element {
   return (
-    <div
-      aria-hidden="true"
-      className="grid size-full place-items-center bg-[radial-gradient(circle_at_28%_18%,rgba(56,189,248,0.28),transparent_36%),radial-gradient(circle_at_80%_70%,rgba(251,146,60,0.22),transparent_38%),linear-gradient(145deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))]"
-    >
-      <span className="font-mono text-4xl font-semibold tracking-[0.28em] text-white/85">
-        ON
-      </span>
-    </div>
-  );
-}
-
-export default function IdentityCard({
-  className = '',
-  reducedMotion,
-}: IdentityCardProps): JSX.Element {
-  const prefersReducedMotion = useReducedMotion();
-  const shouldReduceMotion = reducedMotion ?? Boolean(prefersReducedMotion);
-
-  const [portraitIndex, setPortraitIndex] = useState(0);
-  const [portraitFailed, setPortraitFailed] = useState(false);
-  const [coarsePointer, setCoarsePointer] = useState(false);
-
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const glareX = useMotionValue(50);
-  const glareY = useMotionValue(50);
-
-  const rotateXRaw = useTransform(pointerY, [-0.5, 0.5], [8, -8]);
-  const rotateYRaw = useTransform(pointerX, [-0.5, 0.5], [-9, 9]);
-
-  const rotateX = useSpring(rotateXRaw, {
-    stiffness: 240,
-    damping: 28,
-    mass: 0.5,
-  });
-
-  const rotateY = useSpring(rotateYRaw, {
-    stiffness: 240,
-    damping: 28,
-    mass: 0.5,
-  });
-
-  const glareXSpring = useSpring(glareX, {
-    stiffness: 200,
-    damping: 26,
-    mass: 0.45,
-  });
-
-  const glareYSpring = useSpring(glareY, {
-    stiffness: 200,
-    damping: 26,
-    mass: 0.45,
-  });
-
-  const glareBackground = useMotionTemplate`
-    radial-gradient(
-      circle at ${glareXSpring}% ${glareYSpring}%,
-      rgba(255,255,255,0.34),
-      rgba(56,189,248,0.15) 18%,
-      rgba(251,146,60,0.11) 36%,
-      transparent 60%
-    )
-  `;
-
-  const portraitSrc = PORTRAIT_SOURCES[portraitIndex];
-
-  useEffect(() => {
-    const query = window.matchMedia('(pointer: coarse)');
-
-    const syncPointer = (): void => {
-      setCoarsePointer(query.matches);
-    };
-
-    syncPointer();
-    query.addEventListener('change', syncPointer);
-
-    return () => {
-      query.removeEventListener('change', syncPointer);
-    };
-  }, []);
-
-  const resetTilt = useCallback((): void => {
-    pointerX.set(0);
-    pointerY.set(0);
-    glareX.set(50);
-    glareY.set(50);
-  }, [glareX, glareY, pointerX, pointerY]);
-
-  const handlePointerMove = useCallback(
-    (event: PointerEvent<HTMLElement>): void => {
-      if (shouldReduceMotion || coarsePointer) return;
-
-      const rect = event.currentTarget.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
-
-      pointerX.set(x - 0.5);
-      pointerY.set(y - 0.5);
-      glareX.set(x * 100);
-      glareY.set(y * 100);
-    },
-    [coarsePointer, glareX, glareY, pointerX, pointerY, shouldReduceMotion]
-  );
-
-  const handlePortraitError = useCallback((): void => {
-    const nextIndex = portraitIndex + 1;
-
-    if (nextIndex < PORTRAIT_SOURCES.length) {
-      setPortraitIndex(nextIndex);
-      return;
-    }
-
-    setPortraitFailed(true);
-  }, [portraitIndex]);
-
-  const baseMotionStyle = useMemo<CSSProperties>(
-    () => ({
-      transformStyle: 'preserve-3d',
-      willChange: shouldReduceMotion || coarsePointer ? 'auto' : 'transform',
-    }),
-    [coarsePointer, shouldReduceMotion]
-  );
-
-  const interactiveMotionStyle = shouldReduceMotion || coarsePointer
-    ? baseMotionStyle
-    : {
-        ...baseMotionStyle,
-        rotateX,
-        rotateY,
-      };
-
-  return (
-    <m.article
+    <article
       aria-label="Oscar Ndugbu identity card"
       data-testid="hero-identity-card"
-      className={[
-        IDENTITY_CARD_FRAME_CLASSNAME,
-        'backdrop-blur-2xl [perspective:1200px] transform-gpu',
-        className,
-      ].join(' ')}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={resetTilt}
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
-      animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 180, damping: 24, mass: 0.6 }}
-      style={interactiveMotionStyle}
+      className={[IDENTITY_CARD_FRAME_CLASSNAME, className].join(' ')}
     >
-      <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[linear-gradient(135deg,rgba(56,189,248,0.22),transparent_28%,rgba(251,146,60,0.18)_72%,transparent)] opacity-70" />
-
-      <m.div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-px rounded-[1.9rem] opacity-0 mix-blend-screen transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background: glareBackground }}
-      />
-
       <div className={IDENTITY_CARD_SURFACE_CLASSNAME}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_90%_12%,rgba(251,146,60,0.16),transparent_30%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(56,189,248,0.14),transparent_36%)]" />
 
         <div className={IDENTITY_CARD_CONTENT_CLASSNAME}>
           <div className={IDENTITY_CARD_META_ROW_CLASSNAME}>
             <p className="min-w-0 rounded-full border border-sky-300/20 bg-sky-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.2em] text-sky-100/90 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.28em]">
-              Operating profile
+              Operating model
             </p>
 
             <span className="shrink-0 rounded-full border border-orange-300/20 bg-orange-300/10 px-2.5 py-1.5 font-mono text-[0.56rem] tracking-[0.18em] text-orange-100/85 uppercase sm:px-3 sm:text-[0.62rem] sm:tracking-[0.24em]">
@@ -217,24 +48,16 @@ export default function IdentityCard({
 
           <div className={IDENTITY_CARD_PROFILE_GRID_CLASSNAME}>
             <div className={IDENTITY_CARD_PORTRAIT_CLASSNAME} data-testid="identity-portrait">
-              {portraitFailed ? (
-                <PortraitFallback />
-              ) : (
-                <Image
-                  src={portraitSrc}
-                  alt="Portrait of Oscar Ndugbu"
-                  fill
-                  priority
-                  sizes="(max-width: 640px) 116px, 190px"
-                  className="object-cover object-center opacity-95 transition duration-700 motion-safe:group-hover:scale-[1.035]"
-                  onError={handlePortraitError}
-                  style={{
-                    filter: 'url(#luxury-duotone-cinema) saturate(1.08) contrast(1.04)',
-                  }}
-                />
-              )}
-
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_46%,rgba(2,6,23,0.72))]" />
+              <Image
+                src="/headshot.webp"
+                alt="Portrait of Oscar Ndugbu"
+                fill
+                priority
+                fetchPriority="high"
+                sizes="(max-width: 640px) 116px, 190px"
+                className="identity-card-portrait object-cover object-center opacity-95"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_46%,rgba(2,6,23,0.68))]" />
             </div>
 
             <div className="min-w-0 space-y-2.5 sm:space-y-3">
@@ -248,7 +71,7 @@ export default function IdentityCard({
               </div>
 
               <p className="text-xs leading-5 text-white/62 sm:text-sm sm:leading-6">
-                Decision-led engineering for systems that must remain observable, recoverable, and understandable under pressure.
+                Backend, platform, and AI systems designed to make failure visible, recovery deliberate, and operations easier to understand.
               </p>
 
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -282,6 +105,6 @@ export default function IdentityCard({
           </p>
         </div>
       </div>
-    </m.article>
+    </article>
   );
 }

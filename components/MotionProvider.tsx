@@ -71,7 +71,29 @@ export function MotionProvider({ children }: Readonly<{ children: ReactNode }>) 
     }
 
     if (finePointerQuery.matches && !reducedMotionQuery.matches) {
-      startLoading();
+      // Framer's animation feature bundle is non-critical for the initial
+      // render. Give the hero a clean paint window, while keeping interaction
+      // listeners able to promote the bundle immediately when the visitor
+      // actually interacts.
+      let idleId: number | null = null;
+      let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
+
+      if ('requestIdleCallback' in window) {
+        idleId = window.requestIdleCallback(() => startLoading(), { timeout: 900 });
+      } else {
+        timeoutId = globalThis.setTimeout(startLoading, 600);
+      }
+
+      return () => {
+        if (idleId !== null) {
+          window.cancelIdleCallback(idleId);
+        }
+        if (timeoutId !== null) {
+          globalThis.clearTimeout(timeoutId);
+        }
+        active = false;
+        removeIntentListeners();
+      };
     } else {
       window.addEventListener('scroll', loadOnIntent, { passive: true, once: true });
       window.addEventListener('pointerdown', loadOnIntent, { passive: true, once: true });
@@ -88,7 +110,7 @@ export function MotionProvider({ children }: Readonly<{ children: ReactNode }>) 
   }, []);
 
   return (
-    <LazyMotion features={features} strict>
+    <LazyMotion features={features}>
       {children}
     </LazyMotion>
   );

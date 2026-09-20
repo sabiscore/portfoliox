@@ -14,7 +14,7 @@
 // Usage:
 //   <SectionHeading
 //     eyebrow="01 PROJECTS"
-//     title="Built to survive real constraints."
+//     title="Built around real constraints."
 //     description="Four systems. Every metric traceable to a deployed codebase."
 //   />
 

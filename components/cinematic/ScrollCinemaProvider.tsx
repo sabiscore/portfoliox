@@ -552,9 +552,17 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
       }
     };
 
-    void initializeDesktopEngine();
+    // Keep the first paint free of GSAP/Lenis bootstrap work. The hero is
+    // fully usable with native scrolling; desktop cinematic scrolling is an
+    // enhancement that can safely start after the browser has had a chance to
+    // paint the critical content. A bounded timeout keeps the enhancement from
+    // being postponed indefinitely on a busy main thread.
+    const schedule = window.setTimeout(() => {
+      void initializeDesktopEngine();
+    }, 600);
 
     return () => {
+      window.clearTimeout(schedule);
       cancelled = true;
       cleanupActiveEngine?.();
       cleanupActiveEngine = null;

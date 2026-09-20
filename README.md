@@ -1,6 +1,6 @@
 # Oscar Ndugbu — scardubu.dev
 
-Staff+ Full-Stack / Infra / AI portfolio. Production systems that stay alive when it matters most — compliant, fast, and relentlessly reliable. Built under Lagos constraints. Deployed to global standards.
+Staff Backend and Platform Engineer portfolio. Production systems designed to make failure visible, recovery deliberate, and operations understandable — from fintech workflows to AI infrastructure, built from Lagos for global teams.
 
 **Live site:** [https://scardubu.dev](https://scardubu.dev)
 
@@ -10,7 +10,7 @@ Staff+ Full-Stack / Infra / AI portfolio. Production systems that stay alive whe
 
 ## What it is
 
-A proof system, not a brag sheet. Four production case studies, four open-source packages, 62 verified skills, and writing that explains the decisions behind the work.
+An engineering record, not a list of technologies. Four production case studies, four open-source packages, 62 verified skills, and writing that explains the constraints, decisions, and evidence behind the work.
 
 ## Current release status
 

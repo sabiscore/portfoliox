@@ -190,7 +190,7 @@ export function Footer() {
       <div className="border-color-border-subtle text-3xs border-t py-4 font-mono">
         <div className="container flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
           <p className="tracking-[0.5px] text-balance text-[oklch(93%_0.006_264_/_0.60)] uppercase sm:text-[oklch(93%_0.006_264_/_0.22)]">
-            Backend · Platform · AI infrastructure · Reliability
+            Backend · Platform · AI infrastructure · Production reliability
           </p>
           <p className="text-[oklch(93%_0.006_264_/_0.56)] sm:text-[oklch(93%_0.006_264_/_0.16)]">
             scardubu.dev

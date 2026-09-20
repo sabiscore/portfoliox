@@ -107,6 +107,7 @@ function ContactForm() {
   });
   // Change 1d — V1.0: field-level validation errors per spec §Form State Copy
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+  const [fieldToFocus, setFieldToFocus] = useState<keyof FormValues | null>(null);
   const successRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -114,6 +115,20 @@ function ContactForm() {
       successRef.current?.focus();
     }
   }, [state]);
+
+  useEffect(() => {
+    if (!fieldToFocus) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const field = document.getElementById(`cf-${fieldToFocus}`);
+      if (field instanceof HTMLElement) {
+        field.focus();
+      }
+      setFieldToFocus(null);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [fieldToFocus]);
 
   function handleBlur(e: FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
@@ -139,8 +154,7 @@ function ContactForm() {
 
     if (firstInvalidField) {
       setFieldErrors(validationErrors);
-      const field = e.currentTarget.elements.namedItem(firstInvalidField);
-      if (field instanceof HTMLElement) field.focus();
+      setFieldToFocus(firstInvalidField);
       return;
     }
 
@@ -543,7 +557,7 @@ export function ContactSection() {
               ))}
             </ol>
             <p className="text-color-text-muted mt-5 font-mono text-[10px] leading-5 tracking-wide uppercase">
-              Backend · Platform · AI infrastructure · Reliability
+              Backend · Platform · AI infrastructure · Production reliability
             </p>
           </m.aside>
         </m.div>

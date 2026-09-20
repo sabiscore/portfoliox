@@ -2,7 +2,6 @@
 // CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
 // Major Reset • Lagos → Global • Production Conviction Architecture
 
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import { Mail, MessageSquareText, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -11,7 +10,6 @@ import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { useTheme } from '@/components/ThemeProvider';
 import { PROJECT_PALETTE_COMMANDS } from '@/constants/palette';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
-import { springs } from '@/lib/motionVariants';
 
 interface CommandItem {
   id: string;
@@ -23,20 +21,9 @@ interface CommandItem {
 
 type CommandPaletteWindow = Window & { __commandPaletteRequested?: boolean };
 
-const PANEL_VARIANTS_DESKTOP = {
-  hidden: { opacity: 0, y: -12, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -8, scale: 0.98 },
-};
 
-const PANEL_VARIANTS_MOBILE = {
-  hidden: { opacity: 0, y: 72 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 72 },
-};
-
-export function CommandPalette() {
-  const [open, setOpen] = useState(false);
+export function CommandPalette({ initialOpen = false }: Readonly<{ initialOpen?: boolean }>) {
+  const [open, setOpen] = useState(initialOpen);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [fabExpanded, setFabExpanded] = useState(false);
@@ -57,7 +44,6 @@ export function CommandPalette() {
 
   const router = useRouter();
   const pathname = usePathname();
-  const reducedMotion = useReducedMotion();
   const { scrollToSection } = useScrollCinema();
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -83,7 +69,9 @@ export function CommandPalette() {
   }, []);
 
   const openPaletteFromQuickAction = useCallback(() => {
-    globalThis.dispatchEvent(new Event('command-palette:open'));
+    // The quick-actions control already owns the palette state. Open directly
+    // here instead of round-tripping through the global event bus; the event
+    // remains reserved for the global Cmd/Ctrl+K path and external triggers.
     setOpen(true);
   }, []);
 
@@ -109,7 +97,9 @@ export function CommandPalette() {
   }, [scrollTo]);
 
   const openPaletteShortcuts = useCallback(() => {
-    setFabExpanded(false);
+    // Opening the palette removes the quick-actions subtree via !open. Avoid
+    // a competing FAB state update in the same event; the palette state is the
+    // only source of truth for this transition.
     openPaletteFromQuickAction();
   }, [openPaletteFromQuickAction]);
 
@@ -384,7 +374,7 @@ export function CommandPalette() {
       () => {
         quickContactRef.current?.focus();
       },
-      reducedMotion ? 0 : 120
+      120
     );
 
     const onPointerDown = (event: PointerEvent) => {
@@ -449,7 +439,7 @@ export function CommandPalette() {
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown, { capture: true });
     };
-  }, [fabExpanded, open, reducedMotion]);
+  }, [fabExpanded, open]);
 
   // Groups for display
   const groups = useMemo(() => {
@@ -462,29 +452,23 @@ export function CommandPalette() {
     return map;
   }, [filtered]);
 
-  const panelVariants = isMobile ? PANEL_VARIANTS_MOBILE : PANEL_VARIANTS_DESKTOP;
-  const panelTransition = reducedMotion ? { duration: 0 } : springs.smooth;
 
   return (
     <>
-      <AnimatePresence>
-        {open && (
+      {open && (
           // FIX v22 [COMPOSITOR-1, ARIA-1]:
           //   - No backdropFilter — was triggering on-demand GPU layer promotion on mount.
           //     rgba(0,0,0,0.72) is visually equivalent at this coverage level.
           //   - aria-hidden="true": the backdrop is not a dialog — it's a dismiss target.
           //     The inner panel below carries role="dialog" and the actual semantics.
-          <m.div
+          <div
             className="fixed inset-0 z-[500] bg-[rgba(0,0,0,0.72)]"
-            initial={reducedMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reducedMotion ? {} : { opacity: 0 }}
             onClick={close}
             aria-hidden="true"
           >
             {/* FIX v22 [ARIA-1]: role="dialog" lives here — the panel is the dialog.
                 The outer overlay div above is the dismissible backdrop (aria-hidden). */}
-            <m.div
+            <div
               ref={panelRef}
               className={[
                 'glass-full absolute overflow-hidden',
@@ -495,11 +479,6 @@ export function CommandPalette() {
               role="dialog"
               aria-modal="true"
               aria-label="Command palette"
-              variants={panelVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              transition={panelTransition}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drag handle — enlarged tap target on mobile */}
@@ -626,10 +605,9 @@ export function CommandPalette() {
                   />
                 )}
               </div>
-            </m.div>
-          </m.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
       {/* Persistent quick-actions FAB.
           Keeps one global affordance while exposing a fast-contact action.
@@ -648,17 +626,11 @@ export function CommandPalette() {
               : 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
           }}
         >
-          <AnimatePresence initial={false}>
-            {fabExpanded && (
-              <m.div
-                id="quick-actions-menu"
-                key="quick-actions-menu"
-                initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
-                transition={reducedMotion ? { duration: 0 } : springs.smooth}
-                className="flex flex-col items-end gap-2"
-              >
+          {fabExpanded && (
+            <div
+              id="quick-actions-menu"
+              className="flex flex-col items-end gap-2"
+            >
                 <button
                   ref={quickContactRef}
                   type="button"
@@ -675,15 +647,15 @@ export function CommandPalette() {
                   onClick={openPaletteShortcuts}
                   className="border-color-border text-color-text-primary flex min-h-[44px] items-center gap-2 rounded-full border bg-[oklch(14%_0.008_264_/_0.92)] px-4 py-2 font-mono text-[11px] tracking-wide transition-colors hover:border-white/30 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none"
                   aria-label="Open command palette"
+                  data-testid="open-command-palette"
                 >
                   <span>Open command palette</span>
                   <kbd className="border-color-border text-color-text-muted rounded border px-1.5 py-0.5 font-mono text-[10px]">
                     ⌘K
                   </kbd>
                 </button>
-              </m.div>
-            )}
-          </AnimatePresence>
+            </div>
+          )}
 
           <button
             ref={quickToggleRef}
@@ -692,6 +664,7 @@ export function CommandPalette() {
             aria-label={fabExpanded ? 'Collapse quick actions' : 'Open quick actions'}
             aria-expanded={fabExpanded}
             aria-controls="quick-actions-menu"
+            data-testid="quick-actions-toggle"
             className="flex h-12 w-12 transform-gpu items-center justify-center rounded-2xl border border-white/12 bg-black/85 text-white/80 transition-colors duration-200 hover:border-white/24 hover:text-white focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:outline-none"
             // Chapter-aware glow keeps the FAB visually in sync with active section.
             // eslint-disable-next-line no-restricted-syntax
@@ -712,14 +685,8 @@ export function CommandPalette() {
       {/* /why-lagos modal — V1.0 Change 9: §DELIGHT_MISS:personality easter egg.
           Spec verbatim: "Constraint is a design tool. Lagos constraint is a sharper one."
           Dismiss on Escape or click-outside. */}
-      <AnimatePresence>
-        {whyLagosOpen && (
-          <m.div
-            key="why-lagos-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+      {whyLagosOpen && (
+          <div
             className="fixed inset-0 z-[60] flex items-center justify-center bg-[oklch(0%_0_0_/_0.75)] p-6"
             onClick={() => setWhyLagosOpen(false)}
             role="dialog"
@@ -730,12 +697,7 @@ export function CommandPalette() {
             }}
             tabIndex={-1}
           >
-            <m.div
-              key="why-lagos-panel"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            <div
               className="border-color-border relative w-full max-w-sm rounded-[var(--radius-xl)] border bg-[oklch(14%_0.008_264)] p-8 shadow-[0_32px_80px_oklch(0%_0_0_/_0.6)]"
               onClick={(e) => e.stopPropagation()}
             >
@@ -760,10 +722,9 @@ export function CommandPalette() {
               >
                 Dismiss ↩
               </button>
-            </m.div>
-          </m.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
     </>
   );
 }

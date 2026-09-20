@@ -15,22 +15,28 @@ async function openCommandPalette(page: Page) {
   const search = page.getByRole('textbox', { name: /command search/i });
   const quickActionsToggle = page.getByTestId('quick-actions-toggle');
 
-  // Mobile browsers may reserve Control+K for browser/OS shortcuts. The
-  // command-palette tests verify palette behavior, so open it through the
-  // application's accessible quick-actions control instead of depending on
-  // platform keyboard delivery.
-  await expect(quickActionsToggle).toBeVisible({ timeout: 10_000 });
-  await quickActionsToggle.click();
-  await expect(quickActionsToggle).toHaveAttribute('aria-expanded', 'true', {
-    timeout: 5_000,
-  });
+  const isCoarsePointer = await page.evaluate(() =>
+    window.matchMedia('(pointer: coarse)').matches
+  );
 
-  const quickOpenPaletteButton = page.getByTestId('open-command-palette');
-  await expect(quickOpenPaletteButton).toBeVisible({ timeout: 5_000 });
-  await quickOpenPaletteButton.click();
+  if (isCoarsePointer) {
+    // Touch browsers may reserve Control+K for browser/OS shortcuts. Exercise
+    // the production quick-actions affordance on coarse-pointer devices.
+    await expect(quickActionsToggle).toBeVisible({ timeout: 10_000 });
+    await quickActionsToggle.click();
+    await expect(quickActionsToggle).toHaveAttribute('aria-expanded', 'true', {
+      timeout: 5_000,
+    });
 
-  // The production trigger starts the lazy import on the first intent tap.
-  // Keep the assertion on the actual dialog rather than a test-only event hook.
+    const quickOpenPaletteButton = page.getByTestId('open-command-palette');
+    await expect(quickOpenPaletteButton).toBeVisible({ timeout: 5_000 });
+    await quickOpenPaletteButton.click();
+  } else {
+    // Desktop exercises the same production path exposed by the global
+    // Cmd/Ctrl+K handler, without depending on the deferred FAB being mounted.
+    await page.keyboard.press('Control+k');
+  }
+
   await expect(dialog).toBeVisible({ timeout: 15_000 });
   await expect(search).toBeVisible();
   return { dialog, search };

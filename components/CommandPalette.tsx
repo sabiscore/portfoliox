@@ -629,17 +629,11 @@ export function CommandPalette() {
               : 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
           }}
         >
-          <AnimatePresence initial={false}>
-            {fabExpanded && (
-              <m.div
-                id="quick-actions-menu"
-                key="quick-actions-menu"
-                initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
-                transition={reducedMotion ? { duration: 0 } : springs.smooth}
-                className="flex flex-col items-end gap-2"
-              >
+          {fabExpanded && (
+            <div
+              id="quick-actions-menu"
+              className="flex flex-col items-end gap-2"
+            >
                 <button
                   ref={quickContactRef}
                   type="button"
@@ -653,10 +647,6 @@ export function CommandPalette() {
 
                 <button
                   type="button"
-                  onPointerDown={(event) => {
-                    event.stopPropagation();
-                    openPaletteShortcuts();
-                  }}
                   onClick={openPaletteShortcuts}
                   className="border-color-border text-color-text-primary flex min-h-[44px] items-center gap-2 rounded-full border bg-[oklch(14%_0.008_264_/_0.92)] px-4 py-2 font-mono text-[11px] tracking-wide transition-colors hover:border-white/30 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none"
                   aria-label="Open command palette"
@@ -666,9 +656,8 @@ export function CommandPalette() {
                     ⌘K
                   </kbd>
                 </button>
-              </m.div>
-            )}
-          </AnimatePresence>
+            </div>
+          )}
 
           <button
             ref={quickToggleRef}

@@ -79,13 +79,16 @@ export function DeferredCommandPalette() {
     // listener tolerant makes the deferred boundary robust across cached chunks.
     window.addEventListener('command-palette:open', onGlobalOpen);
     document.addEventListener('command-palette:open', onGlobalOpen);
-    document.addEventListener('keydown', onKeyDown, { capture: true });
+    // Capture at window so the deferred boundary sees Cmd/Ctrl+K before any
+    // document-level handler can consume the shortcut. This is the earliest
+    // React-independent point in the event path available to the component.
+    window.addEventListener('keydown', onKeyDown, { capture: true });
 
     return () => {
       cleanupDeferredMount();
       window.removeEventListener('command-palette:open', onGlobalOpen);
       document.removeEventListener('command-palette:open', onGlobalOpen);
-      document.removeEventListener('keydown', onKeyDown, { capture: true });
+      window.removeEventListener('keydown', onKeyDown, { capture: true });
     };
   }, []);
 

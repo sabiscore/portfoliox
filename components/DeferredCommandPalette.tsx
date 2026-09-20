@@ -3,8 +3,18 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
+const markPalette = (name: string) => {
+  if (typeof performance !== 'undefined') performance.mark(name);
+};
+
 const CommandPalette = dynamic(
-  () => import('@/components/CommandPalette').then((mod) => mod.CommandPalette),
+  () => {
+    markPalette('command-palette:chunk-requested');
+    return import('@/components/CommandPalette').then((mod) => {
+      markPalette('command-palette:chunk-resolved');
+      return mod.CommandPalette;
+    });
+  },
   {
     ssr: false,
     loading: () => null,
@@ -20,6 +30,7 @@ export function DeferredCommandPalette() {
 
   useEffect(() => {
     const commandWindow = window as CommandPaletteWindow;
+    markPalette('command-palette:boundary-mounted');
     let cleanupDeferredMount = () => {};
 
     const mountPalette = () => {
@@ -27,6 +38,7 @@ export function DeferredCommandPalette() {
     };
 
     const requestMount = () => {
+      markPalette('command-palette:mount-requested');
       commandWindow.__commandPaletteRequested = true;
       mountPalette();
     };
@@ -42,6 +54,7 @@ export function DeferredCommandPalette() {
     };
 
     if (commandWindow.__commandPaletteRequested) {
+      markPalette('command-palette:pending-request-consumed');
       mountPalette();
     } else if (window.matchMedia('(pointer: coarse)').matches) {
       const scheduleMount = () => {

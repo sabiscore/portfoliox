@@ -11,7 +11,6 @@ import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { useTheme } from '@/components/ThemeProvider';
 import { PROJECT_PALETTE_COMMANDS } from '@/constants/palette';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
-import { springs } from '@/lib/motionVariants';
 
 interface CommandItem {
   id: string;

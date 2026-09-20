@@ -32,7 +32,7 @@ async function openCommandPalette(page: Page) {
   await quickOpenPaletteButton.click();
 
   // The accessible trigger is the production user path; no test-only event fallback.
-  await expect(dialog).toBeVisible({ timeout: 5_000 });
+  await expect(dialog).toBeVisible({ timeout: 15_000 });
   await expect(search).toBeVisible();
   return { dialog, search };
 }

@@ -16,7 +16,6 @@ import { PROFILE } from '@/lib/portfolio-data';
 import { cn } from '@/lib/utils';
 
 import './globals.css';
-import './fixes.css';
 
 const syne = Syne({
   subsets: ['latin'],

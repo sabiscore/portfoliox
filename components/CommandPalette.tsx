@@ -647,6 +647,7 @@ export function CommandPalette({ initialOpen = false }: Readonly<{ initialOpen?:
                   onClick={openPaletteShortcuts}
                   className="border-color-border text-color-text-primary flex min-h-[44px] items-center gap-2 rounded-full border bg-[oklch(14%_0.008_264_/_0.92)] px-4 py-2 font-mono text-[11px] tracking-wide transition-colors hover:border-white/30 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none"
                   aria-label="Open command palette"
+                  data-testid="open-command-palette"
                 >
                   <span>Open command palette</span>
                   <kbd className="border-color-border text-color-text-muted rounded border px-1.5 py-0.5 font-mono text-[10px]">
@@ -663,6 +664,7 @@ export function CommandPalette({ initialOpen = false }: Readonly<{ initialOpen?:
             aria-label={fabExpanded ? 'Collapse quick actions' : 'Open quick actions'}
             aria-expanded={fabExpanded}
             aria-controls="quick-actions-menu"
+            data-testid="quick-actions-toggle"
             className="flex h-12 w-12 transform-gpu items-center justify-center rounded-2xl border border-white/12 bg-black/85 text-white/80 transition-colors duration-200 hover:border-white/24 hover:text-white focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent focus-visible:outline-none"
             // Chapter-aware glow keeps the FAB visually in sync with active section.
             // eslint-disable-next-line no-restricted-syntax

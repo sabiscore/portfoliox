@@ -5,8 +5,6 @@
 import { CONTACT_EMAIL } from '@/lib/config';
 import { expect, test, type Page } from '@playwright/test';
 
-const COMMAND_PALETTE_SHORTCUT = process.platform === 'darwin' ? 'Meta+k' : 'Control+k';
-
 async function goto(page: Page) {
   await page.goto('/');
   await expect(page.locator('h1')).toBeVisible();
@@ -16,31 +14,18 @@ async function openCommandPalette(page: Page) {
   const dialog = page.getByRole('dialog', { name: /command palette/i });
   const search = page.getByRole('textbox', { name: /command search/i });
 
-  await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
-  // Generous window: under CI's parallel workers sharing one `next start`
-  // server, hydration (and therefore the keyboard listener) can land well
-  // past a tight timeout. A too-tight wait here falls through to the FAB
-  // fallback below just as the shortcut's own effect opens the dialog,
-  // hiding the FAB (`!open`) right as this checks for it — failing both.
-  const openedFromShortcut = await Promise.any([
-    dialog.waitFor({ state: 'visible', timeout: 6_000 }),
-    search.waitFor({ state: 'visible', timeout: 6_000 }),
-  ])
-    .then(() => true)
-    .catch(() => false);
-
-  if (openedFromShortcut) {
-    await expect(search).toBeVisible();
-    return { dialog, search };
-  }
-
-  const quickActionsToggle = page.getByRole('button', { name: /open quick actions/i });
-  await expect(quickActionsToggle).toBeVisible();
-  await quickActionsToggle.click();
-
-  const quickOpenPaletteButton = page.getByRole('button', { name: /open command palette/i });
-  await expect(quickOpenPaletteButton).toBeVisible();
-  await quickOpenPaletteButton.click();
+  // Pre-seed the early-intercept flag CommandPalette reads on mount, then
+  // reload — same technique as e2e/smoke.spec.ts. A synthetic keyboard
+  // shortcut races DeferredCommandPalette's own listener attaching after
+  // React hydrates; under CI's parallel workers sharing one `next start`
+  // server that race isn't reliably bounded by any fixed wait. Seeding the
+  // flag before the page loads removes the race entirely.
+  await page.addInitScript(() => {
+    (
+      globalThis as typeof globalThis & { __commandPaletteRequested?: boolean }
+    ).__commandPaletteRequested = true;
+  });
+  await page.reload();
 
   await expect(dialog).toBeVisible();
   await expect(search).toBeVisible();

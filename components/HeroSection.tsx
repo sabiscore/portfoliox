@@ -36,7 +36,7 @@ export function HeroSection(): JSX.Element {
           <h1
             id="hero-title"
             aria-label={HERO_ARIA_LABEL}
-            className="font-sans text-[clamp(2.6rem,11.6vw,3.55rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-white sm:font-display sm:text-6xl lg:text-[4.5rem]"
+            className="hero-lcp-title font-sans text-[clamp(2.6rem,11.6vw,3.55rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-white sm:font-display sm:text-6xl lg:text-[4.5rem]"
           >
             {HERO.h1}
             <span className="mt-3 block text-xl leading-[1.12] font-medium tracking-[-0.02em] text-white/70 sm:text-3xl">

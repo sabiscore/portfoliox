@@ -1,8 +1,11 @@
 name: Conviction Agent
 
+# Scheduled trigger disabled: conviction-fix.ts does unscoped blind regex
+# rewrites (assumes an undefined `reveal` motion variant, deletes every
+# style={{...}} including dynamic ones) across all tracked .tsx files.
+# Re-enable the schedule only after the fixer is scoped to scanner-flagged
+# files with transforms that don't corrupt animation/layout code.
 on:
-  schedule:
-    - cron: "0 */6 * * *" # every 6 hours
   workflow_dispatch:
 
 jobs:
@@ -14,11 +17,12 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.24.0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
 
       - run: pnpm install
 
@@ -37,4 +41,6 @@ jobs:
           git config user.email "agent@bot.com"
           git checkout -b conviction/fixes
           git commit -am "chore: auto-fix conviction violations" || echo "No changes"
-          git push origin conviction/fixes
+          # Branch is disposable bot output recreated fresh each run; force-push avoids
+          # non-fast-forward rejection against a stale branch left by a prior run.
+          git push origin conviction/fixes --force

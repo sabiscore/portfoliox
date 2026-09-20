@@ -17,9 +17,14 @@ async function openCommandPalette(page: Page) {
   const search = page.getByRole('textbox', { name: /command search/i });
 
   await page.keyboard.press(COMMAND_PALETTE_SHORTCUT);
+  // Generous window: under CI's parallel workers sharing one `next start`
+  // server, hydration (and therefore the keyboard listener) can land well
+  // past a tight timeout. A too-tight wait here falls through to the FAB
+  // fallback below just as the shortcut's own effect opens the dialog,
+  // hiding the FAB (`!open`) right as this checks for it — failing both.
   const openedFromShortcut = await Promise.any([
-    dialog.waitFor({ state: 'visible', timeout: 1_200 }),
-    search.waitFor({ state: 'visible', timeout: 1_200 }),
+    dialog.waitFor({ state: 'visible', timeout: 6_000 }),
+    search.waitFor({ state: 'visible', timeout: 6_000 }),
   ])
     .then(() => true)
     .catch(() => false);

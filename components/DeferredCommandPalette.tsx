@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react';
 // Keep the full command palette code-split and off the critical path. The small
 // quick-actions shell remains interactive so users can request the palette
 // immediately without paying the full palette cost during first paint.
+const loadCommandPalette = () =>
+  import('@/components/CommandPalette').then((mod) => ({ default: mod.CommandPalette }));
+
 const CommandPalette = dynamic(
-  () => import('@/components/CommandPalette').then((mod) => mod.CommandPalette),
+  loadCommandPalette,
   {
     ssr: false,
     loading: () => null,
@@ -65,9 +68,13 @@ export function DeferredCommandPalette() {
           </button>
           <button
             type="button"
-            onClick={requestPalette}
+            onClick={() => {
+              preloadCommandPalette();
+              requestPalette();
+            }}
             className="border-color-border text-color-text-primary flex min-h-[44px] items-center gap-2 rounded-full border bg-[oklch(14%_0.008_264_/_0.92)] px-4 py-2 font-mono text-[11px] tracking-wide"
             aria-label="Open command palette"
+            data-testid="open-command-palette"
           >
             Open command palette
             <kbd className="border-color-border text-color-text-muted rounded border px-1.5 py-0.5 font-mono text-[10px]">
@@ -80,9 +87,9 @@ export function DeferredCommandPalette() {
       <button
         type="button"
         onClick={() => {
-        preloadCommandPalette();
-        setQuickActionsOpen((value) => !value);
-      }}
+          preloadCommandPalette();
+          setQuickActionsOpen((value) => !value);
+        }}
         aria-label={quickActionsOpen ? 'Collapse quick actions' : 'Open quick actions'}
         data-testid="quick-actions-toggle"
         aria-expanded={quickActionsOpen}

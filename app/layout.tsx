@@ -239,9 +239,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
                   event.preventDefault();
                   window.__commandPaletteRequested = true;
-                  document.dispatchEvent(
-                    new CustomEvent('command-palette:open', { bubbles: true })
-                  );
+                  window.dispatchEvent(new CustomEvent('command-palette:open'));
                 }
               }, { capture: true });
             })();`,

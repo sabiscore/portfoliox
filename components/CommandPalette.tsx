@@ -22,8 +22,8 @@ interface CommandItem {
 type CommandPaletteWindow = Window & { __commandPaletteRequested?: boolean };
 
 
-export function CommandPalette() {
-  const [open, setOpen] = useState(false);
+export function CommandPalette({ initialOpen = false }: Readonly<{ initialOpen?: boolean }>) {
+  const [open, setOpen] = useState(initialOpen);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [fabExpanded, setFabExpanded] = useState(false);

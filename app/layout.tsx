@@ -33,8 +33,8 @@ const dmSans = DM_Sans({
   // The measured mobile LCP is hero copy, not an image. Do not make the
   // first paint compete with a font preload; optional keeps the fallback
   // paintable on constrained Lighthouse runs and avoids a late font swap.
-  display: 'optional',
-  preload: false,
+  display: 'swap',
+  preload: true,
   fallback: ['Inter', 'Avenir Next', 'Segoe UI', 'system-ui', 'sans-serif'],
 });
 

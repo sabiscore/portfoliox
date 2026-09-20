@@ -1,29 +1,27 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 // Keep the full command palette code-split and off the critical path. The small
 // quick-actions shell remains interactive so users can request the palette
 // immediately without paying the full palette cost during first paint.
-const loadCommandPalette = () =>
-  import('@/components/CommandPalette').then((mod) => ({ default: mod.CommandPalette }));
+type CommandPaletteComponent = typeof import('@/components/CommandPalette').CommandPalette;
 
-const CommandPalette = dynamic(
-  loadCommandPalette,
-  {
-    ssr: false,
-    loading: () => null,
-  }
-);
+const loadCommandPalette = () => import('@/components/CommandPalette').then((mod) => mod.CommandPalette);
 
 export function DeferredCommandPalette() {
   const [shouldMount, setShouldMount] = useState(false);
   const [paletteRequested, setPaletteRequested] = useState(false);
+  const [CommandPaletteView, setCommandPaletteView] = useState<CommandPaletteComponent | null>(null);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   useEffect(() => {
-    const timer = globalThis.setTimeout(() => setShouldMount(true), 5000);
+    const timer = globalThis.setTimeout(() => {
+      void loadCommandPalette().then((Component) => {
+        setCommandPaletteView(() => Component);
+        setShouldMount(true);
+      });
+    }, 5000);
     return () => globalThis.clearTimeout(timer);
   }, []);
 
@@ -38,13 +36,14 @@ export function DeferredCommandPalette() {
     // Do not mount the dynamic component until its chunk is actually warm.
     // This prevents WebKit/Chromium from rendering the dynamic fallback forever
     // when the intent tap and dynamic import resolve on different task turns.
-    await loadCommandPalette();
+    const Component = await loadCommandPalette();
+    setCommandPaletteView(() => Component);
     setPaletteRequested(true);
     setShouldMount(true);
   };
 
-  if (shouldMount) {
-    return <CommandPalette initialOpen={paletteRequested} />;
+  if (shouldMount && CommandPaletteView) {
+    return <CommandPaletteView initialOpen={paletteRequested} />;
   }
 
   return (

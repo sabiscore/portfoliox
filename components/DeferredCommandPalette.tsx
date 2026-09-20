@@ -26,7 +26,19 @@ type CommandPaletteWindow = Window & {
 };
 
 export function DeferredCommandPalette() {
-  const [shouldMount, setShouldMount] = useState(false);
+  // The bootstrap in app/layout.tsx can capture Cmd/Ctrl+K before React hydrates.
+  // Seed from that flag during the first client render so the request cannot be
+  // lost in the hydration/effect gap. Coarse-pointer devices also need the
+  // palette mounted before the quick-actions trigger can exist; keep the heavy
+  // command implementation itself dynamically split.
+  const [shouldMount, setShouldMount] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const commandWindow = window as CommandPaletteWindow;
+    return Boolean(
+      commandWindow.__commandPaletteRequested ||
+        window.matchMedia('(pointer: coarse)').matches
+    );
+  });
 
   useEffect(() => {
     const commandWindow = window as CommandPaletteWindow;

@@ -7,7 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function goto(page: Page) {
   await page.goto('/');
-  await expect(page.locator('#hero-title')).toBeVisible();
+  await expect(page.locator('section#hero').getByRole('heading', { level: 1 })).toBeVisible();
 }
 
 async function openCommandPalette(page: Page) {
@@ -31,20 +31,7 @@ async function openCommandPalette(page: Page) {
   await expect(quickOpenPaletteButton).toBeVisible({ timeout: 5_000 });
   await quickOpenPaletteButton.click();
 
-  const opened = await dialog
-    .waitFor({ state: 'visible', timeout: 2_000 })
-    .then(() => true)
-    .catch(() => false);
-
-  if (!opened) {
-    // The component exposes this event as the same application-level open path
-    // used by the early keyboard interceptor. Use it only if the animated FAB
-    // transition did not commit the open state within the bounded window.
-    await page.evaluate(() => {
-      globalThis.dispatchEvent(new Event('command-palette:open'));
-    });
-  }
-
+  // The accessible trigger is the production user path; no test-only event fallback.
   await expect(dialog).toBeVisible({ timeout: 5_000 });
   await expect(search).toBeVisible();
   return { dialog, search };

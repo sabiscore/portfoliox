@@ -78,9 +78,19 @@ function SectionBlock({
   );
 }
 
-export default async function Home() {
+async function WritingSectionBlock() {
   const posts = (await getWritingPosts()).slice(0, 6);
 
+  if (posts.length === 0) return null;
+
+  return (
+    <SectionBlock id="section-writing" label="Writing" height={420}>
+      <WritingSection posts={posts} />
+    </SectionBlock>
+  );
+}
+
+export default function Home() {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-[100dvh]">
       {/* 00 — Hero: first paint, zero deferred loading */}
@@ -111,12 +121,10 @@ export default async function Home() {
         <AboutSection />
       </SectionBlock>
 
-      {/* 05 — Writing: decision-making depth and technical judgment */}
-      {posts.length > 0 && (
-        <SectionBlock id="section-writing" label="Writing" height={420}>
-          <WritingSection posts={posts} />
-        </SectionBlock>
-      )}
+      {/* 05 — Writing: fetch only inside its Suspense boundary so it cannot block the hero. */}
+      <Suspense fallback={<SectionSkeleton id="section-writing" label="Writing" height={420} />}>
+        <WritingSectionBlock />
+      </Suspense>
 
       {/* 06 — Contact: final conversion endpoint */}
       <SectionBlock id="section-contact" label="Contact" height={280}>

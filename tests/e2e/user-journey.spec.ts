@@ -14,7 +14,7 @@ test('recruiter journey moves from hero to projects to contact', async ({ page }
   await expect(page.locator('#section-projects')).toBeAttached();
 
   await expect(
-    page.getByRole('heading', { level: 2, name: /Built to survive real constraints/i })
+    page.getByRole('heading', { level: 2, name: /Built around\s+real constraints\./i })
   ).toBeVisible();
   await expect(page.locator('[data-project-id="sabiscore"]')).toBeVisible();
 

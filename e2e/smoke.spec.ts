@@ -206,7 +206,7 @@ test.describe('Portfolio smoke tests', () => {
     await expect(section).toBeAttached();
     // Scroll to trigger the GSAP ScrollTrigger reveal before asserting visibility.
     await section.scrollIntoViewIfNeeded();
-    await expect(page.getByRole('heading', { name: /Writing that ships decisions/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /Writing that makes engineering decisions clear/i })).toBeVisible({
       timeout: 8000,
     });
   });
@@ -238,7 +238,7 @@ test.describe('Portfolio smoke tests', () => {
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
     await expect(footer).toContainText(
-      'Backend · Platform · AI infrastructure · Reliability'
+      'Backend · Platform · AI infrastructure · Production reliability'
     );
     await expect(footer).toContainText('scardubu.dev');
   });

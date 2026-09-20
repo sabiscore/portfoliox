@@ -16,11 +16,11 @@ import { formatDate } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Writing · Oscar Ndugbu',
   description:
-    'Architecture decisions, ML trade-offs, and what actually held in production — technical writing by Oscar Ndugbu from Lagos.',
+    'Practical writing on architecture decisions, ML trade-offs, and the engineering choices that hold up in production — by Oscar Ndugbu.',
   alternates: { canonical: 'https://www.scardubu.dev/writing' },
   openGraph: {
     title: 'Writing · Oscar Ndugbu',
-    description: 'Architecture decisions, ML trade-offs, and what held in production.',
+    description: 'Architecture decisions, ML trade-offs, and practical lessons from production engineering.',
     url: 'https://www.scardubu.dev/writing',
     type: 'website',
   },
@@ -42,8 +42,8 @@ export default async function WritingPage() {
                 eyebrowNumber="05"
                 eyebrowLabel="Writing"
                 headingId="writing-list-heading"
-                title={<>Writing that ships decisions.</>}
-                description="Architecture calls, ML trade-offs, and what actually held in production — from Lagos to the world."
+                title={<>Writing that makes engineering decisions clear.</>}
+                description="Architecture decisions, ML trade-offs, and practical lessons from building and operating production systems."
                 eyebrowClassName="mb-[var(--space-2)]"
                 titleClassName="text-color-text-primary mt-[var(--space-2)] max-w-[22ch]"
                 descriptionClassName="text-color-text-secondary mt-4 max-w-[56ch] text-base leading-8"

@@ -145,8 +145,8 @@ function FeaturedProjectCard({ featured }: Readonly<{ featured: Project }>) {
 
         <details className="group mt-5">
           <summary className="text-color-text-muted inline-flex min-h-[48px] cursor-pointer list-none items-center gap-1.5 rounded-full border border-white/14 px-4 py-2.5 font-mono text-[11px] tracking-widest uppercase transition hover:border-white/28 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none">
-            <span className="group-open:hidden">Full brief ↓</span>
-            <span className="hidden group-open:inline">Hide brief ↑</span>
+            <span className="group-open:hidden">How it works ↓</span>
+            <span className="hidden group-open:inline">Hide details ↑</span>
           </summary>
           <div className="mt-4 pb-1">
             <p className="text-color-text-secondary max-w-[72ch] text-sm leading-8 sm:text-base">
@@ -386,12 +386,12 @@ export function ProjectsSection() {
             headingId="projects-heading"
             title={
               <>
-                Built to survive <br className="hidden lg:block" />
+                Built around <br className="hidden lg:block" />
                 real constraints.
               </>
             }
             description={
-              'The work is shown as a decision record: what the system had to survive, what was chosen, what changed, and where the evidence lives.'
+              'Each case study starts with the constraint, explains the architecture decision, and shows the resulting behaviour and available evidence.'
             }
             eyebrowVariant={child}
             titleVariant={reducedMotion ? child : clipReveal}

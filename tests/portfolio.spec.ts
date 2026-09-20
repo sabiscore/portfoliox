@@ -7,12 +7,26 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function goto(page: Page) {
   await page.goto('/');
-  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.getByTestId('hero-heading')).toBeVisible();
 }
 
 async function openCommandPalette(page: Page) {
   const dialog = page.getByRole('dialog', { name: /command palette/i });
   const search = page.getByRole('textbox', { name: /command search/i });
+  const quickActionsToggle = page.getByTestId('quick-actions-toggle');
+
+  const isCoarsePointer = await page.evaluate(() =>
+    window.matchMedia('(pointer: coarse)').matches
+  );
+
+  if (isCoarsePointer) {
+    // Touch browsers may reserve Control+K for browser/OS shortcuts. Exercise
+    // the production quick-actions affordance on coarse-pointer devices.
+    await expect(quickActionsToggle).toBeVisible({ timeout: 10_000 });
+    await quickActionsToggle.click();
+    await expect(quickActionsToggle).toHaveAttribute('aria-expanded', 'true', {
+      timeout: 5_000,
+    });
 
   // Pre-seed the early-intercept flag CommandPalette reads on mount, then
   // reload — same technique as e2e/smoke.spec.ts. A synthetic keyboard
@@ -29,7 +43,6 @@ async function openCommandPalette(page: Page) {
 
   await expect(dialog).toBeVisible();
   await expect(search).toBeVisible();
-
   return { dialog, search };
 }
 
@@ -111,7 +124,7 @@ test.describe('Hero', () => {
   });
 
   test('h1 aria-label is the positioning headline', async ({ page }) => {
-    await expect(page.locator('h1[aria-label*="The system has to work at 2am"]')).toBeAttached();
+    await expect(page.getByTestId('hero-heading')).toBeAttached();
   });
 
   test('headshot image has descriptive alt text', async ({ page }) => {
@@ -119,7 +132,7 @@ test.describe('Hero', () => {
     await expect(headshot).toBeAttached();
   });
 
-  test('hero bio contains reliability-first positioning', async ({ page }) => {
+  test('hero bio contains backend, platform, and AI infrastructure positioning', async ({ page }) => {
     const hero = page.locator('section#hero[aria-labelledby="hero-title"]');
     await expect(hero.locator('p.hero-body-text')).toContainText(
       /Backend, platform, and AI infrastructure/i
@@ -127,7 +140,7 @@ test.describe('Hero', () => {
   });
 
   test('headline "The system has to work at 2am." is visible', async ({ page }) => {
-    await expect(page.locator('h1')).toHaveAttribute('aria-label', /The system has to work at 2am/);
+    await expect(page.getByTestId('hero-heading')).toHaveAttribute('aria-label', /The system has to work at 2am/);
   });
 
   test('no first-person identity claims', async ({ page }) => {
@@ -196,8 +209,8 @@ test.describe('Projects', () => {
     await goto(page);
   });
 
-  test('section heading "Built to survive real constraints." is visible', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Built to survive/i })).toBeVisible();
+  test('section heading "Built around real constraints." is visible', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Built around\s+real constraints\./i })).toBeVisible();
   });
 
   test('no meta-commentary headings', async ({ page }) => {
@@ -303,7 +316,7 @@ test.describe('About', () => {
     await page.locator('#section-about').scrollIntoViewIfNeeded();
     await expect(
       page.getByRole('heading', {
-        name: /Long-horizon systems|Explicit decisions/i,
+        name: /Systems built for the long run\.\s+Decisions made explicit\./i,
       })
     ).toBeVisible();
   });
@@ -389,6 +402,7 @@ test.describe('Contact', () => {
 
   test('contact form exposes field errors before sending an incomplete brief', async ({ page }) => {
     const form = page.locator('form[aria-label="Contact Oscar Ndugbu"]');
+    await expect(form).toBeVisible({ timeout: 10_000 });
     await form.scrollIntoViewIfNeeded();
 
     await form.locator('button[type="submit"]').click();
@@ -401,9 +415,10 @@ test.describe('Contact', () => {
   });
 
   test('focused brief guidance is visible', async ({ page }) => {
+    const brief = page.getByText('A useful first brief', { exact: true });
+    await expect(brief).toBeVisible({ timeout: 10_000 });
+    await brief.scrollIntoViewIfNeeded();
     const section = page.locator('section#section-contact[aria-labelledby="contact-heading"]');
-    await section.scrollIntoViewIfNeeded();
-    await expect(section.getByText('A useful first brief', { exact: true })).toBeVisible();
     await expect(section.getByText('Problem', { exact: true })).toBeVisible();
     await expect(section.getByText('Stakes', { exact: true })).toBeVisible();
     await expect(section.getByText('Timeline', { exact: true }).first()).toBeVisible();
@@ -509,7 +524,7 @@ test.describe('Footer', () => {
 
   test('trust strip copy is correct', async ({ page }) => {
     await expect(page.locator('footer')).toContainText(
-      'Backend · Platform · AI infrastructure · Reliability'
+      'Backend · Platform · AI infrastructure · Production reliability'
     );
   });
 

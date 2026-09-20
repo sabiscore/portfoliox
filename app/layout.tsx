@@ -16,14 +16,12 @@ import { PROFILE } from '@/lib/portfolio-data';
 import { cn } from '@/lib/utils';
 
 import './globals.css';
-import './fixes.css';
 
 const syne = Syne({
   subsets: ['latin'],
   variable: '--font-syne',
-  // The hero H1 is the mobile LCP element. Keep the first paint on the
-  // metrically compatible fallback during a constrained cold load. Because the
-  // face is optional, preloading it only competes with render-blocking CSS.
+  // Display-only face: never make the critical hero paint wait on the display font.
+  // The hero has a system-compatible fallback and the display face is non-critical.
   display: 'optional',
   preload: false,
   fallback: ['Avenir Next', 'Segoe UI', 'Inter', 'system-ui', 'sans-serif'],
@@ -32,11 +30,11 @@ const syne = Syne({
 const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-dm-sans',
-  // The hero body can also become the mobile LCP candidate. `optional` avoids
-  // a late repaint, while disabling preload keeps this non-essential face from
-  // competing with critical CSS and application chunks before first paint.
-  display: 'optional',
-  preload: false,
+  // The measured mobile LCP is hero copy, not an image. Do not make the
+  // first paint compete with a font preload; optional keeps the fallback
+  // paintable on constrained Lighthouse runs and avoids a late font swap.
+  display: 'swap',
+  preload: true,
   fallback: ['Inter', 'Avenir Next', 'Segoe UI', 'system-ui', 'sans-serif'],
 });
 
@@ -60,11 +58,11 @@ const siteUrl =
   (deploymentHost ? `https://${deploymentHost}` : 'http://localhost:3000');
 
 const shouldLoadVercelInsights = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
-const siteTitle = `${PROFILE.name} — ${PROFILE.role} · AI Infrastructure · Fintech Systems`;
+const siteTitle = `${PROFILE.name} — ${PROFILE.role} · AI Infrastructure · Fintech Engineering`;
 const siteDescription =
-  'Staff backend and platform engineer in Lagos. Decision records across fintech workflows, ensemble ML inference, resilient queues, and AI infrastructure. Systems that hold at 2am.';
+  'Staff backend and platform engineer in Lagos. Case studies across fintech workflows, ML inference, distributed systems, and AI infrastructure — with the architecture decisions and evidence behind the work.';
 const socialDescription =
-  'Staff Backend and Platform Engineer building reliability-first AI, fintech, and infrastructure systems from Lagos.';
+  'Staff Backend and Platform Engineer building reliable AI, fintech, and infrastructure systems from Lagos.';
 const socialImagePath = '/og';
 
 export const metadata: Metadata = {
@@ -159,7 +157,7 @@ const schemaGraph = {
       url: siteUrl,
       jobTitle: PROFILE.role,
       description:
-        'Staff backend and platform engineer based in Lagos, Nigeria. Specialises in backend infrastructure, AI systems, production reliability, React Native, and SRE.',
+        'Staff backend and platform engineer based in Lagos, Nigeria. Builds backend infrastructure, AI systems, fintech workflows, and production reliability tooling.',
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': siteUrl,
@@ -219,7 +217,7 @@ const schemaGraph = {
       alternateName: 'scardubu.dev',
       url: siteUrl,
       description:
-        'Portfolio and operational registry for Oscar Ndugbu — staff backend and platform engineer specialising in AI infrastructure, fintech systems, and production reliability.',
+        'Portfolio and engineering record for Oscar Ndugbu — staff backend and platform engineer focused on AI infrastructure, fintech systems, and production reliability.',
       inLanguage: 'en-US',
       author: { '@id': `${siteUrl}/#person` },
       copyrightHolder: { '@id': `${siteUrl}/#person` },
@@ -259,22 +257,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
 
       <body className={cn('relative min-h-[100dvh] overflow-x-clip antialiased')}>
-        <div
-          className="site-grain pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
-          aria-hidden="true"
-        >
-          <svg className="absolute h-full w-full" xmlns="http://www.w3.org/2000/svg">
-            <filter id="scar-grain-noise">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.8"
-                numOctaves="3"
-                stitchTiles="stitch"
-              />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#scar-grain-noise)" />
-          </svg>
-        </div>
+        <div className="site-grain pointer-events-none fixed inset-0 z-0" aria-hidden="true" />
 
         <a href="#main-content" className="skip-nav">
           Skip to main content
@@ -301,31 +284,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <clipPath id="squircle-id" clipPathUnits="objectBoundingBox">
               <path d="M 0.500 0.000 C 0.817 0.000 0.870 0.030 0.920 0.080 C 0.977 0.136 1.000 0.183 1.000 0.500 C 1.000 0.817 0.977 0.864 0.920 0.920 C 0.870 0.970 0.817 1.000 0.500 1.000 C 0.183 1.000 0.130 0.970 0.080 0.920 C 0.023 0.864 0.000 0.817 0.000 0.500 C 0.000 0.183 0.023 0.136 0.080 0.080 C 0.130 0.030 0.183 0.000 0.500 0.000 Z" />
             </clipPath>
-            <filter id="luxury-duotone-cinema" colorInterpolationFilters="sRGB">
-              <feColorMatrix
-                type="matrix"
-                values="0.2126 0.7152 0.0722 0 0
-                        0.2126 0.7152 0.0722 0 0
-                        0.2126 0.7152 0.0722 0 0
-                        0      0      0      1 0"
-                result="grayscale"
-              />
-              <feComponentTransfer in="grayscale" result="duotone">
-                <feFuncR type="table" tableValues="0.0118 1.0000" />
-                <feFuncG type="table" tableValues="0.1098 0.5843" />
-                <feFuncB type="table" tableValues="0.1412 0.2510" />
-              </feComponentTransfer>
-              <feColorMatrix
-                type="matrix"
-                values="1 0 0 0 0
-                        0 1 0 0 0
-                        0 0 1 0 0
-                        0 0 0 0.15 0"
-                in="SourceGraphic"
-                result="faint-original"
-              />
-              <feComposite operator="over" in="faint-original" in2="duotone" />
-            </filter>
           </defs>
         </svg>
 

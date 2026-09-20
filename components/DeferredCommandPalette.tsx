@@ -3,8 +3,18 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
+const markPalette = (name: string) => {
+  if (typeof performance !== 'undefined') performance.mark(name);
+};
+
 const CommandPalette = dynamic(
-  () => import('@/components/CommandPalette').then((mod) => mod.CommandPalette),
+  () => {
+    markPalette('command-palette:chunk-requested');
+    return import('@/components/CommandPalette').then((mod) => {
+      markPalette('command-palette:chunk-resolved');
+      return mod.CommandPalette;
+    });
+  },
   {
     ssr: false,
     loading: () => null,
@@ -16,10 +26,23 @@ type CommandPaletteWindow = Window & {
 };
 
 export function DeferredCommandPalette() {
-  const [shouldMount, setShouldMount] = useState(false);
+  // The bootstrap in app/layout.tsx can capture Cmd/Ctrl+K before React hydrates.
+  // Seed from that flag during the first client render so the request cannot be
+  // lost in the hydration/effect gap. Coarse-pointer devices also need the
+  // palette mounted before the quick-actions trigger can exist; keep the heavy
+  // command implementation itself dynamically split.
+  const [shouldMount, setShouldMount] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const commandWindow = window as CommandPaletteWindow;
+    return Boolean(
+      commandWindow.__commandPaletteRequested ||
+        window.matchMedia('(pointer: coarse)').matches
+    );
+  });
 
   useEffect(() => {
     const commandWindow = window as CommandPaletteWindow;
+    markPalette('command-palette:boundary-mounted');
     let cleanupDeferredMount = () => {};
 
     const mountPalette = () => {
@@ -27,6 +50,7 @@ export function DeferredCommandPalette() {
     };
 
     const requestMount = () => {
+      markPalette('command-palette:mount-requested');
       commandWindow.__commandPaletteRequested = true;
       mountPalette();
     };
@@ -42,6 +66,7 @@ export function DeferredCommandPalette() {
     };
 
     if (commandWindow.__commandPaletteRequested) {
+      markPalette('command-palette:pending-request-consumed');
       mountPalette();
     } else if (window.matchMedia('(pointer: coarse)').matches) {
       const scheduleMount = () => {
@@ -74,13 +99,21 @@ export function DeferredCommandPalette() {
       }
     }
 
-    globalThis.addEventListener('command-palette:open', onGlobalOpen);
-    document.addEventListener('keydown', onKeyDown, { capture: true });
+    // Listen on both targets because older builds dispatched the custom event on
+    // document while the canonical path now dispatches it on window. Keeping the
+    // listener tolerant makes the deferred boundary robust across cached chunks.
+    window.addEventListener('command-palette:open', onGlobalOpen);
+    document.addEventListener('command-palette:open', onGlobalOpen);
+    // Capture at window so the deferred boundary sees Cmd/Ctrl+K before any
+    // document-level handler can consume the shortcut. This is the earliest
+    // React-independent point in the event path available to the component.
+    window.addEventListener('keydown', onKeyDown, { capture: true });
 
     return () => {
       cleanupDeferredMount();
-      globalThis.removeEventListener('command-palette:open', onGlobalOpen);
-      document.removeEventListener('keydown', onKeyDown, { capture: true });
+      window.removeEventListener('command-palette:open', onGlobalOpen);
+      document.removeEventListener('command-palette:open', onGlobalOpen);
+      window.removeEventListener('keydown', onKeyDown, { capture: true });
     };
   }, []);
 

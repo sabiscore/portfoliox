@@ -33,9 +33,9 @@ export const PROJECTS: readonly Project[] = [
     type: 'Compliance Platform · Fintech',
     status: 'case-study',
     featured: true,
-    tagline: 'Tax workflow orchestration with idempotent replay, database-enforced tenant isolation, and an explicitly private evidence record.',
+    tagline: 'Tax workflow automation designed to keep tenant boundaries, retries, and audit history explicit — so deadline-driven filing can recover cleanly.',
     description:
-      'Tax workflow automation for Nigerian small businesses. PostgreSQL RLS isolates each tenant at the database level. BullMQ jobs use submission-derived idempotency keys to prevent duplicate processing through retries, and the audit trail is hash-chained. NRS DigiTax integration remains in progress.',
+      'Tax workflow automation for Nigerian small businesses. PostgreSQL RLS enforces tenant isolation at the database level, while BullMQ jobs use submission-derived idempotency keys so retries do not create duplicate filings. Hash-chained audit records preserve a traceable history. NRS DigiTax integration remains in progress.',
     chosen: 'PostgreSQL Row-Level Security for multi-tenancy',
     over: 'Application-layer tenant filtering',
     because:
@@ -75,9 +75,9 @@ export const PROJECTS: readonly Project[] = [
     type: 'ML Platform · Observability',
     status: 'live',
     featured: true,
-    tagline: 'Ensemble ML serving with versioned caching, model-quality telemetry, and a deliberate lower-confidence fallback path.',
+    tagline: 'An ensemble ML platform that keeps prediction delivery useful through cache failures, retraining, and dependency loss.',
     description:
-      'Ensemble prediction serving (XGBoost, LightGBM, CatBoost) with model-quality monitoring. Versioned Redis caching prevents stale predictions from surviving a retrain, and a baseline model provides an explicit degraded path when dependencies are unavailable.',
+      'XGBoost, LightGBM, and CatBoost serve ensemble predictions with model-quality monitoring. Versioned Redis caching prevents stale output from surviving a retrain, while a baseline model provides a clearly labelled lower-confidence path when dependencies fail.',
     chosen: 'FastAPI + Redis Pub/Sub for inference serving',
     over: 'Synchronous REST with database polling',
     because:
@@ -121,9 +121,9 @@ export const PROJECTS: readonly Project[] = [
     type: 'AI Agent Platform · Orchestration',
     status: 'case-study',
     featured: true,
-    tagline: 'Multi-agent orchestration with task-specific model routing, bounded fallbacks, checkpoint recovery, and an operator dashboard.',
+    tagline: 'Multi-agent orchestration that routes work to the right model, exposes system state to operators, and recovers from interrupted runs.',
     description:
-      'Multi-agent orchestration platform with local inference via Ollama. Phi-4-mini handles routing, DeepSeek-R1 handles multi-step reasoning, and Qwen2.5-Coder handles generation. The evolution layer scores strategies against recorded outcomes, while the operator dashboard exposes queue depth, agent health, completion state, and checkpoint recovery.',
+      'Multi-agent orchestration platform with local inference via Ollama. Phi-4-mini handles routing, DeepSeek-R1 handles multi-step reasoning, and Qwen2.5-Coder handles generation. The operator dashboard exposes queue depth, agent health, completion state, and checkpoint recovery, while the evolution layer evaluates strategies against recorded outcomes.',
     chosen: 'Autonomous evolution layer with LLM-guided strategy mutation',
     over: 'Static agent configurations with manual tuning cycles',
     because:
@@ -162,9 +162,9 @@ export const PROJECTS: readonly Project[] = [
     status: 'case-study',
     featured: true,
     tagline:
-      'Pressure-aware short-form video generation powered by an autonomous agent runtime, from a raw topic to a publish-ready creative package.',
+      'A structured short-form video pipeline that turns a topic or brief into a publish-ready creative package while keeping resource pressure and recovery visible.',
     description:
-      'The Yap Engine is a short-form video generation platform powered by SwarmXQ. It turns a topic or creative brief into structured intent, a hook-led script, storyboard scenes, voice, captions, deterministic media assembly, and a certified export path while the runtime governs local-model memory pressure, retries, queue state, and graceful degradation.',
+      'The Yap Engine is a short-form video generation platform powered by SwarmXQ. It turns a topic or creative brief into structured intent, a hook-led script, storyboard scenes, voice, captions, deterministic media assembly, and a certified export path. The runtime makes model-memory pressure, retries, queue state, and graceful degradation explicit.',
     chosen: 'A pressure-aware multi-stage pipeline with task-specific local model routing',
     over: 'A single general-purpose model call followed by ad-hoc media scripting',
     because:
@@ -208,9 +208,9 @@ export const PROJECTS: readonly Project[] = [
     status: 'case-study',
     featured: false,
     tagline:
-      'ZK proofs for document integrity verification — confidentiality and verifiability as simultaneous properties, not a tradeoff.',
+      'Zero-knowledge verification for document integrity without exposing the underlying document.',
     description:
-      'Privacy-preserving blockchain infrastructure using Circom 2 circuits and Groth16 proofs. A verifier can check document integrity without seeing the document. Multi-network adapters isolate chain-specific behavior, while CBOR streaming keeps large archives off the in-memory critical path.',
+      'Privacy-preserving blockchain infrastructure using Circom 2 and Groth16 proofs. Verifiers can check document integrity without seeing the document, while multi-network adapters isolate chain-specific behaviour and CBOR streaming keeps large archives out of the in-memory critical path.',
     chosen: 'Groth16 ZK proofs with off-chain proving',
     over: 'Database timestamp signatures',
     because:
@@ -247,9 +247,9 @@ export const PROJECTS: readonly Project[] = [
     type: 'Federal Infrastructure · Data Engineering',
     status: 'case-study',
     featured: false,
-    tagline: 'Federal education reporting across 36 state sources — probabilistic deduplication, per-state retry semantics, and explicit partial-output handling.',
+    tagline: 'Federal education reporting across 36 state sources, designed to keep partial submissions moving without hiding data quality issues.',
     description:
-      'Batch ingestion pipeline for the Universal Basic Education Commission (Abuja HQ). It processes reporting data from 36 state sources with heterogeneous schemas. Probabilistic deduplication (dedupe.io + PostgreSQL) is validated against a manual review sample. Per-state DAG tasks mean one late submission does not block reporting for the other 35, while Great Expectations flags anomalies before they enter ministry reports.',
+      'Batch ingestion pipeline for the Universal Basic Education Commission (Abuja HQ). It handles heterogeneous reporting schemas across 36 state sources, uses probabilistic deduplication with dedupe.io and PostgreSQL, and validates the approach against a manual review sample. Per-state DAG tasks keep submitted reports moving when another source is late, while Great Expectations flags anomalies before they enter ministry reports.',
     chosen: 'Blocking + probabilistic record linkage (dedupe.io)',
     over: 'Exact-match deduplication on school_name',
     because:

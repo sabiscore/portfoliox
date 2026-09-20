@@ -84,12 +84,12 @@ export function AboutSection() {
                 headingId="about-heading"
                 title={
                   <>
-                    Long-horizon systems. <br className="hidden sm:block" />
-                    Explicit decisions.
+                    Systems built for the long run. <br className="hidden sm:block" />
+                    Decisions made explicit.
                   </>
                 }
                 description={
-                  'More than a decade in federal data systems, including reporting pipelines across 36 state sources, followed by backend, platform, and AI infrastructure work built around failure-aware delivery.'
+                  'More than a decade in federal data systems shaped this approach to software: start with the constraint, make failure visible, and design recovery before it is needed.'
                 }
                 eyebrowVariant={itemVariants}
                 titleVariant={headingVariant}
@@ -106,29 +106,21 @@ export function AboutSection() {
                 variants={itemVariants}
                 className="about-narrative-p text-color-text-primary mt-7 max-w-[var(--max-width-prose)] text-base leading-8 opacity-[0.82]"
               >
-                The UBEC work centered on heterogeneous submissions, partial state data, and
-                reporting that could not silently accept bad inputs. That operating context carried
-                into every system after it: explicit failure modes and architecture decisions written
-                so the next engineer can understand the reasoning long after deploy.
+                Work at UBEC reinforced a discipline for incomplete inputs and partial results without hiding what is missing. That discipline now carries into every system: make failure visible, make recovery deliberate, and leave enough context for the next engineer to operate the system with confidence.
               </m.p>
 
               <m.p
                 variants={itemVariants}
                 className="about-narrative-p text-color-text-primary mt-5 max-w-[var(--max-width-prose)] text-base leading-8 opacity-75"
               >
-                TaxBridge: React Native / Expo 54 mobile app, Fastify 5 API, and PostgreSQL 15 RLS
-                for database-enforced tenant isolation. SabiScore: ensemble ML inference behind a
-                Next.js dashboard with caching, telemetry, and a deterministic fallback path.
-                SwarmXQ: checkpointed agent orchestration with explicit retry and recovery semantics.
+                TaxBridge combines a mobile workflow with Fastify 5, PostgreSQL 15 RLS, and durable job processing so tenant data stays separated and retries do not create duplicate work. SabiScore pairs ensemble ML inference with a Next.js dashboard, caching, telemetry, and a labelled fallback path. SwarmXQ uses checkpointed agent orchestration so interrupted work can resume instead of starting from zero.
               </m.p>
 
               <m.p
                 variants={itemVariants}
                 className="about-narrative-p text-color-text-primary mt-5 max-w-[var(--max-width-prose)] text-base leading-8 opacity-[0.65]"
               >
-                The current resume records the professional history and certifications; public
-                repositories provide the inspectable layer. The work is the record, and private
-                evidence is labelled as private.
+                The resume gives the professional history; public repositories show the engineering record. Where evidence is private, that boundary stays explicit rather than turning an internal observation into a public metric.
               </m.p>
             </div>
 
@@ -166,29 +158,29 @@ export function AboutSection() {
               className="glass-surface border-l-color-film-teal mt-8 rounded-[var(--radius-lg)] border-l-2 p-5 sm:p-6"
             >
               <p className="text-color-film-teal mb-2 font-mono text-[10px] font-semibold tracking-widest uppercase">
-                Constraint Code · Non-Negotiable Standards
+                Engineering Standards · Non-Negotiable
               </p>
               <div className="flex flex-col gap-4" role="list">
                 {[
                   {
-                    declaration: 'Correctness is a product feature, not a backend preference.',
+                    declaration: 'Correctness belongs to the whole product.',
                     proof:
-                      'The database schema, API contracts, and UI flows all carry the burden of truth — not just the last layer to touch the request.',
+                      'The data model, API, and interface must agree on what is true. Reliability cannot be delegated to the last layer in the request path.',
                   },
                   {
-                    declaration: 'Silent failures are design failures.',
+                    declaration: 'Failures should be visible and recoverable.',
                     proof:
-                      'Retries, dead-letter handling, structured logs, and metrics exist before the first incident, not after the apology.',
+                      'Retries, dead-letter handling, structured logs, and metrics make a failure diagnosable before it becomes a prolonged incident.',
                   },
                   {
-                    declaration: 'Every critical decision deserves a written rationale.',
+                    declaration: 'Important decisions should leave a trail.',
                     proof:
-                      'The next engineer should be able to understand the choice, the tradeoff, and what was consciously rejected.',
+                      'A good decision record explains the choice, the trade-off, and what was deliberately rejected — so the system remains maintainable after handoff.',
                   },
                   {
-                    declaration: 'If a system cannot be observed, it cannot be trusted.',
+                    declaration: 'Observability is part of the product.',
                     proof:
-                      'Health checks, traces, and dashboards are treated as part of the product surface — not optional operations decoration.',
+                      'Health checks, traces, and dashboards turn hidden failure into actionable information for the people operating the system.',
                   },
                 ].map(({ declaration, proof }) => (
                   <div key={declaration} className="flex flex-col gap-1" role="listitem">
@@ -200,7 +192,7 @@ export function AboutSection() {
                 ))}
               </div>
               <p className="text-color-text-muted mt-5 font-mono text-[10px] tracking-wider opacity-60">
-                Traced to architecture decisions across TaxBridge · SabiScore · SwarmXQ
+                Applied across TaxBridge · SabiScore · SwarmXQ
               </p>
             </m.div>
 
@@ -261,7 +253,7 @@ export function AboutSection() {
               variants={itemVariants}
               className="font-body text-color-text-secondary text-xs tracking-widest uppercase"
             >
-              Certifications listed on the current resume
+              Selected certifications
             </m.h3>
 
             {/* Cert cards */}

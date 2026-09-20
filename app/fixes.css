@@ -859,6 +859,19 @@ body::after {
   }
 }
 
+/* ── F15b: Defer below-fold hero identity-card rendering on mobile ──────────
+   Lighthouse identifies .hero-body-text as the mobile LCP element. The identity
+   card follows the text stack and is below the critical viewport on the audited
+   mobile profile. Keep its geometry reserved, but let the browser skip subtree
+   layout/paint until it approaches the viewport. This targets render work without
+   changing the card markup, image quality, or LCP text content. */
+@media (max-width: 767px) {
+  #hero [data-testid='hero-identity-card'] {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 360px;
+  }
+}
+
 /* ── F16: Skip layout and paint for distant mobile chapters ─────────────────
    Chapters retain their server-rendered HTML and become renderable before they
    approach the viewport. Per-section intrinsic sizes keep anchor geometry

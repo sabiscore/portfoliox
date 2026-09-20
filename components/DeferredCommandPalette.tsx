@@ -74,12 +74,17 @@ export function DeferredCommandPalette() {
       }
     }
 
-    globalThis.addEventListener('command-palette:open', onGlobalOpen);
+    // Listen on both targets because older builds dispatched the custom event on
+    // document while the canonical path now dispatches it on window. Keeping the
+    // listener tolerant makes the deferred boundary robust across cached chunks.
+    window.addEventListener('command-palette:open', onGlobalOpen);
+    document.addEventListener('command-palette:open', onGlobalOpen);
     document.addEventListener('keydown', onKeyDown, { capture: true });
 
     return () => {
       cleanupDeferredMount();
-      globalThis.removeEventListener('command-palette:open', onGlobalOpen);
+      window.removeEventListener('command-palette:open', onGlobalOpen);
+      document.removeEventListener('command-palette:open', onGlobalOpen);
       document.removeEventListener('keydown', onKeyDown, { capture: true });
     };
   }, []);

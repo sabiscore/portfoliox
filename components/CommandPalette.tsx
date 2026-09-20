@@ -2,7 +2,6 @@
 // CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
 // Major Reset • Lagos → Global • Production Conviction Architecture
 
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import { Mail, MessageSquareText, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -45,7 +44,6 @@ export function CommandPalette() {
 
   const router = useRouter();
   const pathname = usePathname();
-  const reducedMotion = useReducedMotion();
   const { scrollToSection } = useScrollCinema();
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -376,7 +374,7 @@ export function CommandPalette() {
       () => {
         quickContactRef.current?.focus();
       },
-      reducedMotion ? 0 : 120
+      120
     );
 
     const onPointerDown = (event: PointerEvent) => {
@@ -685,14 +683,8 @@ export function CommandPalette() {
       {/* /why-lagos modal — V1.0 Change 9: §DELIGHT_MISS:personality easter egg.
           Spec verbatim: "Constraint is a design tool. Lagos constraint is a sharper one."
           Dismiss on Escape or click-outside. */}
-      <AnimatePresence>
-        {whyLagosOpen && (
-          <m.div
-            key="why-lagos-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+      {whyLagosOpen && (
+          <div
             className="fixed inset-0 z-[60] flex items-center justify-center bg-[oklch(0%_0_0_/_0.75)] p-6"
             onClick={() => setWhyLagosOpen(false)}
             role="dialog"
@@ -703,12 +695,7 @@ export function CommandPalette() {
             }}
             tabIndex={-1}
           >
-            <m.div
-              key="why-lagos-panel"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            <div
               className="border-color-border relative w-full max-w-sm rounded-[var(--radius-xl)] border bg-[oklch(14%_0.008_264)] p-8 shadow-[0_32px_80px_oklch(0%_0_0_/_0.6)]"
               onClick={(e) => e.stopPropagation()}
             >
@@ -733,10 +720,9 @@ export function CommandPalette() {
               >
                 Dismiss ↩
               </button>
-            </m.div>
-          </m.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
     </>
   );
 }

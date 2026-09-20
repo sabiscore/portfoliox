@@ -13,9 +13,7 @@ async function goto(page: Page) {
 async function openCommandPalette(page: Page) {
   const dialog = page.getByRole('dialog', { name: /command palette/i });
   const search = page.getByRole('textbox', { name: /command search/i });
-  const quickActionsToggle = page
-    .getByRole('button', { name: /open quick actions|collapse quick actions/i })
-    .first();
+  const quickActionsToggle = page.getByTestId('quick-actions-toggle');
 
   // Mobile browsers may reserve Control+K for browser/OS shortcuts. The
   // command-palette tests verify palette behavior, so open it through the
@@ -27,11 +25,12 @@ async function openCommandPalette(page: Page) {
     timeout: 5_000,
   });
 
-  const quickOpenPaletteButton = page.getByRole('button', { name: /open command palette/i });
+  const quickOpenPaletteButton = page.getByTestId('open-command-palette');
   await expect(quickOpenPaletteButton).toBeVisible({ timeout: 5_000 });
   await quickOpenPaletteButton.click();
 
-  // The accessible trigger is the production user path; no test-only event fallback.
+  // The production trigger starts the lazy import on the first intent tap.
+  // Keep the assertion on the actual dialog rather than a test-only event hook.
   await expect(dialog).toBeVisible({ timeout: 15_000 });
   await expect(search).toBeVisible();
   return { dialog, search };

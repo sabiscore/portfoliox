@@ -73,7 +73,7 @@ export function DeferredCommandPalette() {
           <button
             type="button"
             onClick={() => {
-              await requestPalette();
+              void requestPalette();
             }}
             className="border-color-border text-color-text-primary flex min-h-[44px] items-center gap-2 rounded-full border bg-[oklch(14%_0.008_264_/_0.92)] px-4 py-2 font-mono text-[11px] tracking-wide"
             aria-label="Open command palette"

@@ -7859,3 +7859,14 @@ body::after {
     text-wrap: wrap;
   }
 }
+
+
+/* Mobile LCP guard: the live-status pulse uses box-shadow, which Lighthouse
+   correctly classifies as a non-composited animation. Projects can enter the
+   compact first viewport, so stop the pulse during initial mobile rendering. */
+@media (max-width: 767px) {
+  .dot-live {
+    animation: none;
+    box-shadow: none;
+  }
+}

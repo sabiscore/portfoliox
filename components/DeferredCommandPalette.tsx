@@ -24,6 +24,13 @@ export function DeferredCommandPalette() {
     return () => globalThis.clearTimeout(timer);
   }, []);
 
+  const preloadCommandPalette = () => {
+    // Warm the lazy chunk on explicit user intent, before the second tap opens it.
+    // This preserves the deferred initial bundle while removing a cold-import race
+    // in constrained browsers and CI WebKit/Chromium runs.
+    void loadCommandPalette();
+  };
+
   const requestPalette = () => {
     setPaletteRequested(true);
     setShouldMount(true);
@@ -72,8 +79,12 @@ export function DeferredCommandPalette() {
 
       <button
         type="button"
-        onClick={() => setQuickActionsOpen((value) => !value)}
+        onClick={() => {
+        preloadCommandPalette();
+        setQuickActionsOpen((value) => !value);
+      }}
         aria-label={quickActionsOpen ? 'Collapse quick actions' : 'Open quick actions'}
+        data-testid="quick-actions-toggle"
         aria-expanded={quickActionsOpen}
         aria-controls="quick-actions-menu"
         className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-black/85 text-white/80"

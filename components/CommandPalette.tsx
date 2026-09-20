@@ -439,7 +439,7 @@ export function CommandPalette() {
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown, { capture: true });
     };
-  }, [fabExpanded, open, reducedMotion]);
+  }, [fabExpanded, open]);
 
   // Groups for display
   const groups = useMemo(() => {

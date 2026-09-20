@@ -7835,7 +7835,9 @@ body::after {
 
 /* Hero LCP: use a locally available system stack on narrow viewports so the largest
    text element can paint without waiting on the optional display/body web font. */
-.hero-lcp-title {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+@media (max-width: 767px) {
+  .hero-lcp-title {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
 }
 

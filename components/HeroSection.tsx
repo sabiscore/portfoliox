@@ -35,6 +35,7 @@ export function HeroSection(): JSX.Element {
 
           <h1
             id="hero-title"
+            data-testid="hero-heading"
             aria-label={HERO_ARIA_LABEL}
             className="font-sans text-[clamp(2.6rem,11.6vw,3.55rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-white sm:font-display sm:text-6xl lg:text-[4.5rem]"
           >

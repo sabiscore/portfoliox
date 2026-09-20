@@ -683,6 +683,16 @@ test.describe('Anchor scroll — scroll-margin-top', () => {
 });
 
 test.describe('Command Palette — V1.0 Easter Eggs', () => {
+  // Evidence from a failed CI run's trace: the dialog was absent from the DOM
+  // when the visibility wait started and present (correct role/aria-label)
+  // only in the snapshot captured at the 15s timeout boundary — the mount
+  // succeeds, but AnimatePresence's spring-driven mount cycle can be starved
+  // for many seconds under this runner's CPU contention (the same class of
+  // variance independently observed in Lighthouse LCP runs on this branch).
+  // Reduced motion skips that animation cycle and renders the end state
+  // immediately, removing the dependency on real-time animation scheduling.
+  test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
   test.beforeEach(async ({ page }) => {
     await goto(page);
   });

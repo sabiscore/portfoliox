@@ -98,7 +98,7 @@ jobs:
 
             const comment = `## Lighthouse CI Results
 
-            Five-run mobile median. Performance has a hard release floor of 90 and a target of 95; metric ceilings remain hard failures.
+            Three-run mobile median. Performance has a hard release floor of 90 and a target of 95; metric ceilings remain hard failures.
 
             | Category | Median | Hard gate | Target |
             |----------|--------|-----------|--------|

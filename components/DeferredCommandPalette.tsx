@@ -20,7 +20,7 @@ export function DeferredCommandPalette() {
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   useEffect(() => {
-    const timer = globalThis.setTimeout(() => setShouldMount(true), 1200);
+    const timer = globalThis.setTimeout(() => setShouldMount(true), 5000);
     return () => globalThis.clearTimeout(timer);
   }, []);
 

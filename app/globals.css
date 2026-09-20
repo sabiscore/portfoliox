@@ -7833,34 +7833,6 @@ body::after {
    ══════════════════════════════════════════════════════════════════════════════ */
 
 
-/* Hero LCP: use a locally available system stack on narrow viewports so the largest
-   text element can paint without waiting on the optional display/body web font. */
-@media (max-width: 767px) {
-  .hero-lcp-title {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-}
-
-
-
-/* Mobile hero render budget: the identity card is a secondary proof surface,
-   not the LCP. Avoid forcing a permanent compositor layer for its desktop-only
-   transform/clip-path treatment while the critical hero text is painting. */
-@media (max-width: 767px) {
-  #hero [data-testid='hero-identity-card'] {
-    transform: none;
-  }
-
-  #hero .identity-card-frame {
-    will-change: auto;
-  }
-
-  .hero-lcp-title {
-    text-wrap: wrap;
-  }
-}
-
-
 /* Mobile LCP guard: the live-status pulse uses box-shadow, which Lighthouse
    correctly classifies as a non-composited animation. Projects can enter the
    compact first viewport, so stop the pulse during initial mobile rendering. */

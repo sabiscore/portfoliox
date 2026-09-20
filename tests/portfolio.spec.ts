@@ -28,20 +28,16 @@ async function openCommandPalette(page: Page) {
       timeout: 5_000,
     });
 
-  // Pre-seed the early-intercept flag CommandPalette reads on mount, then
-  // reload — same technique as e2e/smoke.spec.ts. A synthetic keyboard
-  // shortcut races DeferredCommandPalette's own listener attaching after
-  // React hydrates; under CI's parallel workers sharing one `next start`
-  // server that race isn't reliably bounded by any fixed wait. Seeding the
-  // flag before the page loads removes the race entirely.
-  await page.addInitScript(() => {
-    (
-      globalThis as typeof globalThis & { __commandPaletteRequested?: boolean }
-    ).__commandPaletteRequested = true;
-  });
-  await page.reload();
+    const quickOpenPaletteButton = page.getByTestId('open-command-palette');
+    await expect(quickOpenPaletteButton).toBeVisible({ timeout: 5_000 });
+    await quickOpenPaletteButton.click();
+  } else {
+    // Desktop exercises the same production path exposed by the global
+    // Cmd/Ctrl+K handler, without depending on the deferred FAB being mounted.
+    await page.keyboard.press('Control+k');
+  }
 
-  await expect(dialog).toBeVisible();
+  await expect(dialog).toBeVisible({ timeout: 15_000 });
   await expect(search).toBeVisible();
   return { dialog, search };
 }

@@ -7870,3 +7870,17 @@ body::after {
     box-shadow: none;
   }
 }
+
+
+/* Keep the secondary identity proof in the DOM, but defer its rendering on
+   compact viewports until the Hero's critical text has painted. */
+@media (max-width: 767px) {
+  .identity-card-motion[data-hero-card-ready='false'] {
+    content-visibility: hidden;
+    contain-intrinsic-size: 0 520px;
+  }
+
+  .identity-card-motion[data-hero-card-ready='true'] {
+    content-visibility: visible;
+  }
+}

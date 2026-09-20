@@ -7831,3 +7831,11 @@ body::after {
    scardubu.dev fixes.css — Production conviction architecture
    Lagos → Global · Systems that work at 2am
    ══════════════════════════════════════════════════════════════════════════════ */
+
+
+/* Hero LCP: use a locally available system stack on narrow viewports so the largest
+   text element can paint without waiting on the optional display/body web font. */
+.hero-lcp-title {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+

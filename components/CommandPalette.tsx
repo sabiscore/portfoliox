@@ -100,7 +100,9 @@ export function CommandPalette() {
   }, [scrollTo]);
 
   const openPaletteShortcuts = useCallback(() => {
-    setFabExpanded(false);
+    // Opening the palette removes the quick-actions subtree via !open. Avoid
+    // a competing FAB state update in the same event; the palette state is the
+    // only source of truth for this transition.
     openPaletteFromQuickAction();
   }, [openPaletteFromQuickAction]);
 

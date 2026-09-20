@@ -1,7 +1,7 @@
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, JetBrains_Mono, Syne } from 'next/font/google';
+import { DM_Sans, Syne } from 'next/font/google';
 
 import { Providers } from '@/app/providers';
 import { DeferredCursorGlow } from '@/components/DeferredCursorGlow';
@@ -40,13 +40,17 @@ const dmSans = DM_Sans({
   fallback: ['Inter', 'Avenir Next', 'Segoe UI', 'system-ui', 'sans-serif'],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-  preload: false,
-  fallback: ['Fira Code', 'Cascadia Code', 'Consolas', 'Menlo', 'monospace'],
-});
+// JetBrains Mono is intentionally NOT loaded via next/font/google here.
+// It was previously self-hosted this way, then removed on 2026-05-26
+// ("Hardened build reliability and reduced non-critical font overhead")
+// to cut a live Google Fonts fetch out of the production build. It was
+// re-added at some point after that without updating the corrections log;
+// this restores the documented, build-reliability-first state. `--font-mono`
+// still resolves via the CSS fallback stack already defined in globals.css
+// (`'JetBrains Mono', 'Fira Code', 'SF Mono', monospace`), so mono UI text
+// renders in the visitor's system monospace face instead of the brand
+// typeface — a deliberate, previously-agreed trade for one fewer
+// network-dependent font fetch at build time in CI.
 
 const deploymentHost =
   process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL;
@@ -228,7 +232,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en"
-      className={cn(syne.variable, dmSans.variable, jetbrainsMono.variable)}
+      className={cn(syne.variable, dmSans.variable)}
       suppressHydrationWarning
     >
       <head>

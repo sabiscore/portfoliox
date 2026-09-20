@@ -20,12 +20,9 @@ export function IdentityCardMotion({
       return;
     }
 
-    const reveal = () => setHeroCardReady(true);
-    const idle = window.requestIdleCallback?.(reveal, { timeout: 1500 });
-    const timer = window.setTimeout(reveal, 1500);
+    const timer = window.setTimeout(() => setHeroCardReady(true), 1400);
 
     return () => {
-      if (idle !== undefined) window.cancelIdleCallback?.(idle);
       window.clearTimeout(timer);
     };
   }, []);

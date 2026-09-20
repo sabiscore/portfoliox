@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 import IdentityCard from './IdentityCard';
 import { DeferredLiveActivityBar } from './DeferredHeroEnhancements';
 import { IdentityCardMotion } from './IdentityCardMotion';
+import SquircleDefs from './SquircleDefs';
 import { HERO } from '@/lib/portfolio-data';
 
 const HERO_ARIA_LABEL = `${HERO.h1} ${HERO.subHeadline}`;
@@ -14,9 +15,11 @@ export function HeroSection(): JSX.Element {
       aria-labelledby="hero-title"
       className="relative isolate overflow-x-clip overflow-y-visible bg-[color:var(--brand-bg)] px-5 pt-24 pb-14 text-white min-h-0! sm:px-8 sm:py-24 lg:min-h-dvh! lg:px-12"
     >
+      <SquircleDefs />
+
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(2,6,23,1),rgba(15,23,42,0.94))]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(2,6,23,1),rgba(15,23,42,0.94))]"
       />
 
       <div className="hero-grid-shell mx-auto grid max-w-7xl items-center gap-9 sm:gap-12 lg:min-h-[calc(100dvh-12rem)] lg:grid-cols-[1.04fr_0.96fr]">

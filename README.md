@@ -383,6 +383,28 @@ Validation pass after v2.2:
 
 ---
 
+### CI/CD pipeline repair — build-artifact reuse + scheduled agent v2.3
+
+Two independent GitHub Actions bugs were silently breaking `main`'s CI signal.
+
+| File                                  | Change                                                                                                    | Impact                                                                                                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/ci.yml`             | Added `include-hidden-files: true` to the `nextjs-build` `actions/upload-artifact@v4` step                 | `actions/upload-artifact@v4` treats any path inside a dot-prefixed folder as hidden and drops it by default. `.next/` is exactly that, so the "quality" job's build artifact uploaded **zero files** — `E2E Tests` and `Mobile Regression` then failed at `download-artifact` with `Artifact not found for name: nextjs-build`, every run, since the build-once/reuse-across-jobs refactor landed. `conviction-ci.yml` already had this flag; `ci.yml` was missing it |
+| `.github/workflows/conviction-agent.yml` | `pnpm/action-setup@v4` pinned to `version: 9`, conflicting with `packageManager: pnpm@10.24.0` in `package.json` | The action hard-errors ("Multiple versions of pnpm specified") before installing anything — every scheduled run failed in ~10s. Bumped to `10.24.0` to match `package.json` and the rest of the workflows; added `cache: pnpm` for parity |
+| `.github/workflows/conviction-agent.yml` | Disabled the `schedule` trigger (kept `workflow_dispatch`)                                                | `scripts/conviction-fix.ts` does unscoped blind-regex rewrites across every tracked `.tsx` file — it assumes an undefined `reveal` motion variant and deletes every `style={{...}}`, including ones with dynamic values. With the pnpm fix above, the job would have run for the first time and pushed that mutation to `conviction/fixes` every 6 hours. Re-enable only after the fixer is scoped to scanner-flagged files with transforms that can't corrupt animation/layout code |
+| `.github/workflows/conviction-agent.yml` | `git push origin conviction/fixes` → `--force`                                                            | Branch is disposable bot output recreated from a fresh checkout every run; a plain push would reject on non-fast-forward once a prior run's branch exists remotely                                                                                            |
+
+Validation pass after v2.3:
+
+- `pnpm run lint` ✅
+- `pnpm run type-check` ✅
+- `pnpm run test:unit` ✅ (24/24)
+- `pnpm run build` ✅
+- `pnpm run test:smoke` ✅ (Chromium, after installing the local Playwright browser binary)
+- Workflow YAML re-parsed and validated after edits
+
+---
+
 ## Local setup
 
 **Requirements:** Node.js ≥ 20.0.0 < 24.0.0, pnpm ≥ 9.0.0

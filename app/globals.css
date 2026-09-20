@@ -7841,3 +7841,21 @@ body::after {
   }
 }
 
+
+
+/* Mobile hero render budget: the identity card is a secondary proof surface,
+   not the LCP. Avoid forcing a permanent compositor layer for its desktop-only
+   transform/clip-path treatment while the critical hero text is painting. */
+@media (max-width: 767px) {
+  #hero [data-testid='hero-identity-card'] {
+    transform: none;
+  }
+
+  #hero .identity-card-frame {
+    will-change: auto;
+  }
+
+  .hero-lcp-title {
+    text-wrap: wrap;
+  }
+}

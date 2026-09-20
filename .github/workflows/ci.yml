@@ -39,7 +39,13 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - uses: actions/download-artifact@v4
         with: { name: nextjs-build, path: .next/ }
-      - run: pnpm exec playwright test --project=chromium
+      # --workers=1: a single `next start` server backs every worker's requests.
+      # Default parallelism (multiple workers hammering one shared server) causes
+      # genuine resource contention that makes CommandPalette's lazy-loaded,
+      # dynamically-imported chunk unreliable to hydrate in time — not a test
+      # timing issue, a real concurrency bottleneck. test:smoke already forces
+      # --workers=1 for the same reason and is reliably green.
+      - run: pnpm exec playwright test --project=chromium --workers=1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -63,7 +69,8 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium webkit
       - uses: actions/download-artifact@v4
         with: { name: nextjs-build, path: .next/ }
-      - run: pnpm exec playwright test --project=mobile-chrome --project=mobile-safari
+      # --workers=1: see the matching comment in the e2e job above.
+      - run: pnpm exec playwright test --project=mobile-chrome --project=mobile-safari --workers=1
       - uses: actions/upload-artifact@v4
         if: always()
         with:

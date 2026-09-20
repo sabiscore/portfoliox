@@ -21,9 +21,8 @@ import './fixes.css';
 const syne = Syne({
   subsets: ['latin'],
   variable: '--font-syne',
-  // The hero H1 is the mobile LCP element. Keep the first paint on the
-  // metrically compatible fallback during a constrained cold load. Because the
-  // face is optional, preloading it only competes with render-blocking CSS.
+  // Display-only face: never make the critical hero paint wait on the display font.
+  // The hero has a system-compatible fallback and the display face is non-critical.
   display: 'optional',
   preload: false,
   fallback: ['Avenir Next', 'Segoe UI', 'Inter', 'system-ui', 'sans-serif'],
@@ -32,11 +31,11 @@ const syne = Syne({
 const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-dm-sans',
-  // The hero H1 uses the body/sans face on mobile and is the measured LCP
-  // element. Preload only this critical face and use swap so the browser can
-  // paint immediately with the fallback and replace it when DM Sans arrives.
-  display: 'swap',
-  preload: true,
+  // The measured mobile LCP is hero copy, not an image. Do not make the
+  // first paint compete with a font preload; optional keeps the fallback
+  // paintable on constrained Lighthouse runs and avoids a late font swap.
+  display: 'optional',
+  preload: false,
   fallback: ['Inter', 'Avenir Next', 'Segoe UI', 'system-ui', 'sans-serif'],
 });
 

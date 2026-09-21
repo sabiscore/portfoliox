@@ -47,3 +47,35 @@ Integrity mode: development
 - [ ] `pnpm run audit:copy` passes strict copy and claims audit.
 - [ ] `pnpm run test:smoke`, `pnpm run test:e2e`, and `pnpm run test:mobile` pass in Playwright.
 - [ ] Production build (`pnpm run build`) compiles cleanly with valid static route generation.
+
+## 2026-09-21T22:32:09Z
+
+This is a single self-contained fix; keep it small and focused.
+
+Conduct a comprehensive UX, typography, and accessibility audit (Phase 2) on the portfolio website (`scardubu.dev`). Optimize the visual hierarchy for recruiter conversion, fix any remaining a11y issues, and ensure production-grade cohesion across all components.
+
+Working directory: /home/scar/Documents/portfoliox
+Integrity mode: benchmark
+
+## Requirements
+
+### R1. Technical Accessibility
+Identify and resolve any remaining WCAG accessibility violations (e.g., contrast ratios, ARIA labels, semantic HTML, keyboard navigation). Do not break existing cinematic scroll animations while applying fixes.
+
+### R2. Visual Hierarchy & Typography Polish
+Refine spacing, Tailwind design tokens, and typography to create a universally cohesive and premium look. Ensure key information (skills, projects, contact) is highly scannable for recruiters.
+
+### R3. Content Optimization
+Review existing copy and suggest/implement rewrites to make the tone more approachable for non-technical visitors while remaining deeply professional for engineering leads.
+
+## Acceptance Criteria
+
+### Technical Verification
+- [ ] Running `pnpm test:a11y` or `npx @axe-core/cli` yields 0 critical or serious violations on the homepage.
+- [ ] Chrome DevTools (or Lighthouse CI) reports a 100 Accessibility score.
+- [ ] Core cinematic scroll behavior (`ScrollCinemaProvider`) remains fully functional and intact.
+
+### UX/UI Verification (Agent-as-Judge)
+- [ ] Typography rhythm uses consistent spacing multipliers (e.g., Tailwind's `space-y-*` or `gap-*`).
+- [ ] Contrast ratios for all text meet at least WCAG AA standards (4.5:1 for normal text).
+- [ ] Copy changes are concise and avoid overly dense technical jargon in the hero/about sections.

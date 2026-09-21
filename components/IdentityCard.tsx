@@ -71,7 +71,7 @@ export default function IdentityCard({ className = '' }: IdentityCardProps): JSX
               </div>
 
               <p className="text-xs leading-5 text-white/62 sm:text-sm sm:leading-6">
-                Backend, platform, and AI systems designed to make failure visible, recovery deliberate, and operations easier to understand.
+                I build resilient architectures designed for high availability and easy maintenance. My work makes failure visible, recovery deliberate, and operations easier to understand.
               </p>
 
               <div className="flex flex-wrap gap-1.5 sm:gap-2">

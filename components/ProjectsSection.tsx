@@ -145,8 +145,8 @@ function FeaturedProjectCard({ featured }: Readonly<{ featured: Project }>) {
 
         <details className="group mt-5">
           <summary className="text-color-text-muted inline-flex min-h-[48px] cursor-pointer list-none items-center gap-1.5 rounded-full border border-white/14 px-4 py-2.5 font-mono text-[11px] tracking-widest uppercase transition hover:border-white/28 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none">
-            <span className="group-open:hidden">How it works ↓</span>
-            <span className="hidden group-open:inline">Hide details ↑</span>
+            <span className="group-open:hidden">How it works <span aria-hidden="true">↓</span></span>
+            <span className="hidden group-open:inline">Hide details <span aria-hidden="true">↑</span></span>
           </summary>
           <div className="mt-4 pb-1">
             <p className="text-color-text-secondary max-w-[72ch] text-sm leading-8 sm:text-base">

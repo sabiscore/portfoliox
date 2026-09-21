@@ -213,7 +213,6 @@
   /* Structural Global Layout Rhythm Adjustments */
   html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
     background-color: #000000;
   }
 }
@@ -642,7 +641,6 @@ html[data-active-chapter='epilogue'] {
 
 html {
   background: #000000;
-  overflow-x: clip;
   font-size: 16px;
   text-size-adjust: none;
   -webkit-text-size-adjust: none;
@@ -693,7 +691,6 @@ body {
   min-height: 100dvh;
   min-height: 100svh;
   overflow-x: clip;
-  overflow-y: auto;
   /* overscroll-behavior-y moved to pointer:fine below — touch devices need
      native rubber-band bounce; applying none globally was a mobile scroll trap
      when combined with Lenis's html overflow injection on iOS Safari 17+. */

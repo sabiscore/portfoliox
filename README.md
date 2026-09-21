@@ -405,6 +405,23 @@ Validation pass after v2.3:
 
 ---
 
+### Desktop scroll engine repair — viewport constraints v2.4
+
+One critical bug fix restoring the core cinematic scroll capability on desktop.
+
+| File                                  | Change                                                                                                    | Impact                                                                                                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/globals.css` | Removed `overflow-x: hidden` and `overflow-x: clip` from `html` | The viewport's root element is no longer artificially clipped horizontally. This prevents cascading viewport boundary confusion that was failing Lenis's `window` dimension reads on desktop. |
+| `app/globals.css` | Removed `overflow-y: auto` from `body` | Stopped `body` from becoming a secondary scroll container. Lenis binds to the window, so any layout that traps scroll momentum inside `body` completely disables the desktop scroll engine. Smooth scrolling is now restored. |
+
+Validation pass after v2.4:
+
+- Desktop Lenis scroll interpolation ✅
+- `pnpm run type-check` ✅
+- `pnpm run lint` ✅
+
+---
+
 ## Local setup
 
 **Requirements:** Node.js ≥ 20.0.0 < 24.0.0, pnpm ≥ 9.0.0

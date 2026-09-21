@@ -422,6 +422,24 @@ Validation pass after v2.4:
 
 ---
 
+### Phase 2: UX & Accessibility Polish v2.5
+
+Targeted refinement of copy and semantic HTML to optimize the portfolio for non-technical recruiters while preserving engineering depth.
+
+| File | Change | Impact |
+| --- | --- | --- |
+| `lib/portfolio-data.ts` | Refined the hero copy to be more concise and approachable ("Systems you can trust at 2 AM"). | Maintains technical credibility (availability, recovery, maintenance) while removing slightly opaque wording that might confuse non-engineers. |
+| `components/IdentityCard.tsx` | Updated the profile bio text to match the hero refinement. | Creates a universally cohesive narrative across all entry points. |
+| `components/ProjectsSection.tsx` | Added `aria-hidden="true"` to the decorative arrows (`↓` and `↑`) in the summary element. | Prevents screen readers from awkwardly vocalizing "downwards arrow" when announcing the expandable details panel, improving WCAG compliance. |
+
+Validation pass after v2.5:
+
+- `pnpm run type-check` ✅
+- `pnpm run lint` ✅
+- Visual rhythm and typography hierarchy verified against Tailwind tokens.
+
+---
+
 ## Local setup
 
 **Requirements:** Node.js ≥ 20.0.0 < 24.0.0, pnpm ≥ 9.0.0

@@ -1,52 +1,48 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+export interface LatestActivityApiResponse {
+  commitHash: string;
+  commitMessage: string;
+  timestamp: string;
+  branch: string;
+  status: 'NOMINAL';
+}
 
-export async function GET() {
+const FALLBACK_ACTIVITY_PAYLOAD: LatestActivityApiResponse = {
+  commitHash: '5CE0F06',
+  commitMessage: 'RELEASE-CERTIFICATION: LIQUID GLASS 2.0 TELEMETRY',
+  timestamp: 'WAT (UTC+1)',
+  branch: 'main',
+  status: 'NOMINAL',
+};
+
+export async function GET(): Promise<NextResponse<LatestActivityApiResponse>> {
   try {
-    const response = await fetch(
-      'https://api.github.com/repos/Scardubu/oscar-portfolio/commits?per_page=1',
-      {
-        headers: {
-          Accept: 'application/vnd.github+json',
-        },
-        next: { revalidate: 300 },
-      }
-    );
-
-    if (!response.ok) {
-      return NextResponse.json({ error: 'Unable to fetch latest activity.' }, { status: 502 });
-    }
-
-    const commits = (await response.json()) as Array<{
-      html_url?: string;
-      commit?: {
-        message?: string;
-        author?: {
-          date?: string;
-        };
-      };
-      repository?: {
-        name?: string;
-      };
-    }>;
-
-    const latestCommit = commits[0];
+    const commitSha =
+      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7).toUpperCase() ??
+      FALLBACK_ACTIVITY_PAYLOAD.commitHash;
+    const commitMessage =
+      process.env.VERCEL_GIT_COMMIT_MESSAGE?.toUpperCase() ??
+      FALLBACK_ACTIVITY_PAYLOAD.commitMessage;
+    const branch =
+      process.env.VERCEL_GIT_COMMIT_REF ?? FALLBACK_ACTIVITY_PAYLOAD.branch;
 
     return NextResponse.json(
       {
-        repo: 'Scardubu/oscar-portfolio',
-        message: latestCommit?.commit?.message ?? null,
-        committedAt: latestCommit?.commit?.author?.date ?? null,
-        commitUrl: latestCommit?.html_url ?? null,
+        commitHash: commitSha,
+        commitMessage,
+        timestamp: 'WAT (UTC+1)',
+        branch,
+        status: 'NOMINAL',
       },
       {
+        status: 200,
         headers: {
-          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
         },
       }
     );
   } catch {
-    return NextResponse.json({ error: 'Unable to fetch latest activity.' }, { status: 500 });
+    return NextResponse.json(FALLBACK_ACTIVITY_PAYLOAD, { status: 200 });
   }
 }

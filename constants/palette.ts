@@ -1,124 +1,22 @@
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-import { CONTACT_EMAIL } from '@/lib/config';
+export const OBSIDIAN_NOCTURNE_V2 = {
+  backgrounds: {
+    base: "#08090C",     // Pure OLED black base canvas
+    surface: "#0E0E10",  // Elevated structural cards & bars
+    elevated: "#14161B", // Nested metric cells & interactive pills
+  },
+  borders: {
+    default: "#1F222A",  // Crisp 1px structural hairline
+    subtle: "#2A2E39",   // Hover / focus hairline state
+  },
+  accents: {
+    cyan: "#00D9FF",     // Electric cyan for telemetry, badges & focus borders
+    emerald: "#00FF66",  // Emerald green for primary CTAs & live indicators
+  },
+  text: {
+    primary: "#F3F4F6",  // High-contrast primary headings & copy
+    muted: "#9CA3AF",    // Secondary analytical prose
+    dim: "#6B7280",      // Monospace metadata & coordinates
+  },
+} as const;
 
-export interface PaletteItem {
-  id: string;
-  label: string;
-  category: 'NAVIGATE' | 'PROJECTS' | 'WRITING' | 'CONTACT';
-  href?: string;
-  keywords: string[];
-}
-
-export interface ProjectPaletteCommand {
-  id: string;
-  label: string;
-  group: 'Case Studies';
-  href: string;
-}
-
-export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
-  {
-    id: 'nav-projects',
-    label: 'Projects',
-    category: 'NAVIGATE',
-    href: '#section-projects',
-    keywords: ['work', 'portfolio'],
-  },
-  {
-    id: 'nav-writing',
-    label: 'Writing',
-    category: 'NAVIGATE',
-    href: '#section-writing',
-    keywords: ['blog', 'posts', 'articles'],
-  },
-  {
-    id: 'nav-about',
-    label: 'About',
-    category: 'NAVIGATE',
-    href: '#section-about',
-    keywords: ['background', 'bio'],
-  },
-  {
-    id: 'nav-contact',
-    label: 'Contact',
-    category: 'NAVIGATE',
-    href: '#section-contact',
-    keywords: ['email', 'hire', 'reach'],
-  },
-  {
-    id: 'proj-taxbridge',
-    label: 'TaxBridge',
-    category: 'PROJECTS',
-    href: '/work/taxbridge',
-    keywords: ['fintech', 'compliance', 'tax', 'fastify'],
-  },
-  {
-    id: 'proj-sabiscore',
-    label: 'SabiScore',
-    category: 'PROJECTS',
-    href: '/work/sabiscore',
-    keywords: ['ml', 'machine learning', 'xgboost', 'observability'],
-  },
-  {
-    id: 'proj-yap-engine',
-    label: 'The Yap Engine',
-    category: 'PROJECTS',
-    href: '/work/yap-engine',
-    keywords: ['ai', 'video', 'agents', 'orchestration', 'swarmxq', 'ollama', 'ffmpeg'],
-  },
-  {
-    id: 'proj-hashablanca',
-    label: 'Hashablanca',
-    category: 'PROJECTS',
-    href: '/work/hashablanca',
-    keywords: ['blockchain', 'zk', 'privacy', 'encryption'],
-  },
-  {
-    id: 'contact-email',
-    label: 'Email Oscar',
-    category: 'CONTACT',
-    href: `mailto:${CONTACT_EMAIL}`,
-    keywords: ['mail', 'message'],
-  },
-  {
-    id: 'contact-gh',
-    label: 'GitHub',
-    category: 'CONTACT',
-    href: 'https://github.com/Scardubu',
-    keywords: ['code', 'repos'],
-  },
-  {
-    id: 'contact-li',
-    label: 'LinkedIn',
-    category: 'CONTACT',
-    href: 'https://linkedin.com/in/oscar-ndugbu',
-    keywords: ['hire', 'profile'],
-  },
-];
-
-export function getProjectPaletteCommand(itemId: string): ProjectPaletteCommand | null {
-  const item = STATIC_PALETTE_ITEMS.find(
-    (paletteItem): paletteItem is PaletteItem & { href: string } =>
-      paletteItem.id === itemId &&
-      paletteItem.category === 'PROJECTS' &&
-      typeof paletteItem.href === 'string'
-  );
-
-  if (!item) {
-    return null;
-  }
-
-  return {
-    id: `cs-${item.id}`,
-    label: `${item.label} case study`,
-    group: 'Case Studies',
-    href: item.href,
-  };
-}
-
-export const PROJECT_PALETTE_COMMANDS = STATIC_PALETTE_ITEMS.flatMap((item) => {
-  const command = getProjectPaletteCommand(item.id);
-
-  return command ? [command] : [];
-});
+export type ObsidianPalette = typeof OBSIDIAN_NOCTURNE_V2;

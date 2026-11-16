@@ -1,491 +1,147 @@
-'use client';
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-//
-// Skills section v31 — L1 / L2 / L3 progressive disclosure architecture.
-//
-// L1  Core trust layer (immediate): header + outcome metrics + viewport-capped
-//     canonical skills (mobile: 6, tablet: 8, desktop: 10). System 1 readers
-//     reach conviction in <5 s before any full-explorer content mounts.
-// L2  Technical lineage (immediate): system × skill provenance strip showing
-//     exactly which tool powers which live system.
-// L3  Full explorer (gated — user-initiated): SkillsMap with pillar tabs.
-//     Depth available on demand; never auto-rendered before L1/L2 land.
-//     The SkillsMap component is only mounted after the user explicitly opens
-//     the explorer, eliminating the DATABASE_DUMP_EFFECT on first paint.
-//
-// Canonical sources:
-//   getCoreProductionSkills()   →  lib/data/skills.ts (L1 skill set)
-//   SYSTEM_LINEAGE              →  lib/data/skills.ts (L2 provenance)
-//   SkillsMap                   →  components/skills/SkillsMap.tsx (L3)
+import React from "react";
+import { Server, Database, Cpu, ShieldCheck } from "lucide-react";
 
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-
-import { ChapterFrame } from '@/components/cinematic/ChapterFrame';
-import { SectionIntro } from '@/components/shared/SectionIntro';
-import { SkillsMap } from '@/components/skills/SkillsMap';
-import { SkillsRadar } from '@/components/skills/SkillsRadar';
-import { getChapterBySectionId } from '@/lib/cinematic/chapters';
-import { anchorUrl } from '@/lib/config';
-import { getCoreProductionSkills, SYSTEM_LINEAGE } from '@/lib/data/skills';
-import { clipReveal, fadeRise, noMotion } from '@/lib/motionVariants';
-import type { SkillLevel, SkillNode } from '@/lib/types';
-
-// ── Level display config ──────────────────────────────────────────────────────
-// Local copy for compact L1 cards only.
-// SkillsMap maintains its own equivalent for the full explorer.
-const LEVEL_DISPLAY: Record<
-  SkillLevel,
-  { label: string; color: string; barColor: string; barWidth: string }
-> = {
-  expert: {
-    label: 'Expert',
-    color: 'var(--color-film-teal)',
-    barColor: 'oklch(73% 0.18 196)',
-    barWidth: '95%',
-  },
-  proficient: {
-    label: 'Pro',
-    color: 'oklch(72% 0.17 160)',
-    barColor: 'oklch(72% 0.17 160)',
-    barWidth: '70%',
-  },
-  foundational: {
-    label: 'Foundational',
-    color: 'var(--color-text-muted)',
-    barColor: 'oklch(100% 0 0 / 0.3)',
-    barWidth: '35%',
-  },
-};
-
-// ── Capability signals ────────────────────────────────────────────────────────
-// Project outcomes live in the Reliability Ledger. This section shows where the
-// stack carries operational responsibility without repeating headline metrics.
-const TRUST_METRICS = [
-  {
-    value: 'Isolation',
-    label: 'data boundary',
-    sub: 'TaxBridge · Fastify 5 · PostgreSQL 15 RLS',
-    color: 'var(--color-film-teal)',
-    borderColor: 'oklch(70% 0.21 188 / 0.22)',
-  },
-  {
-    value: 'Telemetry',
-    label: 'operating signal',
-    sub: 'SabiScore · XGBoost · LightGBM · Prometheus',
-    color: 'oklch(72% 0.17 160)',
-    borderColor: 'oklch(72% 0.17 160 / 0.22)',
-  },
-  {
-    value: 'Recovery',
-    label: 'failure path',
-    sub: 'SwarmXQ · Ollama GGUF · Checkpoint Recovery',
-    color: 'oklch(75% 0.16 300)',
-    borderColor: 'oklch(75% 0.16 300 / 0.22)',
-  },
-] as const;
-
-const TOTAL_SKILL_COUNT = 62;
-const MOBILE_CORE_COUNT = 6;
-const TABLET_CORE_COUNT = 8;
-const DESKTOP_CORE_COUNT = 10;
-
-function getInitialCoreSkillCount() {
-  if (typeof window === 'undefined') return MOBILE_CORE_COUNT;
-  if (window.innerWidth >= 1024) return DESKTOP_CORE_COUNT;
-  if (window.innerWidth >= 768) return TABLET_CORE_COUNT;
-  return MOBILE_CORE_COUNT;
+export interface CapabilityDomain {
+  id: string;
+  code: string;
+  title: string;
+  summary: string;
+  items: { name: string; spec: string }[];
+  credentials?: string[];
 }
 
-// ── L1 Core Skill Card ────────────────────────────────────────────────────────
-function CoreSkillCard({
-  skill,
-  index,
-  reducedMotion,
-  shouldAnimate,
-}: {
-  skill: SkillNode;
-  index: number;
-  reducedMotion: boolean;
-  shouldAnimate: boolean;
-}) {
-  const lvl = LEVEL_DISPLAY[skill.level];
-  const systemTags = skill.tags
-    .filter((t) => t.startsWith('used-in:'))
-    .map((t) => t.replace('used-in:', ''));
-  const projectLabel = systemTags.slice(0, 2).join(' · ');
-  const valuenow = skill.level === 'expert' ? 95 : skill.level === 'proficient' ? 70 : 35;
+const CAPABILITY_DOMAINS: CapabilityDomain[] = [
+  {
+    id: "backend-distributed",
+    code: "DOM-01",
+    title: "Distributed Backend & APIs",
+    summary:
+      "High-throughput service architecture, idempotent event queues, and strict schema validation.",
+    items: [
+      { name: "Python · FastAPI", spec: "Async / Pydantic v2" },
+      { name: "Node.js · TypeScript", spec: "Fastify 5 / JSNSD" },
+      { name: "BullMQ · Redis 7", spec: "Replay-Safe Workers" },
+      { name: "GraphQL · REST", spec: "Contract-First" },
+    ],
+  },
+  {
+    id: "data-storage",
+    code: "DOM-02",
+    title: "Data Engineering & Storage Engines",
+    summary:
+      "Multi-tenant relational isolation, out-of-core analytical pipelines, and automated national ETL.",
+    items: [
+      { name: "PostgreSQL 15", spec: "RLS / Query Tuning" },
+      { name: "Polars · DuckDB", spec: "Out-of-Core Execution" },
+      { name: "Automated ETL", spec: "Python / Power BI" },
+      { name: "Audit Chains", spec: "SHA-256 Linked Logs" },
+    ],
+  },
+  {
+    id: "ai-infrastructure",
+    code: "DOM-03",
+    title: "AI & ML Infrastructure",
+    summary:
+      "Low-memory model serving, deterministic ensemble meta-learners, and multi-agent DAG routing.",
+    items: [
+      { name: "Zero-Pickle ML", spec: "< 512MB RAM Envelopes" },
+      { name: "SwarmXQ DAGs", spec: "Agent Orchestration" },
+      { name: "Local LLM Routing", spec: "Circuit-Broken Fallbacks" },
+      { name: "Kokoro TTS", spec: "CPU-Bounded Synthesis" },
+    ],
+  },
+  {
+    id: "cloud-security",
+    code: "DOM-04",
+    title: "Cloud Platform, Security & Certifications",
+    summary:
+      "Zero-trust deployment topologies, cryptographic payload validation, and verified cloud credentials.",
+    items: [
+      { name: "AWS Certified Developer", spec: "Dec 2023" },
+      { name: "GCP Associate Cloud Eng", spec: "Aug 2023" },
+      { name: "OpenJS Node.js (JSNSD)", spec: "May 2024" },
+      { name: "PostgreSQL 14 Associate", spec: "Mar 2024" },
+    ],
+  },
+];
 
+export const SkillsSection: React.FC = () => {
   return (
-    <div
-      data-cinematic="card"
-      className="glass-surface flex h-full min-w-0 flex-col gap-2 rounded-[var(--radius-md)] p-3"
-      // eslint-disable-next-line no-restricted-syntax
-      style={{ borderTop: `2px solid color-mix(in oklch, ${lvl.color} 30%, transparent)` }}
-      aria-label={`${skill.name} — ${lvl.label}${projectLabel ? ` — ${projectLabel}` : ''}`}
+    <section
+      id="capabilities"
+      aria-labelledby="capabilities-heading"
+      className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14"
     >
-      <span
-        className="shrink-0 font-mono text-[9px] font-semibold tracking-widest uppercase"
-        // eslint-disable-next-line no-restricted-syntax
-        style={{ color: lvl.color }}
-      >
-        {lvl.label}
-      </span>
-
-      <span className="text-color-text-primary text-xs leading-tight font-semibold break-words">
-        {skill.name}
-      </span>
-
-      {projectLabel ? (
-        <span
-          className="text-color-text-muted font-mono text-[8px] leading-tight break-words"
-          title={systemTags.join(' · ')}
-        >
-          {projectLabel}
-        </span>
-      ) : null}
-
-      <div
-        className="mt-auto h-[2px] w-full overflow-hidden rounded-full bg-[oklch(100%_0_0_/_0.07)]"
-        role="meter"
-        aria-valuenow={valuenow}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`${skill.name} proficiency`}
-      >
-        <m.div
-          className="h-full rounded-full"
-          // eslint-disable-next-line no-restricted-syntax
-          style={{ background: lvl.barColor }}
-          initial={{ width: '0%' }}
-          animate={{ width: shouldAnimate || reducedMotion ? lvl.barWidth : '0%' }}
-          transition={
-            reducedMotion
-              ? { duration: 0 }
-              : {
-                  delay: index * 0.04 + 0.08,
-                  type: 'spring',
-                  stiffness: 120,
-                  damping: 20,
-                  mass: 1,
-                }
-          }
-        />
-      </div>
-    </div>
-  );
-}
-
-// ── L2 System Lineage Row ─────────────────────────────────────────────────────
-function SystemLineageRow({
-  system,
-  accent,
-  skills,
-}: {
-  system: string;
-  accent: string;
-  skills: SkillNode[];
-}) {
-  return (
-    <div
-      data-cinematic="panel"
-      className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:gap-3"
-    >
-      <span
-        className="shrink-0 font-mono text-[9px] font-semibold tracking-widest uppercase sm:w-[5.5rem] sm:pt-0.5"
-        // eslint-disable-next-line no-restricted-syntax
-        style={{ color: accent }}
-      >
-        {system}
-      </span>
-      <div className="flex min-w-0 flex-wrap gap-1">
-        {skills.map((s) => (
-          <span
-            key={s.id}
-            className="border-color-border text-color-text-secondary rounded border bg-[oklch(100%_0_0_/_0.015)] px-1.5 py-0.5 font-mono text-[9px] tracking-wide"
-          >
-            {s.name}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Main section ──────────────────────────────────────────────────────────────
-export function SkillsSection() {
-  const reducedMotion = useReducedMotion() ?? false;
-  const chapter = getChapterBySectionId('skills');
-  const [coreVisibleCount, setCoreVisibleCount] = useState(MOBILE_CORE_COUNT);
-  const [isExplorerOpen, setIsExplorerOpen] = useState(false);
-  const [radarView, setRadarView] = useState(false);
-  const child = reducedMotion ? noMotion : fadeRise;
-  const coreSkills = getCoreProductionSkills();
-  const visibleCoreSkills = coreSkills.slice(0, coreVisibleCount);
-  const hiddenCoreSkillCount = coreSkills.length - visibleCoreSkills.length;
-
-  useEffect(() => {
-    const updateSkillDensity = () => {
-      setCoreVisibleCount(getInitialCoreSkillCount());
-    };
-
-    updateSkillDensity();
-    window.addEventListener('resize', updateSkillDensity);
-    return () => window.removeEventListener('resize', updateSkillDensity);
-  }, []);
-
-  return (
-    <ChapterFrame chapter={chapter} ariaLabelledBy="skills-heading" className="border-color-border">
-      <div>
-        {/* ── L1: Header ─────────────────────────────────────────────── */}
-        <m.div variants={child} className="mb-10 sm:mb-12">
-          <SectionIntro
-            eyebrowNumber="03"
-            eyebrowLabel="Skills"
-            headingId="skills-heading"
-            title={<>The stack behind systems that hold.</>}
-            description={
-              'The stack is organized by operational responsibility: isolation, observability, recovery, data movement, and delivery. Each tool maps to a recorded system decision rather than a generic proficiency list.'
-            }
-            eyebrowVariant={child}
-            titleVariant={reducedMotion ? child : clipReveal}
-            descriptionVariant={child}
-            titleClassName="text-color-text-primary mt-3 max-w-[22ch]"
-            descriptionClassName="text-color-text-secondary mt-4 max-w-[52ch] text-sm leading-8 [overflow-wrap:break-word] sm:text-base lg:mt-0"
-          />
-
-          {/* L1: Outcome-first trust metrics */}
-          <div
-            data-cinematic="proof"
-            className="mt-6 grid gap-3 sm:grid-cols-3"
-            aria-label="System outcomes linked to skills"
-          >
-            {TRUST_METRICS.map(({ value, label, sub, color, borderColor }) => (
-              <div
-                key={label}
-                className="border-color-border rounded-[var(--radius-md)] border bg-[oklch(100%_0_0_/_0.02)] p-4"
-                // eslint-disable-next-line no-restricted-syntax
-                style={{
-                  borderTop: `2px solid ${borderColor}`,
-                }}
-              >
-                <p
-                  className="font-mono text-sm font-semibold"
-                  // eslint-disable-next-line no-restricted-syntax
-                  style={{ color }}
-                >
-                  {value}
-                </p>
-                <p className="text-color-text-primary mt-0.5 text-xs font-medium">{label}</p>
-                <p className="text-color-text-muted mt-1 font-mono text-[9px] tracking-wide">
-                  {sub}
-                </p>
-              </div>
-            ))}
-          </div>
-        </m.div>
-
-        {/* ── L1: Core skills grid — 12 canonical production skills ─── */}
-        <m.div variants={child} className="mb-3">
-          <p className="text-color-text-muted mb-3 font-mono text-[10px] tracking-widest uppercase">
-            Core production stack
-          </p>
-          <p className="text-color-text-muted max-w-[60ch] text-xs leading-6 sm:text-sm">
-            Default view is intentionally curated for fast trust. Open the full explorer only when
-            you want deep implementation coverage across all {TOTAL_SKILL_COUNT} tools.
-          </p>
-        </m.div>
-
-        <m.div
-          variants={child}
-          className="mb-10 grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-          aria-label="Core production skills — top 12"
-          role="list"
-        >
-          {visibleCoreSkills.map((skill, idx) => (
-            <div key={skill.id} role="listitem">
-              <CoreSkillCard
-                skill={skill}
-                index={idx}
-                reducedMotion={reducedMotion}
-                shouldAnimate={true}
-              />
-            </div>
-          ))}
-        </m.div>
-
-        {hiddenCoreSkillCount > 0 ? (
-          <m.p
-            variants={child}
-            className="text-color-text-muted mb-10 font-mono text-[11px] tracking-wider"
-          >
-            +{hiddenCoreSkillCount} more in the full explorer below.
-          </m.p>
-        ) : null}
-
-        {/* ── L2: System lineage strip — always visible ─────────────── */}
-        <m.div variants={child} className="mb-12">
-          <p className="text-color-text-muted mb-3 font-mono text-[10px] tracking-widest uppercase">
-            Production system × skill lineage
-          </p>
-          <div
-            data-cinematic="panel"
-            className="border-color-border space-y-3 rounded-[var(--radius-lg)] border bg-[oklch(100%_0_0_/_0.015)] p-4 sm:p-5"
-            aria-label="Which skills power each live production system"
-          >
-            {SYSTEM_LINEAGE.map(({ system, accent, skills }) => (
-              <SystemLineageRow key={system} system={system} accent={accent} skills={skills} />
-            ))}
-          </div>
-        </m.div>
-
-        {/* ── L3: Full interactive SkillsMap — tabbed by pillar ─────────── */}
-        <div className="border-color-border-subtle border-t pt-10">
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-color-text-muted font-mono text-[10px] tracking-widest uppercase">
-                Full explorer · {TOTAL_SKILL_COUNT} tools · 8 pillars
-              </p>
-              <p className="text-color-text-muted mt-2 max-w-[60ch] text-xs leading-6 sm:text-sm">
-                Expanded layer for CTO and engineer-level scrutiny. Optional by design to preserve
-                reading momentum for recruiters and founders.
-              </p>
-            </div>
-
-            <div className="flex shrink-0 flex-col gap-2 sm:items-end">
-              <button
-                type="button"
-                onClick={() => setIsExplorerOpen((v) => !v)}
-                data-cinematic="cta"
-                aria-expanded={isExplorerOpen}
-                aria-controls="skills-explorer-panel"
-                aria-label={
-                  isExplorerOpen
-                    ? 'Collapse full skills explorer'
-                    : `Open full engineering stack — ${TOTAL_SKILL_COUNT} tools across 8 pillars`
-                }
-                className="cta-secondary min-h-[48px] justify-center text-xs sm:text-sm"
-              >
-                {isExplorerOpen
-                  ? 'Hide full explorer'
-                  : `Explore full engineering stack (${TOTAL_SKILL_COUNT})`}
-              </button>
-
-              {isExplorerOpen && (
-                <div
-                  className="glass-light inline-flex min-h-[44px] items-center gap-1 rounded-full border border-white/10 p-1"
-                  role="tablist"
-                  aria-label="Skills explorer view"
-                >
-                  <button
-                    id="skills-list-tab"
-                    type="button"
-                    role="tab"
-                    aria-selected={!radarView}
-                    aria-controls="skills-list-panel"
-                    tabIndex={!radarView ? 0 : -1}
-                    onClick={() => setRadarView(false)}
-                    className={[
-                      'min-h-[44px] min-w-[44px] rounded-full px-3 py-1.5 font-mono text-[11px] tracking-widest uppercase transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none',
-                      !radarView
-                        ? 'text-color-text-primary bg-white/10 shadow-[0_10px_24px_oklch(0%_0_0_/_0.18)]'
-                        : 'text-color-text-muted hover:text-color-text-secondary',
-                    ].join(' ')}
-                  >
-                    List view
-                  </button>
-
-                  <button
-                    id="skills-radar-tab"
-                    type="button"
-                    role="tab"
-                    aria-selected={radarView}
-                    aria-controls="skills-radar-panel"
-                    tabIndex={radarView ? 0 : -1}
-                    onClick={() => setRadarView(true)}
-                    className={[
-                      'min-h-[44px] min-w-[44px] rounded-full px-3 py-1.5 font-mono text-[11px] tracking-widest uppercase transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none',
-                      radarView
-                        ? 'text-color-text-primary bg-white/10 shadow-[0_10px_24px_oklch(0%_0_0_/_0.18)]'
-                        : 'text-color-text-muted hover:text-color-text-secondary',
-                    ].join(' ')}
-                  >
-                    Radar view
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <AnimatePresence initial={false}>
-            {isExplorerOpen && (
-              <m.div
-                id="skills-explorer-panel"
-                initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                transition={
-                  reducedMotion
-                    ? { duration: 0.01 }
-                    : { type: 'spring', stiffness: 300, damping: 28 }
-                }
-                className="pb-2"
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {radarView ? (
-                    <m.div
-                      key="skills-radar"
-                      id="skills-radar-panel"
-                      role="tabpanel"
-                      aria-labelledby="skills-radar-tab"
-                      initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                      transition={
-                        reducedMotion
-                          ? { duration: 0.01 }
-                          : { type: 'spring', stiffness: 280, damping: 26 }
-                      }
-                    >
-                      <SkillsRadar />
-                    </m.div>
-                  ) : (
-                    <m.div
-                      key="skills-list"
-                      id="skills-list-panel"
-                      role="tabpanel"
-                      aria-labelledby="skills-list-tab"
-                      initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                      transition={
-                        reducedMotion
-                          ? { duration: 0.01 }
-                          : { type: 'spring', stiffness: 280, damping: 26 }
-                      }
-                    >
-                      <SkillsMap />
-                    </m.div>
-                  )}
-                </AnimatePresence>
-              </m.div>
-            )}
-          </AnimatePresence>
+      <div className="mb-8">
+        <div className="mb-2 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-telemetry">
+          <span className="font-semibold text-accent-emerald">02.5</span>
+          <span className="text-obsidian-muted">CAPABILITIES MATRIX</span>
         </div>
 
-        {/* Flow hook — V1.0 Change 6c: §Flow Mechanics §Skills + §Engagement Protocol */}
-        <m.p
-          variants={child}
-          data-cinematic="cta"
-          className="text-color-text-muted mt-8 font-mono text-[13px] [letter-spacing:0.06em]"
+        <h2
+          id="capabilities-heading"
+          className="mb-3 font-sans text-2xl font-bold tracking-tight text-obsidian-text sm:text-3xl"
         >
-          <Link href={anchorUrl('section-about')} className="transition-opacity hover:opacity-80">
-            These 62 skills map to three featured systems →
-          </Link>
-        </m.p>
+          Production stack &amp; verified credentials.
+        </h2>
       </div>
-    </ChapterFrame>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {CAPABILITY_DOMAINS.map((domain, idx) => {
+          const IconComponent =
+            idx === 0
+              ? Server
+              : idx === 1
+                ? Database
+                : idx === 2
+                  ? Cpu
+                  : ShieldCheck;
+
+          return (
+            <div
+              key={domain.id}
+              className="relative overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-5"
+            >
+              <div
+                className="absolute inset-x-0 top-0 h-px bg-illuminate-cyan opacity-60"
+                aria-hidden="true"
+              />
+
+              <div className="mb-3 flex items-center justify-between border-b border-obsidian-border pb-3">
+                <div className="flex items-center gap-2">
+                  <IconComponent className="h-4 w-4 text-accent-cyan" />
+                  <h3 className="font-sans text-base font-bold text-obsidian-text">
+                    {domain.title}
+                  </h3>
+                </div>
+                <span className="font-mono text-micro text-obsidian-dim">
+                  {domain.code}
+                </span>
+              </div>
+
+              <p className="mb-4 font-sans text-caption leading-relaxed text-obsidian-muted">
+                {domain.summary}
+              </p>
+
+              <ul className="space-y-2">
+                {domain.items.map((item) => (
+                  <li
+                    key={item.name}
+                    className="flex items-center justify-between rounded-lg border border-obsidian-border bg-obsidian-elevated px-3 py-2 font-mono text-caption"
+                  >
+                    <span className="text-obsidian-text">{item.name}</span>
+                    <span className="text-micro text-accent-cyan">
+                      {item.spec}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
-}
+};
+
+export default SkillsSection;

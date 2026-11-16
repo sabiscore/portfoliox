@@ -1,79 +1,122 @@
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-// Mobile-native: consistent spacing scale, accessible article structure.
-// Used as a standalone card in any section needing a labelled metric display.
+import React from "react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
-import type { CSSProperties, ReactNode } from 'react';
+export type MetricCardVariant = "focus" | "proof" | "method";
 
-type MetricAccent = 'teal' | 'amber' | 'live' | 'accent' | 'wip';
-
-const ACCENT_COLOR: Record<MetricAccent, string> = {
-  teal: 'var(--color-film-teal)',
-  amber: 'var(--color-film-amber)',
-  live: 'var(--color-live)',
-  accent: 'var(--color-accent)',
-  wip: 'var(--color-warning)',
-};
-
-interface MetricCardProps {
+export interface MetricItem {
   label: string;
-  headline?: string;
-  body: string;
-  icon?: ReactNode;
-  breath?: boolean;
-  accent?: MetricAccent;
+  detail?: string;
+  href?: string;
 }
 
-export function MetricCard({
-  label,
-  headline,
-  body,
-  icon,
-  breath = false,
-  accent,
-}: Readonly<MetricCardProps>) {
-  const accentColor = accent ? ACCENT_COLOR[accent] : 'var(--color-border)';
+export interface MetricCardProps {
+  index: string;
+  title: string;
+  variant: MetricCardVariant;
+  items: MetricItem[];
+  accent?: "cyan" | "emerald";
+}
 
-  const borderStyle: CSSProperties = { borderTopColor: accentColor };
-  const labelStyle: CSSProperties = accent
-    ? { color: accentColor }
-    : { color: 'var(--color-text-muted)' };
+export const MetricCard: React.FC<MetricCardProps> = ({
+  index,
+  title,
+  variant,
+  items,
+  accent = "cyan",
+}) => {
+  const illuminationClass =
+    accent === "emerald" ? "bg-illuminate-emerald" : "bg-illuminate-cyan";
 
   return (
-    <article
-      className={`glass glass-medium h-full border-t-2 p-4 sm:p-5 lg:p-6${breath ? 'metric-breath' : ''}`}
-      aria-label={label}
-      data-metric="true"
-      // eslint-disable-next-line no-restricted-syntax
-      style={borderStyle}
-    >
-      {icon ? (
-        <div
-          className="mb-3"
-          // eslint-disable-next-line no-restricted-syntax
-          style={{ color: accentColor }}
-          aria-hidden="true"
-          role="presentation"
-        >
-          {icon}
+    <div className="group relative flex flex-col justify-between rounded-lg border border-obsidian-border bg-obsidian-elevated p-3.5 transition-colors hover:border-obsidian-subtle">
+      {/* Crisp 1px Top Illumination on Hover */}
+      <div
+        className={`
+          absolute inset-x-0 top-0 h-px opacity-50 transition-opacity
+          group-hover:opacity-100 ${illuminationClass}
+        `}
+        aria-hidden="true"
+      />
+
+      {/* Module Header */}
+      <div className="mb-3 flex items-center justify-between border-b border-obsidian-border pb-2">
+        <span className="font-mono text-micro font-semibold uppercase tracking-telemetry text-obsidian-muted">
+          {title}
+        </span>
+        <span className="font-mono text-micro text-obsidian-dim tabular-nums">
+          {index}
+        </span>
+      </div>
+
+      {/* Variant 1: FOCUS (Structured Capability Rows) */}
+      {variant === "focus" && (
+        <ul className="space-y-2">
+          {items.map((item) => (
+            <li
+              key={item.label}
+              className="flex items-center justify-between gap-2 font-mono text-caption text-obsidian-text"
+            >
+              <span className="flex items-center gap-2">
+                <span
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-cyan"
+                  aria-hidden="true"
+                />
+                <span>{item.label}</span>
+              </span>
+              {item.detail && (
+                <span className="rounded border border-obsidian-border bg-obsidian-surface px-1.5 py-0.5 text-micro text-obsidian-dim">
+                  {item.detail}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Variant 2: PROOF (Interactive Case Study Pills) */}
+      {variant === "proof" && (
+        <div className="flex flex-wrap gap-2">
+          {items.map((item) => (
+            <a
+              key={item.label}
+              href={item.href || "#projects"}
+              className="inline-flex min-h-pill items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-surface px-2.5 py-1 font-mono text-caption text-obsidian-text transition-colors hover:border-accent-emerald hover:text-accent-emerald"
+            >
+              <span>{item.label}</span>
+              {item.detail && (
+                <span className="text-micro text-obsidian-dim">
+                  · {item.detail}
+                </span>
+              )}
+              <ArrowUpRight className="h-3 w-3 text-accent-emerald" />
+            </a>
+          ))}
         </div>
-      ) : null}
+      )}
 
-      <p
-        className="mb-2 font-mono text-[10px] tracking-widest uppercase"
-        // eslint-disable-next-line no-restricted-syntax
-        style={labelStyle}
-      >
-        {label}
-      </p>
-
-      {headline ? (
-        <p className="text-color-text-primary mb-2 text-base leading-snug font-semibold">
-          {headline}
-        </p>
-      ) : null}
-
-      <p className="text-color-text-secondary text-sm leading-[1.75]">{body}</p>
-    </article>
+      {/* Variant 3: METHOD (Deterministic Engineering Pipeline) */}
+      {variant === "method" && (
+        <div
+          className="flex flex-wrap items-center gap-1.5 pt-0.5"
+          aria-label="Engineering decision pipeline"
+        >
+          {items.map((item, idx) => (
+            <React.Fragment key={item.label}>
+              <span className="inline-flex items-center rounded border border-obsidian-border bg-obsidian-surface px-2 py-1 font-mono text-micro text-obsidian-text">
+                {item.label}
+              </span>
+              {idx < items.length - 1 && (
+                <ArrowRight
+                  className="h-3 w-3 shrink-0 text-accent-cyan"
+                  aria-hidden="true"
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+    </div>
   );
-}
+};
+
+export default MetricCard;

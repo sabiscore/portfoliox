@@ -1,75 +1,92 @@
-'use client';
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-// Mobile-native: BECAUSE is the hero signal — dominant type, colored border, full-width.
-// CHOSEN / OVER: secondary rows, 48px min touch target, compact on mobile, expanded sm+.
+import React from "react";
+import { Cpu, ShieldAlert, CheckCircle2, Scale } from "lucide-react";
 
-interface ArchDecisionProps {
-  readonly chosen: string;
-  readonly over: string;
-  readonly because: string;
-  /** Render a condensed variant for non-featured / grid cards */
-  readonly compact?: boolean;
-  /**
-   * Render the BECAUSE conviction row. Default true (standalone case-study use).
-   * Pass false on the home project cards, where `because` is already surfaced as
-   * the always-visible "WHY" hook above the panel — rendering it here too made the
-   * identical sentence appear twice (WHY ≡ BECAUSE) on every featured card.
-   */
-  readonly showBecause?: boolean;
+export interface ArchDecisionProps {
+  id?: string;
+  title: string;
+  status?: "ACCEPTED" | "ENFORCED" | "SUPERSEDED";
+  context: string;
+  decision: string;
+  tradeoffs: string;
+  consequences: string;
 }
 
-export function ArchDecision({
-  chosen,
-  over,
-  because,
-  compact = false,
-  showBecause = true,
-}: ArchDecisionProps) {
+export const ArchDecision: React.FC<ArchDecisionProps> = ({
+  id = "ADR-01",
+  title,
+  status = "ENFORCED",
+  context,
+  decision,
+  tradeoffs,
+  consequences,
+}) => {
   return (
-    <div className="border-color-border-subtle rounded-[var(--radius-lg)] border bg-[oklch(100%_0_0_/_0.018)]">
-      {/* BECAUSE — primary conviction signal */}
-      {showBecause && (
-        <div
-          className={`border-color-border-subtle border-b ${compact ? 'px-3 py-3' : 'px-4 py-4 sm:px-6 sm:py-5'}`}
-        >
-          <p className="label-mono text-color-film-teal mb-2 text-[10px]">BECAUSE</p>
-          <p
-            className={`text-color-text-primary leading-[1.75] font-medium ${compact ? 'line-clamp-3 text-xs' : 'text-sm sm:text-base'}`}
-          >
-            {because}
+    <aside
+      aria-label={`Architecture Decision Record: ${title}`}
+      className="my-6 overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-4 sm:p-6"
+    >
+      {/* Header Bar */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-obsidian-border pb-3">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-elevated px-2 py-0.5 font-mono text-micro text-accent-cyan">
+            <Cpu className="h-3 w-3" />
+            <span>{id}</span>
+          </span>
+          <h4 className="font-sans text-base font-bold text-obsidian-text sm:text-lg">
+            {title}
+          </h4>
+        </div>
+
+        <span className="inline-flex items-center gap-1 rounded border border-accent-emerald/40 bg-obsidian-elevated px-2.5 py-0.5 font-mono text-micro text-accent-emerald">
+          <CheckCircle2 className="h-3 w-3" />
+          <span>{status}</span>
+        </span>
+      </div>
+
+      {/* 2x2 Specification Grid */}
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="rounded-lg border border-obsidian-border bg-obsidian-elevated p-3.5">
+          <div className="mb-1.5 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
+            <ShieldAlert className="h-3.5 w-3.5 text-accent-cyan" />
+            <span>Constraint &amp; Context</span>
+          </div>
+          <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
+            {context}
           </p>
         </div>
-      )}
 
-      {/* CHOSEN / OVER — secondary rows */}
-      <div className="divide-color-border-subtle divide-y">
-        <div
-          className={`flex min-h-[48px] items-start gap-3 py-3 ${compact ? 'px-3' : 'px-4 sm:px-6'}`}
-        >
-          <span className="label-mono text-color-success w-14 shrink-0 pt-0.5 text-[10px]">
-            CHOSEN
-          </span>
-          <span
-            className={`text-color-text-secondary leading-[1.7] ${compact ? 'line-clamp-2 text-[11px]' : 'text-xs sm:text-sm'}`}
-          >
-            {chosen}
-          </span>
+        <div className="rounded-lg border border-obsidian-border bg-obsidian-elevated p-3.5">
+          <div className="mb-1.5 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
+            <Cpu className="h-3.5 w-3.5 text-accent-emerald" />
+            <span>Architectural Decision</span>
+          </div>
+          <p className="font-sans text-caption leading-relaxed text-obsidian-text">
+            {decision}
+          </p>
         </div>
 
-        <div
-          className={`flex min-h-[48px] items-start gap-3 py-3 ${compact ? 'px-3' : 'px-4 sm:px-6'}`}
-        >
-          <span className="label-mono text-color-warning w-14 shrink-0 pt-0.5 text-[10px]">
-            OVER
-          </span>
-          <span
-            className={`text-color-text-muted leading-[1.7] ${compact ? 'line-clamp-2 text-[11px]' : 'text-xs sm:text-sm'}`}
-          >
-            {over}
-          </span>
+        <div className="rounded-lg border border-obsidian-border bg-obsidian-base p-3.5">
+          <div className="mb-1.5 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
+            <Scale className="h-3.5 w-3.5 text-accent-cyan" />
+            <span>Explicit Trade-Offs</span>
+          </div>
+          <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
+            {tradeoffs}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-obsidian-border bg-obsidian-base p-3.5">
+          <div className="mb-1.5 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-accent-emerald">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            <span>Production Evidence</span>
+          </div>
+          <p className="font-mono text-micro leading-relaxed text-obsidian-text">
+            {consequences}
+          </p>
         </div>
       </div>
-    </div>
+    </aside>
   );
-}
+};
+
+export default ArchDecision;

@@ -1,127 +1,136 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { Menu, X, Mail, ArrowUpRight, Terminal } from "lucide-react";
+import React, { useState, useCallback, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-const NAV_ITEMS = [
-  { index: "00", label: "Operating Model", href: "#operating-model" },
-  { index: "01", label: "Projects", href: "#projects" },
-  { index: "02", label: "Patterns", href: "#patterns" },
-  { index: "03", label: "Writing", href: "#writing" },
-  { index: "04", label: "Contact", href: "#contact" },
-] as const;
+interface NavRoute {
+  label: string;
+  href: string;
+  code: string;
+}
 
-export const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const NAV_ROUTES: ReadonlyArray<NavRoute> = [
+  { code: '01', label: 'PROJECTS', href: '/#projects' },
+  { code: '02', label: 'FAILURE MODES', href: '/#failure-modes' },
+  { code: '03', label: 'ARCHITECTURE LEDGER', href: '/#identity' },
+  { code: '04', label: 'WRITING', href: '/writing' },
+];
+
+export function Navbar(): React.JSX.Element {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const pathname = usePathname();
+
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen((prev) => !prev);
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  useEffect(() => {
+    closeMobileMenu();
+  }, [pathname, closeMobileMenu]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-obsidian-border bg-obsidian-base/95 backdrop-blur-md">
-      {/* 1px Top Structural Illumination Line */}
-      <div
-        className="h-px w-full bg-illuminate-cyan opacity-60"
-        aria-hidden="true"
-      />
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#08090C]/90 backdrop-blur-xl">
+      <nav
+        aria-label="Primary system navigation"
+        className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16"
+      >
+        {/* Brand Wordmark & Live Telemetry Pulse */}
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="min-h-[44px] inline-flex items-center gap-3 font-heading text-base sm:text-lg font-bold tracking-[0.28em] text-white hover:text-[#00D9FF] transition-colors"
+          >
+            <span>SCARDUBU</span>
+          </Link>
 
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
-        {/* Wordmark + Live Status Node */}
-        <Link
-          href="/"
-          className="group inline-flex items-center gap-2.5 py-2 focus:outline-none"
-          aria-label="SCARDUBU Home"
-        >
-          <span
-            className="h-2 w-2 rounded-full bg-accent-emerald"
-            aria-hidden="true"
-          />
-          <span className="font-mono text-sm font-semibold tracking-wordmark text-obsidian-text transition-colors group-hover:text-accent-cyan">
-            SCARDUBU
+          <span className="hidden sm:inline-flex items-center gap-1.5 border border-[#00FF66]/30 bg-[#0E0E10] px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#00FF66]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#00FF66] animate-pulse" />
+            NOMINAL
           </span>
-        </Link>
+        </div>
 
         {/* Desktop Navigation Links */}
-        <nav
-          className="hidden md:flex md:items-center md:gap-1"
-          aria-label="Primary Navigation"
-        >
-          {NAV_ITEMS.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="inline-flex items-center gap-1.5 rounded-md border border-transparent px-3 py-1.5 font-mono text-caption text-obsidian-muted transition-colors hover:border-obsidian-border hover:bg-obsidian-surface hover:text-accent-cyan"
+        <div className="hidden md:flex items-center gap-1">
+          {NAV_ROUTES.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              className="min-h-[44px] px-3.5 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-white/75 hover:text-[#00D9FF] hover:bg-white/[0.03] transition-colors"
             >
-              <span className="text-obsidian-dim">{item.index}</span>
-              <span>{item.label}</span>
-            </a>
+              <span className="text-[#00D9FF]/70">{route.code}</span>
+              <span>{route.label}</span>
+            </Link>
           ))}
-        </nav>
+        </div>
 
-        {/* Touch-Safe Action Controls (Replaces overlapping bottom-right FAB) */}
+        {/* Right Controls: Docked Contact Trigger & 44px Mobile Hamburger */}
         <div className="flex items-center gap-2">
-          <a
-            href="#contact"
-            aria-label="Discuss a system or send direct message"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-obsidian-border bg-obsidian-surface text-obsidian-muted transition-colors hover:border-accent-cyan hover:text-accent-cyan md:w-auto md:gap-2 md:px-3.5"
+          <Link
+            href="/#contact"
+            aria-label="Direct architectural inquiry"
+            className="min-h-[44px] min-w-[44px] px-3.5 inline-flex items-center justify-center gap-2 border border-white/15 hover:border-[#00D9FF] bg-[#0E0E10] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
           >
-            <Mail className="h-4 w-4 text-accent-cyan" />
-            <span className="hidden font-mono text-caption text-obsidian-text md:inline">
-              Contact
+            <span className="text-[#00D9FF]" aria-hidden="true">
+              ✉
             </span>
-          </a>
+            <span className="hidden sm:inline">INQUIRE</span>
+          </Link>
 
           <button
             type="button"
-            onClick={() => setIsOpen((prev) => !prev)}
-            aria-expanded={isOpen}
+            onClick={toggleMobileMenu}
+            aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-navigation-drawer"
-            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-obsidian-border bg-obsidian-surface text-obsidian-text transition-colors hover:border-accent-cyan hover:text-accent-cyan md:hidden"
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            className="md:hidden min-h-[44px] min-w-[44px] inline-flex items-center justify-center border border-white/15 hover:border-[#00D9FF] bg-[#0E0E10] font-mono text-sm text-white hover:text-[#00D9FF] transition-colors"
           >
-            {isOpen ? (
-              <X className="h-4 w-4 text-accent-cyan" />
-            ) : (
-              <Menu className="h-4 w-4" />
-            )}
+            {isMobileMenuOpen ? '✕' : '☰'}
           </button>
         </div>
-      </div>
+      </nav>
 
-      {/* Mobile Navigation Drawer */}
-      {isOpen && (
-        <nav
+      {/* Mobile High-Glare Drawer */}
+      {isMobileMenuOpen && (
+        <div
           id="mobile-navigation-drawer"
-          aria-label="Mobile Navigation"
-          className="border-t border-obsidian-border bg-obsidian-surface px-4 py-3 md:hidden"
+          className="md:hidden border-t border-white/10 bg-[#0E0E10]/95 backdrop-blur-xl px-4 pt-3 pb-5 space-y-2"
         >
-          <ul className="space-y-1.5">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex min-h-touch items-center justify-between rounded-lg border border-obsidian-border bg-obsidian-elevated px-3.5 py-2.5 font-mono text-caption text-obsidian-text transition-colors hover:border-accent-cyan hover:text-accent-cyan"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <span className="text-accent-emerald">{item.index}</span>
-                    <span>{item.label}</span>
-                  </span>
-                  <ArrowUpRight className="h-4 w-4 text-accent-cyan" />
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-3 flex items-center justify-between border-t border-obsidian-border pt-3 font-mono text-micro text-obsidian-dim">
-            <span className="inline-flex items-center gap-1.5">
-              <Terminal className="h-3.5 w-3.5 text-accent-emerald" />
-              <span>FAIL-CLOSED TELEMETRY</span>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-2">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-white/50">
+              NAVIGATION MATRIX
             </span>
-            <span>LOS · ABV // UTC+1</span>
+            <span className="font-mono text-[11px] text-[#00FF66]">
+              ● LAGOS · UTC+1
+            </span>
           </div>
-        </nav>
+
+          <div className="grid grid-cols-1 gap-1.5">
+            {NAV_ROUTES.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                onClick={closeMobileMenu}
+                className="min-h-[48px] px-4 flex items-center justify-between border border-white/10 hover:border-[#00D9FF]/50 bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
+              >
+                <span className="flex items-center gap-2.5">
+                  <span className="text-[#00D9FF]">{route.code}</span>
+                  <span>{route.label}</span>
+                </span>
+                <span aria-hidden="true" className="text-[#00D9FF]">
+                  →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
       )}
     </header>
   );
-};
+}
 
 export default Navbar;

@@ -3,45 +3,27 @@
 @tailwind utilities;
 
 :root {
-  --bg-base: #08090C;
-  --bg-surface: #0E0E10;
-  --bg-elevated: #14161B;
-  --border-hairline: #1F222A;
-  --accent-cyan: #00D9FF;
-  --accent-emerald: #00FF66;
-  --text-primary: #F3F4F6;
-  --text-muted: #9CA3AF;
-  --text-dim: #6B7280;
+  --bg-oled-base: #08090c;
+  --bg-oled-elevated: #0e0e10;
+  --accent-cyan: #00d9ff;
+  --accent-emerald: #00ff66;
+  color-scheme: dark;
 }
 
-@layer base {
-  html {
-    background-color: #08090C;
-    color: #F3F4F6;
-    scroll-behavior: smooth;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    background-color: #08090C;
-    color: #F3F4F6;
-    overflow-x: hidden;
-  }
-
-  ::selection {
-    background-color: rgba(0, 217, 255, 0.2);
-    color: #00D9FF;
-  }
+html {
+  background-color: #08090c;
+  color: #ffffff;
+  scroll-behavior: smooth;
 }
 
-@layer utilities {
-  .border-hairline {
-    border: 1px solid #1F222A;
-  }
+body {
+  background-color: #08090c;
+  color: #ffffff;
+  overflow-x: hidden;
+}
 
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
-  }
+/* High-Glare Outdoor Focus Ring */
+*:focus-visible {
+  outline: 2px solid #00d9ff;
+  outline-offset: 2px;
 }

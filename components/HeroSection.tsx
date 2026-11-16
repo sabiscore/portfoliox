@@ -1,81 +1,79 @@
-import type { JSX } from 'react';
+import React from "react";
+import { ShieldCheck, Terminal } from "lucide-react";
+import { Liveactivitybar } from "@/components/Liveactivitybar";
 
-import IdentityCard from './IdentityCard';
-import { DeferredLiveActivityBar } from './DeferredHeroEnhancements';
-import { IdentityCardMotion } from './IdentityCardMotion';
-import SquircleDefs from './SquircleDefs';
-import { HERO } from '@/lib/portfolio-data';
-
-const HERO_ARIA_LABEL = `${HERO.h1} ${HERO.subHeadline}`;
-
-export function HeroSection(): JSX.Element {
+export const HeroSection: React.FC = () => {
   return (
     <section
       id="hero"
-      aria-labelledby="hero-title"
-      className="relative isolate overflow-x-clip overflow-y-visible bg-[color:var(--brand-bg)] px-5 pt-24 pb-14 text-white min-h-0! sm:px-8 sm:py-24 lg:min-h-dvh! lg:px-12"
+      aria-labelledby="hero-heading"
+      className="relative border-b border-obsidian-border bg-obsidian-base"
     >
-      <SquircleDefs />
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(2,6,23,1),rgba(15,23,42,0.94))]"
-      />
-
-      <div className="hero-grid-shell mx-auto grid max-w-7xl items-center gap-9 sm:gap-12 lg:min-h-[calc(100dvh-12rem)] lg:grid-cols-[1.04fr_0.96fr]">
-        <div className="hero-grid-child max-w-3xl">
-          <div className="mb-6 sm:mb-8">
-            <p className="text-xl font-semibold tracking-[-0.025em] text-white sm:text-2xl">
+      <div className="mx-auto max-w-5xl px-4 pb-10 pt-8 sm:px-6 sm:pb-16 sm:pt-14">
+        {/* Engineer Identity & Role Kicker */}
+        <div className="mb-6">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
+            <span className="font-sans text-lg font-semibold tracking-tight text-obsidian-text sm:text-xl">
               Oscar Ndugbu
-            </p>
-            <p className="hero-kicker mt-2 font-mono text-[10px] leading-5 tracking-[0.2em] text-white/60 uppercase sm:text-[11px] sm:tracking-[0.24em]">
-              {HERO.kicker}
-            </p>
-          </div>
-
-          <h1
-            id="hero-title"
-            data-testid="hero-heading"
-            aria-label={HERO_ARIA_LABEL}
-            className="font-sans text-[clamp(2.6rem,11.6vw,3.55rem)] leading-[0.98] font-semibold tracking-[-0.045em] text-white sm:font-display sm:text-6xl lg:text-[4.5rem]"
-          >
-            {HERO.h1}
-            <span className="mt-3 block text-xl leading-[1.12] font-medium tracking-[-0.02em] text-white/70 sm:text-3xl">
-              {HERO.subHeadline}
             </span>
-          </h1>
+            <span className="inline-flex items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-surface px-2 py-0.5 font-mono text-micro text-accent-cyan">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-emerald" />
+              <span>UTC+1 · LAGOS / ABUJA</span>
+            </span>
+          </div>
 
-          <p className="hero-body-text mt-5 max-w-2xl text-base leading-7 text-white/72 sm:mt-6 sm:text-lg sm:leading-8">
-            {HERO.body}
+          <p className="font-mono text-micro font-medium uppercase tracking-telemetry text-obsidian-muted">
+            STAFF BACKEND AND PLATFORM ENGINEER
           </p>
-
-          <div className="cta-hero-group mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-            <a
-              href={HERO.cta.primary.href}
-              className="cta-primary inline-flex min-h-12 touch-manipulation items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-[0_12px_40px_-22px_rgba(255,255,255,0.72)] transition duration-300 hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:outline-none active:scale-[0.985] motion-safe:hover:scale-[1.025]"
-            >
-              {HERO.cta.primary.label}
-            </a>
-
-            <a
-              href={HERO.cta.secondary.href}
-              className="cta-secondary inline-flex min-h-12 touch-manipulation items-center justify-center rounded-full border border-white/12 bg-white/[0.055] px-6 py-3 text-sm font-semibold text-white/86 transition duration-300 hover:border-white/20 hover:bg-white/[0.09] focus-visible:ring-2 focus-visible:ring-[color:var(--brand-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:outline-none active:scale-[0.985] motion-safe:hover:scale-[1.025]"
-            >
-              {HERO.cta.secondary.label}
-            </a>
-          </div>
-
-          <div className="live-bar-wrapper-hero max-w-full">
-            <DeferredLiveActivityBar />
-          </div>
         </div>
 
-        <IdentityCardMotion className="hero-grid-child">
-          <IdentityCard />
-        </IdentityCardMotion>
+        {/* Primary Value Proposition */}
+        <h1
+          id="hero-heading"
+          className="mb-4 font-sans text-hero font-bold tracking-tight text-obsidian-text sm:text-5xl md:text-6xl"
+        >
+          Systems you can{" "}
+          <span className="bg-gradient-to-r from-obsidian-text via-obsidian-text to-accent-cyan bg-clip-text text-transparent">
+            trust at 2 AM.
+          </span>
+        </h1>
+
+        {/* High-Contrast Subheadline */}
+        <p className="mb-4 max-w-2xl font-sans text-lg font-medium leading-snug text-obsidian-text sm:text-xl">
+          Scalable backend, platform, and AI infrastructure.
+        </p>
+
+        {/* Supporting Empirical Narrative */}
+        <p className="mb-8 max-w-2xl font-sans text-sm leading-relaxed text-obsidian-muted sm:text-base">
+          I build resilient architectures designed for high availability and
+          easy maintenance. My work makes failure visible, recovery deliberate,
+          and day-to-day operations simple to understand.
+        </p>
+
+        {/* Touch-Target Optimized CTA Stack (48px min-height, 12px mobile gap) */}
+        <div className="mb-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <a
+            href="#projects"
+            className="inline-flex min-h-touch items-center justify-center gap-2 rounded-lg border border-accent-emerald bg-accent-emerald px-6 font-sans text-sm font-semibold text-obsidian-base transition-colors hover:bg-accent-cyan hover:border-accent-cyan focus:outline-none"
+          >
+            <ShieldCheck className="h-4 w-4 stroke-2" />
+            <span>Review production evidence</span>
+          </a>
+
+          <a
+            href="#contact"
+            className="inline-flex min-h-touch items-center justify-center gap-2 rounded-lg border border-obsidian-border bg-obsidian-surface px-6 font-sans text-sm font-medium text-obsidian-text transition-colors hover:border-accent-cyan hover:text-accent-cyan focus:outline-none"
+          >
+            <Terminal className="h-4 w-4 text-accent-cyan" />
+            <span>Discuss a system</span>
+          </a>
+        </div>
+
+        {/* Contained Telemetry Commit Bar */}
+        <Liveactivitybar />
       </div>
     </section>
   );
-}
+};
 
 export default HeroSection;

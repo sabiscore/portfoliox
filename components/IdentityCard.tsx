@@ -1,170 +1,232 @@
-import React from "react";
-import Image from "next/image";
-import { Cpu, CheckCircle2 } from "lucide-react";
-import { MetricCard, MetricCardProps } from "@/components/MetricCard";
+'use client';
 
-export interface IdentityCardProps {
-  portraitSrc?: string;
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+interface DeploymentArchitectureSpec {
+  code: string;
+  name: string;
+  role: string;
+  invariant: string;
+  stack: ReadonlyArray<string>;
+  metric: string;
+  href: string;
 }
 
-const OPERATING_MODEL_BOXES: MetricCardProps[] = [
+const DEPLOYMENT_LEDGER: ReadonlyArray<DeploymentArchitectureSpec> = [
   {
-    index: "01",
-    title: "FOCUS",
-    variant: "focus",
-    accent: "cyan",
-    items: [
-      { label: "Backend & Platform", detail: "p99 < 150ms" },
-      { label: "System Reliability", detail: "Fail-Closed" },
-      { label: "AI Infrastructure", detail: "< 512MB RAM" },
-    ],
+    code: 'SYS-01',
+    name: 'SabiScore',
+    role: 'Institutional Quant Football Platform',
+    invariant:
+      'Out-of-core Polars + DuckDB feature store feeding stacked XGBoost, LightGBM, and CatBoost ensembles with Shin devigging and Murphy Brier decomposition.',
+    stack: ['Polars', 'DuckDB', 'XGBoost', 'LightGBM', 'CatBoost', 'Next.js App Router'],
+    metric: 'E5c Dixon-Coles · E10 Market-Offset',
+    href: '/work/sabiscore',
   },
   {
-    index: "02",
-    title: "PROOF",
-    variant: "proof",
-    accent: "emerald",
-    items: [
-      { label: "TaxBridge", detail: "Fintech", href: "#taxbridge" },
-      { label: "SabiScore", detail: "ML Engine", href: "#sabiscore" },
-      { label: "SwarmXQ", detail: "Agents", href: "#swarmxq" },
-    ],
+    code: 'SYS-02',
+    name: 'YapCommerce',
+    role: 'Zero-USD Edge Conversational Commerce',
+    invariant:
+      'Translates unstructured WhatsApp Pidgin audio into single-turn NIBSS NIP escrow checkouts via INT8 faster-whisper ASR and cgroup-bounded local GGUF models.',
+    stack: ['faster-whisper INT8', 'Local GGUF', 'Fastify 5', 'NIBSS NIP', 'NRS B2C Worker'],
+    metric: '$0.00 Cloud-LLM API Dependency',
+    href: '/work/yap-engine',
   },
   {
-    index: "03",
-    title: "METHOD",
-    variant: "method",
-    accent: "cyan",
-    items: [
-      { label: "Constraint" },
-      { label: "decision" },
-      { label: "outcome" },
-      { label: "evidence" },
-    ],
+    code: 'SYS-03',
+    name: 'TaxBridge',
+    role: 'SME Fiscalization & Offline Compliance',
+    invariant:
+      'Enforces tenant isolation via PostgreSQL 15 Row-Level Security and idempotent BullMQ queues, paired with an offline-first Expo Android SQLite sync engine.',
+    stack: ['Fastify 5', 'PostgreSQL 15 RLS', 'BullMQ', 'React Native Expo', 'SQLite Sync'],
+    metric: 'Zero Duplicate Filings · RLS Enforced',
+    href: '/work/taxbridge',
   },
 ];
 
-const CAPABILITY_PILLS = [
-  { label: "Backend · Platform", primary: true },
-  { label: "AI infrastructure", primary: true },
-  { label: "PostgreSQL RLS · Fastify", primary: false },
-  { label: "Polars · DuckDB · FastAPI", primary: false },
-] as const;
-
-export const IdentityCard: React.FC<IdentityCardProps> = ({
-  portraitSrc = "/headshot.webp",
-}) => {
+export function IdentityCard(): React.JSX.Element {
   return (
     <section
-      id="operating-model"
-      aria-label="Operating Model and Engineering Profile"
-      className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12"
+      aria-labelledby="identity-ledger-heading"
+      className="w-full bg-[#08090C] text-white py-10 sm:py-16 px-4 sm:px-6 lg:px-8"
     >
-      {/* Single-Bezel Obsidian Surface Card with 1px Structural Illumination */}
-      <div className="relative overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-4 sm:p-6">
-        <div
-          className="absolute inset-x-0 top-0 h-px bg-illuminate-dual"
-          aria-hidden="true"
-        />
-
-        {/* Two-Pole Card Header (Resolves 3-item mobile text wrapping collision) */}
-        <div className="mb-5 flex items-center justify-between gap-2 border-b border-obsidian-border pb-3.5">
-          <div className="inline-flex items-center gap-2 rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1">
-            <Cpu className="h-3.5 w-3.5 text-accent-cyan" />
-            <span className="font-mono text-micro font-semibold uppercase tracking-telemetry text-obsidian-text">
-              OPERATING MODEL
+      <div className="mx-auto max-w-6xl border border-white/15 bg-[#0E0E10]/90 backdrop-blur-xl">
+        {/* Top Ledger Header Bar — Pr-14 on mobile prevents fixed FAB collision */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 sm:px-6 py-3.5 pr-14 sm:pr-6">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-block h-2 w-2 bg-[#00D9FF]" />
+            <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#00D9FF]">
+              OPERATING MODEL // ARCHITECTURAL LEDGER
             </span>
           </div>
-
-          <div className="inline-flex items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1 font-mono text-micro text-obsidian-muted tabular-nums">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-emerald" />
-            <span>UTC+1</span>
+          <div className="flex items-center gap-3">
+            <span className="border border-white/15 bg-[#08090C] px-2.5 py-1 font-mono text-xs text-white/80">
+              WAT · UTC+1
+            </span>
+            <span className="border border-[#00FF66]/40 bg-[#00FF66]/10 px-2.5 py-1 font-mono text-xs font-semibold text-[#00FF66]">
+              FAIL-CLOSED
+            </span>
           </div>
         </div>
 
-        {/* Profile Identity Block (Vertical stack on mobile, split row on tablet/desktop) */}
-        <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-start">
-          {/* Portrait + Mobile Identity Header */}
-          <div className="flex items-center gap-4 sm:block">
-            <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg border border-obsidian-border bg-obsidian-elevated sm:h-36 sm:w-32">
+        {/* Profile & Engineering Philosophy Row — Stacks cleanly on mobile to prevent 2-col text squeeze */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-white/10">
+          {/* Portrait & Core Identity Cell */}
+          <div className="lg:col-span-4 p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-start gap-5">
+            <div className="relative h-24 w-24 sm:h-28 sm:w-28 shrink-0 border border-[#00D9FF]/40 bg-[#08090C] overflow-hidden">
               <Image
-                src={portraitSrc}
-                alt="Oscar Ndugbu — Staff Backend and Platform Engineer"
+                src="/headshot.webp"
+                alt="Oscar Ndugbu — Software Architect and Quantitative Strategist"
                 fill
-                sizes="(max-width: 640px) 80px, 128px"
+                sizes="(max-width: 640px) 96px, 112px"
                 className="object-cover"
-                priority
+                priority={false}
               />
             </div>
 
-            {/* Mobile-Only Compact Identity Header Beside Portrait */}
-            <div className="min-w-0 sm:hidden">
-              <p className="mb-1 inline-flex items-center gap-1.5 font-mono text-micro text-accent-emerald">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>STAFF BACKEND &amp; PLATFORM</span>
-              </p>
-              <h2 className="font-sans text-xl font-bold tracking-tight text-obsidian-text">
+            <div className="space-y-1.5">
+              <div className="font-mono text-[11px] uppercase tracking-widest text-[#00D9FF]">
+                PRINCIPAL ENGINEER · QUANT ARCHITECT
+              </div>
+              <h2
+                id="identity-ledger-heading"
+                className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white"
+              >
                 Oscar Ndugbu
               </h2>
-              <p className="font-mono text-micro text-obsidian-dim">
-                Distributed Systems · AI Infrastructure
+              <p className="font-mono text-xs text-white/60">
+                github.com/scardubu · scardubu.dev
               </p>
             </div>
           </div>
 
-          {/* Right Column: Architectural Thesis & Domain Pills (100% width on mobile) */}
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 hidden items-center justify-between sm:flex">
-              <div>
-                <h2 className="font-sans text-2xl font-bold tracking-tight text-obsidian-text">
-                  Oscar Ndugbu
-                </h2>
-                <p className="font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                  STAFF BACKEND AND PLATFORM ENGINEER
-                </p>
+          {/* Non-Redundant Architectural Thesis & Quantitative Invariants */}
+          <div className="lg:col-span-8 p-5 sm:p-6 flex flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <div className="font-mono text-xs uppercase tracking-widest text-white/50">
+                SYSTEMS PHILOSOPHY &amp; RUNTIME CONSTRAINTS
               </div>
-
-              <span className="inline-flex items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1 font-mono text-micro text-accent-emerald">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>FAIL-CLOSED ARCHITECTURE</span>
-              </span>
+              <p className="font-heading text-lg sm:text-xl font-medium text-white leading-snug">
+                Zero-USD cloud-LLM inference, memory-bounded columnar analytics, and deterministic state machines built for high-friction financial infrastructure.
+              </p>
+              <p className="text-sm sm:text-base text-white/75 leading-relaxed">
+                Instead of delegating critical paths to metered third-party AI APIs or unbounded cloud clusters, I architect self-hosted GGUF inference workers, out-of-core Polars/DuckDB pipelines, and schema-locked Fastify 5 services that guarantee predictable latency and zero silent data corruption.
+              </p>
             </div>
 
-            {/* Distinct Operating Specification Copy (Eliminates verbatim duplication from Hero) */}
-            <p className="mb-4 font-sans text-sm leading-relaxed text-obsidian-muted sm:text-base">
-              Engineering deterministic backend platforms, replay-safe financial
-              workflows, and low-memory ML inference pipelines. Every subsystem
-              is built around strict data contracts, bounded compute envelopes,
-              and verifiable production telemetry.
-            </p>
+            {/* Quantitative Operating Metrics Grid — Stacks 1-col on mobile, 3-col on tablet+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="border border-white/10 bg-[#08090C] p-3.5">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  LLM CLOUD API COST
+                </div>
+                <div className="mt-1 font-mono text-lg font-bold text-[#00FF66]">
+                  $0.00 / REQ
+                </div>
+                <div className="mt-0.5 font-mono text-xs text-white/70">
+                  Self-hosted INT8 / GGUF
+                </div>
+              </div>
 
-            {/* Full-Width Wrapping Capability Pills */}
-            <div className="flex flex-wrap gap-2">
-              {CAPABILITY_PILLS.map((pill) => (
-                <span
-                  key={pill.label}
-                  className={`inline-flex min-h-pill items-center rounded border px-3 py-1 font-mono text-caption ${
-                    pill.primary
-                      ? "border-accent-cyan/50 bg-obsidian-elevated text-obsidian-text"
-                      : "border-obsidian-border bg-obsidian-base text-obsidian-muted"
-                  }`}
-                >
-                  {pill.label}
-                </span>
-              ))}
+              <div className="border border-white/10 bg-[#08090C] p-3.5">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  ML MEMORY CEILING
+                </div>
+                <div className="mt-1 font-mono text-lg font-bold text-[#00D9FF]">
+                  OOC STREAMING
+                </div>
+                <div className="mt-0.5 font-mono text-xs text-white/70">
+                  Polars + DuckDB cgroup cap
+                </div>
+              </div>
+
+              <div className="border border-white/10 bg-[#08090C] p-3.5">
+                <div className="font-mono text-[11px] uppercase tracking-wider text-white/50">
+                  WRITE SEMANTICS
+                </div>
+                <div className="mt-1 font-mono text-lg font-bold text-white">
+                  FAIL-CLOSED
+                </div>
+                <div className="mt-0.5 font-mono text-xs text-white/70">
+                  PG15 RLS + Idempotent Queues
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Responsive 1-to-3 Column Telemetry Grid */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          {OPERATING_MODEL_BOXES.map((box) => (
-            <MetricCard key={box.title} {...box} />
-          ))}
+        {/* Contextual Deployment Matrix — Replaces cramped 3-col FOCUS/PROOF/METHOD mobile grid */}
+        <div className="p-5 sm:p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-[#00D9FF]">
+              CONTEXTUAL TECH STACK // ACTIVE PRODUCTION DEPLOYMENTS
+            </h3>
+            <span className="font-mono text-xs text-white/50">
+              CONSTRAINT → PRIMITIVES → VERIFIED TELEMETRY
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {DEPLOYMENT_LEDGER.map((item) => (
+              <article
+                key={item.code}
+                className="flex flex-col justify-between border border-white/10 hover:border-[#00D9FF]/40 bg-[#08090C] p-4 sm:p-5 transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                    <span className="font-mono text-xs font-bold text-[#00D9FF]">
+                      {item.code} // {item.name}
+                    </span>
+                    <span className="font-mono text-[11px] text-[#00FF66]">
+                      ● LIVE
+                    </span>
+                  </div>
+
+                  <h4 className="font-heading text-base font-bold text-white">
+                    {item.role}
+                  </h4>
+
+                  <p className="text-xs sm:text-sm text-white/75 leading-relaxed">
+                    {item.invariant}
+                  </p>
+
+                  {/* Embedded Contextual Tech Primitives */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {item.stack.map((primitive) => (
+                      <span
+                        key={primitive}
+                        className="border border-white/15 bg-[#0E0E10] px-2.5 py-1 font-mono text-[11px] text-white/90"
+                      >
+                        {primitive}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                  <span className="font-mono text-[11px] text-white/60 truncate">
+                    {item.metric}
+                  </span>
+
+                  {/* 44px Minimum Touch Target Link */}
+                  <Link
+                    href={item.href}
+                    className="min-h-[44px] px-3 inline-flex items-center justify-center gap-1.5 border border-white/15 hover:border-[#00D9FF] bg-[#0E0E10] font-mono text-xs font-semibold uppercase tracking-wider text-[#00D9FF] hover:bg-[#00D9FF]/10 transition-colors shrink-0"
+                  >
+                    <span>SPEC</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
-};
+}
 
 export default IdentityCard;

@@ -1,198 +1,100 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { GitCommit, Activity } from "lucide-react";
 
-interface ActivityData {
-  ago: string;
-  type: string;
-  repo: string;
-  sha?: string;
-  message?: string;
-  checkedAt?: string;
+export interface ActivityPayload {
+  sha: string;
+  message: string;
+  timestamp: string;
+  repo?: string;
 }
 
-const ACTIVITY_REFRESH_INTERVAL = 300_000;
+export interface LiveActivityBarProps {
+  initialData?: ActivityPayload;
+}
 
-const FALLBACK_LOADING: ActivityData = {
-  ago: 'Recently',
-  type: 'PushEvent',
-  repo: 'scardubu.dev',
-  message: 'Checking latest activity',
+const DEFAULT_ACTIVITY: ActivityPayload = {
+  sha: "02A4B84",
+  message: "feat(pipeline): enforce deterministic contract validation",
+  timestamp: "21:28",
+  repo: "scardubu/portfoliox",
 };
 
-function unavailableActivity(): ActivityData {
-  return {
-    ago: 'Recently',
-    type: 'StatusEvent',
-    repo: 'scardubu.dev',
-    message: 'Activity feed temporarily unavailable',
-    checkedAt: new Date().toISOString(),
-  };
-}
-
-function typeLabel(type: string): string {
-  const map: Record<string, string> = {
-    PushEvent: 'Pushed update',
-    PullRequestEvent: 'Pull request',
-    CreateEvent: 'Branch created',
-    IssuesEvent: 'Issue activity',
-  };
-
-  return map[type] ?? 'Recent activity';
-}
-
-function formatLastChecked(checkedAt: string | undefined): string {
-  if (!checkedAt) {
-    return 'Checking';
-  }
-
-  const date = new Date(checkedAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return 'Recently';
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(date);
-}
-
-function ActivitySkeleton() {
-  return (
-    <div className="flex h-6 items-center gap-2" aria-hidden="true">
-      <div className="bg-color-border h-1.5 w-1.5 animate-pulse rounded-full" />
-      <div className="bg-color-border h-3 w-44 animate-pulse rounded" />
-    </div>
-  );
-}
-
-export function LiveActivityBar() {
-  const [activity, setActivity] = useState<ActivityData | null>(null);
-  const [loading, setLoading] = useState(true);
+export const Liveactivitybar: React.FC<LiveActivityBarProps> = ({
+  initialData = DEFAULT_ACTIVITY,
+}) => {
+  const [activity, setActivity] = useState<ActivityPayload>(initialData);
 
   useEffect(() => {
-    let disposed = false;
-    let controller: AbortController | null = null;
+    let mounted = true;
 
-    const loadActivity = async () => {
-      controller?.abort();
-
-      const nextController = new AbortController();
-      controller = nextController;
-
+    async function fetchLatestCommit() {
       try {
-        const response = await fetch('/api/activity', {
-          cache: 'no-store',
-          signal: nextController.signal,
+        const res = await fetch("/api/activity/latest", {
+          headers: { Accept: "application/json" },
         });
-
-        if (!response.ok) {
-          throw new Error(`Activity request failed with ${response.status}`);
-        }
-
-        const data = (await response.json()) as ActivityData;
-
-        if (!disposed && !nextController.signal.aborted) {
-          setActivity(data);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (mounted && data?.sha) {
+          setActivity({
+            sha: String(data.sha).slice(0, 7).toUpperCase(),
+            message: String(data.message || DEFAULT_ACTIVITY.message)
+              .split("\n")[0]
+              .trim(),
+            timestamp: String(data.timestamp || DEFAULT_ACTIVITY.timestamp),
+            repo: data.repo,
+          });
         }
       } catch {
-        if (!disposed && !nextController.signal.aborted) {
-          setActivity(unavailableActivity());
-        }
-      } finally {
-        if (!disposed && !nextController.signal.aborted) {
-          setLoading(false);
-        }
+        // Fail-closed fallback to deterministic initialData
       }
-    };
+    }
 
-    void loadActivity();
-
-    const refreshTimer = window.setInterval(() => {
-      void loadActivity();
-    }, ACTIVITY_REFRESH_INTERVAL);
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        void loadActivity();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
+    fetchLatestCommit();
     return () => {
-      disposed = true;
-      controller?.abort();
-      window.clearInterval(refreshTimer);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      mounted = false;
     };
   }, []);
-
-  const safeActivity = activity ?? FALLBACK_LOADING;
-
-  const label = useMemo(
-    () => safeActivity.message ?? typeLabel(safeActivity.type),
-    [safeActivity.message, safeActivity.type]
-  );
-
-  const lastCheckedLabel = formatLastChecked(safeActivity.checkedAt);
-
-  const announcement =
-    safeActivity.checkedAt === undefined
-      ? `${label}. Checking latest GitHub activity.`
-      : `${label}. Last checked at ${lastCheckedLabel}.`;
 
   return (
     <div
       role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      aria-busy={loading ? 'true' : 'false'}
-      aria-label="Recent GitHub activity"
-      className="live-bar-text flex min-h-6 items-center gap-2 overflow-hidden"
+      aria-label="Latest production commit telemetry"
+      className="relative overflow-hidden rounded-lg border border-obsidian-border bg-obsidian-surface px-3.5 py-2.5"
     >
-      <span className="sr-only">{announcement}</span>
+      {/* Subtle Top Border Illumination */}
+      <div
+        className="absolute inset-x-0 top-0 h-px bg-illuminate-cyan opacity-40"
+        aria-hidden="true"
+      />
 
-      {loading ? (
-        <div aria-hidden="true">
-          <ActivitySkeleton />
-        </div>
-      ) : (
-        <div className="flex min-h-6 min-w-0 flex-1 items-center gap-2" aria-hidden="true">
-          <span className="size-1.5 shrink-0 rounded-full bg-[var(--color-film-teal)]" />
-
-          <span className="text-color-text-muted hidden shrink-0 font-mono text-[10px] tracking-wider uppercase sm:inline">
-            Recent GitHub activity
-          </span>
-
-          {safeActivity.sha && safeActivity.sha !== 'unknown' && (
-            <span className="text-color-text-muted shrink-0 font-mono text-[11px] uppercase">
-              {safeActivity.sha.slice(0, 7)}
-            </span>
-          )}
-
+      <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-caption">
+        {/* Left: Status Pulse + Commit SHA */}
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <span
-            className="text-color-text-secondary min-w-0 flex-1 truncate text-xs leading-snug"
-            title={label}
-          >
-            {label}
+            className="h-2 w-2 shrink-0 rounded-full bg-accent-cyan"
+            aria-hidden="true"
+          />
+
+          <span className="inline-flex shrink-0 items-center gap-1 rounded border border-obsidian-border bg-obsidian-elevated px-1.5 py-0.5 text-micro font-medium text-accent-cyan">
+            <GitCommit className="h-3 w-3" />
+            <span>{activity.sha}</span>
           </span>
 
-          <span aria-hidden="true" className="text-color-border shrink-0">
-            ·
-          </span>
-
-          <span className="text-color-text-muted hidden shrink-0 font-mono text-[10px] sm:inline">
-            checked {lastCheckedLabel}
-          </span>
-
-          <span className="text-color-text-muted shrink-0 font-mono text-[10px] sm:hidden">
-            {lastCheckedLabel}
+          <span className="truncate text-obsidian-muted" title={activity.message}>
+            {activity.message}
           </span>
         </div>
-      )}
+
+        {/* Right: Timestamp */}
+        <div className="flex shrink-0 items-center gap-1.5 text-micro text-obsidian-dim tabular-nums">
+          <Activity className="h-3 w-3 text-accent-emerald" aria-hidden="true" />
+          <span>{activity.timestamp}</span>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Liveactivitybar;

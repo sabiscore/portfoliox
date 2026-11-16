@@ -1,251 +1,177 @@
-'use client';
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-// Architecture depth signal: four production patterns, each expandable.
-// Mobile-native: tap to expand, 48px touch targets, spring physics.
-// Migrated from legacy @/lib/motion → @/lib/motionVariants.
+import React from "react";
+import { ShieldAlert, Database, Cpu, Lock, CheckCircle2 } from "lucide-react";
 
-import { AnimatePresence, m, useInView, useReducedMotion } from 'framer-motion';
-import { useRef, useState } from 'react';
-
-import { SectionIntro } from '@/components/shared/SectionIntro';
-import { cardReveal, fadeRise, noMotion, staggerContainer } from '@/lib/motionVariants';
-
-/* ── Pattern data ──────────────────────────────────────────────────────────── */
-const PRODUCTION_PATTERNS = [
-  {
-    id: 'mlops',
-    caption: 'ML SYSTEMS',
-    title: 'Ensemble inference with live drift monitoring',
-    description:
-      'SabiScore combines independently evaluated model outputs behind a versioned cache. Telemetry makes drift and delivery failures visible, while a deterministic fallback keeps the response path understandable when inference is unavailable.',
-    accent: 'teal',
-  },
-  {
-    id: 'rls',
-    caption: 'COMPLIANCE · FINTECH',
-    title: 'Row-Level Security at the database engine',
-    description:
-      'TaxBridge enforces tenant isolation at the PostgreSQL engine instead of relying only on application filters. RLS narrows the failure surface, while tests and scoped database sessions provide the inspectable evidence for each boundary.',
-    accent: 'cyan',
-  },
-  {
-    id: 'zk',
-    caption: 'CRYPTOGRAPHIC PROOF',
-    title: 'Zero-knowledge proofs for document integrity',
-    description:
-      'Hashablanca generates ZK proofs for document hash sequences, allowing any verifier to confirm a document existed and was unmodified at a given timestamp — without revealing document contents. Critical for legal and financial evidence chains where confidentiality and verifiability are simultaneously required.',
-    accent: 'violet',
-  },
-  {
-    id: 'observability',
-    caption: 'RELIABILITY · DEVOPS',
-    title: 'Zero-downtime deploy with full observability',
-    description:
-      'Health checks, idempotent queues, circuit breakers, and rate-limit scoping are designed into the delivery path. Traces connect the HTTP edge to queue and database work so rollback and recovery decisions are based on observable behavior.',
-    accent: 'amber',
-  },
-] as const;
-
-/* ── Icons ─────────────────────────────────────────────────────────────────── */
-const ICONS: Record<string, React.FC<{ color: string }>> = {
-  mlops: ({ color }) => (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <circle cx="5" cy="14" r="3" stroke={color} strokeWidth="1.5" />
-      <circle cx="14" cy="5" r="3" stroke={color} strokeWidth="1.5" />
-      <circle cx="23" cy="14" r="3" stroke={color} strokeWidth="1.5" />
-      <circle cx="14" cy="23" r="3" stroke={color} strokeWidth="1.5" />
-      <path
-        d="M8 12l3-5M17 7l3 5M20 16l-3 5M11 21l-3-5"
-        stroke={color}
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  rls: ({ color }) => (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <rect x="4" y="12" width="20" height="12" rx="2" stroke={color} strokeWidth="1.5" />
-      <path d="M9 12V9a5 5 0 0 1 10 0v3" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="14" cy="18" r="2" fill={color} />
-    </svg>
-  ),
-  zk: ({ color }) => (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <path d="M14 3l10 5.5v11L14 25 4 19.5V8.5z" stroke={color} strokeWidth="1.5" />
-      <circle cx="14" cy="14" r="4" stroke={color} strokeWidth="1.5" />
-      <path d="M14 10v8M10 14h8" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  ),
-  observability: ({ color }) => (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <polyline
-        points="3,21 8,14 13,17 18,9 23,13 26,6"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="8" cy="14" r="1.5" fill={color} />
-      <circle cx="18" cy="9" r="1.5" fill={color} />
-      <circle cx="26" cy="6" r="1.5" fill={color} />
-    </svg>
-  ),
-  amber: ({ color }) => (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <circle cx="14" cy="14" r="10" stroke={color} strokeWidth="1.5" />
-      <path d="M14 8v6l4 4" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  ),
-};
-
-const ACCENT: Record<string, { color: string; bg: string }> = {
-  teal: { color: 'var(--color-film-teal)', bg: 'var(--color-film-teal-surface)' },
-  cyan: { color: 'var(--color-cyan)', bg: 'var(--color-cyan-surface)' },
-  violet: { color: 'var(--color-accent)', bg: 'var(--color-accent-surface)' },
-  amber: { color: 'var(--color-film-amber)', bg: 'var(--color-film-amber-surface)' },
-};
-
-/* ── Pattern card ─────────────────────────────────────────────────────────── */
-function PatternCard({
-  pattern,
-  reducedMotion,
-}: Readonly<{
-  pattern: (typeof PRODUCTION_PATTERNS)[number];
-  reducedMotion: boolean;
-}>) {
-  const [expanded, setExpanded] = useState(false);
-  const accent = ACCENT[pattern.accent] ?? ACCENT.teal;
-  const Icon = ICONS[pattern.id] ?? ICONS.observability;
-  const cardVar = reducedMotion ? noMotion : cardReveal(20);
-
-  function toggle() {
-    setExpanded((v) => !v);
-  }
-
-  return (
-    <m.div
-      variants={cardVar}
-      className="glass-medium overflow-hidden rounded-[var(--radius-xl)]"
-      whileHover={
-        reducedMotion
-          ? undefined
-          : { y: -3, transition: { type: 'spring', stiffness: 380, damping: 28 } }
-      }
-    >
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={expanded}
-        aria-label={`${expanded ? 'Collapse' : 'Expand'} details: ${pattern.title}`}
-        className="flex min-h-[80px] w-full items-start gap-4 rounded-[var(--radius-xl)] p-5 text-left focus-visible:ring-2 focus-visible:ring-[color:var(--chapter-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none sm:p-6"
-      >
-        {/* Icon */}
-        <div
-          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-          // eslint-disable-next-line no-restricted-syntax
-          style={{ background: accent.bg }}
-        >
-          <Icon color={accent.color} />
-        </div>
-
-        {/* Header */}
-        <div className="min-w-0 flex-1">
-          <p
-            className="label-mono mb-1 text-[10px]"
-            // eslint-disable-next-line no-restricted-syntax
-            style={{ color: accent.color }}
-          >
-            {pattern.caption}
-          </p>
-          <h3 className="text-color-text-primary text-sm leading-snug font-semibold tracking-tight sm:text-base">
-            {pattern.title}
-          </h3>
-        </div>
-
-        {/* Chevron */}
-        <m.span
-          animate={{ rotate: expanded ? 180 : 0 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          className="mt-1 shrink-0"
-          aria-hidden="true"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M4 6l4 4 4-4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </m.span>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <m.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 32, mass: 0.9 }}
-            className="overflow-hidden"
-          >
-            <div className="border-color-border-subtle border-t px-5 pb-5 sm:px-6 sm:pb-6">
-              <p className="text-color-text-secondary mt-4 text-sm leading-[1.8]">
-                {pattern.description}
-              </p>
-            </div>
-          </m.div>
-        )}
-      </AnimatePresence>
-    </m.div>
-  );
+export interface ArchitecturalPattern {
+  id: string;
+  code: string;
+  title: string;
+  failureMode: string;
+  implementation: string;
+  verification: string;
+  stack: string[];
+  accent: "cyan" | "emerald";
 }
 
-/* ── Section ──────────────────────────────────────────────────────────────── */
-export function ProductionPatterns() {
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  const reducedMotion = useReducedMotion();
+const PRODUCTION_PATTERNS: ArchitecturalPattern[] = [
+  {
+    id: "replay-safe-idempotency",
+    code: "PAT-01",
+    title: "Replay-Safe Financial & Compliance Workflows",
+    failureMode:
+      "Network partitions and client retries under degraded mobile connectivity causing duplicate ledger mutations or orphaned webhook payloads.",
+    implementation:
+      "Deterministic idempotency keys scoped per tenant with atomic PostgreSQL state transitions, BullMQ dead-letter isolation, and hash-linked audit trails.",
+    verification:
+      "Zero duplicate ledger postings across simulated 30% packet-loss chaos suites.",
+    stack: ["Fastify 5", "PostgreSQL 15", "BullMQ", "AES-256"],
+    accent: "emerald",
+  },
+  {
+    id: "bounded-memory-execution",
+    code: "PAT-02",
+    title: "Out-of-Core Data & Sub-512MB ML Inference",
+    failureMode:
+      "OOM container kills and GC latency spikes caused by unbounded in-memory DataFrame materialization and pickle deserialization.",
+    implementation:
+      "Streaming out-of-core execution via Polars and DuckDB paired with zero-pickle meta-learners and strict Pydantic v2 boundary contracts.",
+    verification:
+      "Sustained p99 < 150ms inference latency within a hard 512MB RAM ceiling.",
+    stack: ["Polars", "DuckDB", "FastAPI", "Pydantic v2"],
+    accent: "cyan",
+  },
+  {
+    id: "zero-trust-tenant-isolation",
+    code: "PAT-03",
+    title: "Database-Enforced Multi-Tenant Isolation",
+    failureMode:
+      "Application-layer query omissions exposing cross-tenant records in multi-organization B2B platforms.",
+    implementation:
+      "Transaction-scoped PostgreSQL Row-Level Security (RLS) policies bound to cryptographically verified session claims via pg-tenant.",
+    verification:
+      "Fail-closed query rejection when tenant context is absent or mismatched.",
+    stack: ["PostgreSQL RLS", "pg-tenant", "audit-chain", "TypeScript"],
+    accent: "emerald",
+  },
+];
 
-  const container = staggerContainer(0.08, 0.05);
-  const child = reducedMotion ? noMotion : fadeRise;
-
+export const ProductionPatterns: React.FC = () => {
   return (
     <section
-      ref={ref}
+      id="patterns"
       aria-labelledby="patterns-heading"
-      className="border-color-border border-t py-[var(--section-py)]"
+      className="border-t border-obsidian-border bg-obsidian-base"
     >
-      <div className="container">
-        <m.div variants={container} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
-          <m.div variants={child} className="mb-8 sm:mb-12">
-            <SectionIntro
-              eyebrowNumber="↳"
-              eyebrowLabel="Architecture Depth"
-              headingId="patterns-heading"
-              title={<>Patterns that hold at 2am.</>}
-              description="The architectural choices in every system — not retrofitted after incidents, designed in before first deploy."
-              eyebrowVariant={child}
-              titleVariant={child}
-              descriptionVariant={child}
-              titleClassName="text-color-text-primary mt-3 max-w-[24ch]"
-              descriptionClassName="text-color-text-secondary mt-4 max-w-[52ch] text-sm leading-8 sm:text-base"
-            />
-          </m.div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {PRODUCTION_PATTERNS.map((pattern) => (
-              <PatternCard
-                key={pattern.id}
-                pattern={pattern}
-                reducedMotion={reducedMotion ?? false}
-              />
-            ))}
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
+        {/* Section Header */}
+        <div className="mb-8">
+          <div className="mb-2 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-telemetry">
+            <span className="font-semibold text-accent-cyan">02</span>
+            <span className="text-obsidian-muted">PRODUCTION PATTERNS</span>
           </div>
-        </m.div>
+
+          <h2
+            id="patterns-heading"
+            className="mb-3 font-sans text-3xl font-bold tracking-tight text-obsidian-text sm:text-4xl"
+          >
+            Engineered to fail closed.
+          </h2>
+
+          <p className="max-w-2xl font-sans text-sm leading-relaxed text-obsidian-muted sm:text-base">
+            Repeatable architectural blueprints designed to keep distributed
+            systems observable, bounded in memory, and deterministic during
+            infrastructure degradation.
+          </p>
+        </div>
+
+        {/* Pattern Specification Grid */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {PRODUCTION_PATTERNS.map((pattern) => {
+            const topEdgeClass =
+              pattern.accent === "emerald"
+                ? "bg-illuminate-emerald"
+                : "bg-illuminate-cyan";
+
+            return (
+              <article
+                key={pattern.id}
+                className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-5 transition-colors hover:border-obsidian-subtle"
+              >
+                <div
+                  className={`absolute inset-x-0 top-0 h-px opacity-70 transition-opacity group-hover:opacity-100 ${topEdgeClass}`}
+                  aria-hidden="true"
+                />
+
+                <div>
+                  {/* Pattern Code & Icon */}
+                  <div className="mb-4 flex items-center justify-between border-b border-obsidian-border pb-3">
+                    <span className="inline-flex items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-elevated px-2 py-0.5 font-mono text-micro text-accent-cyan">
+                      <Cpu className="h-3 w-3" />
+                      <span>{pattern.code}</span>
+                    </span>
+
+                    <Lock
+                      className="h-3.5 w-3.5 text-obsidian-dim"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mb-4 font-sans text-lg font-bold tracking-tight text-obsidian-text">
+                    {pattern.title}
+                  </h3>
+
+                  {/* Failure Mode */}
+                  <div className="mb-3 rounded-lg border border-obsidian-border bg-obsidian-elevated p-3">
+                    <div className="mb-1 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
+                      <ShieldAlert className="h-3 w-3 text-accent-cyan" />
+                      <span>Failure Mode</span>
+                    </div>
+                    <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
+                      {pattern.failureMode}
+                    </p>
+                  </div>
+
+                  {/* Architectural Implementation */}
+                  <div className="mb-3 rounded-lg border border-obsidian-border bg-obsidian-elevated p-3">
+                    <div className="mb-1 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
+                      <Database className="h-3 w-3 text-accent-emerald" />
+                      <span>Implementation</span>
+                    </div>
+                    <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
+                      {pattern.implementation}
+                    </p>
+                  </div>
+
+                  {/* Empirical Verification */}
+                  <div className="mb-4 rounded-lg border border-obsidian-border bg-obsidian-base p-3">
+                    <div className="mb-1 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-accent-emerald">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>Verified Outcome</span>
+                    </div>
+                    <p className="font-mono text-micro leading-relaxed text-obsidian-text">
+                      {pattern.verification}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stack Tokens */}
+                <div className="flex flex-wrap gap-1.5 border-t border-obsidian-border pt-3">
+                  {pattern.stack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded border border-obsidian-border bg-obsidian-elevated px-2 py-0.5 font-mono text-micro text-obsidian-muted"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
-}
+};
+
+export default ProductionPatterns;

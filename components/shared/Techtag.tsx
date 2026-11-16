@@ -1,26 +1,30 @@
-import { cn } from '@/lib/utils';
+import React from "react";
 
-interface TechTagProps {
+export interface TechtagProps {
   label: string;
-  size?: 'sm' | 'md';
+  variant?: "default" | "cyan" | "emerald";
   className?: string;
 }
 
-export function TechTag({ label, size = 'md', className }: Readonly<TechTagProps>) {
+export const Techtag: React.FC<TechtagProps> = ({
+  label,
+  variant = "default",
+  className = "",
+}) => {
+  const variantStyles =
+    variant === "cyan"
+      ? "border-accent-cyan/50 bg-obsidian-elevated text-accent-cyan"
+      : variant === "emerald"
+        ? "border-accent-emerald/50 bg-obsidian-elevated text-accent-emerald"
+        : "border-obsidian-border bg-obsidian-base text-obsidian-muted";
+
   return (
     <span
-      className={cn(
-        'inline-block rounded-full border font-mono transition-colors duration-150',
-        // Border and color: always readable (no hover-only contrast)
-        'text-color-text-muted border-white/12',
-        // Size
-        size === 'sm' ? 'px-2.5 py-0.5 text-[10px]' : 'px-3 py-1 text-xs',
-        // Hover: only on pointer:fine (desktop) — safe for mobile
-        'hover:[@media(hover:hover)]:border-white/30 hover:[@media(hover:hover)]:text-white',
-        className
-      )}
+      className={`inline-flex min-h-pill items-center rounded border px-2.5 py-1 font-mono text-micro ${variantStyles} ${className}`}
     >
       {label}
     </span>
   );
-}
+};
+
+export default Techtag;

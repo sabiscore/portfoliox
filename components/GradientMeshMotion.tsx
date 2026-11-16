@@ -1,74 +1,43 @@
 'use client';
 
-import {
-  m,
-  useAnimationFrame,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-  useTransform,
-  type MotionValue,
-} from 'framer-motion';
+import React from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
+export interface GradientMeshMotionProps {
+  className?: string;
+}
 
-function DesktopOrbs({
-  reducedMotion,
-  scrollProgress,
-}: {
-  reducedMotion: boolean;
-  scrollProgress: MotionValue<number>;
-}) {
-  const indigoRaw = useTransform(scrollProgress, [0, 1], reducedMotion ? [0, 0] : [0, 96]);
-  const greenRaw = useTransform(scrollProgress, [0, 1], reducedMotion ? [0, 0] : [0, -72]);
-  const amberRaw = useTransform(scrollProgress, [0, 1], reducedMotion ? [0, 0] : [0, -44]);
-
-  const indigoY = useSpring(indigoRaw, { stiffness: 130, damping: 24, mass: 0.7 });
-  const greenY = useSpring(greenRaw, { stiffness: 130, damping: 24, mass: 0.7 });
-  const amberY = useSpring(amberRaw, { stiffness: 130, damping: 24, mass: 0.7 });
+export function GradientMeshMotion({
+  className = '',
+}: GradientMeshMotionProps): React.JSX.Element {
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <>
-      <m.div
-        className="gradient-mesh-wrap gradient-mesh-wrap--indigo"
-        style={{ y: indigoY, willChange: 'transform' }}
-      >
-        <div className="gradient-mesh-orb gradient-mesh-orb--indigo orb-cw h-full w-full" />
-      </m.div>
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#08090C] ${className}`}
+    >
+      {/* Primary Coordinate Grid Layer */}
+      <div className="absolute inset-0 bg-kinetic-grid bg-[size:36px_36px] opacity-60" />
 
-      <m.div
-        className="gradient-mesh-wrap gradient-mesh-wrap--green"
-        style={{ y: greenY, willChange: 'transform' }}
-      >
-        <div className="gradient-mesh-orb gradient-mesh-orb--green orb-ccw h-full w-full" />
-      </m.div>
+      {/* Top Cyan Telemetry Horizon */}
+      <div
+        className={`absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-[#00D9FF]/[0.04] blur-3xl ${
+          prefersReducedMotion ? '' : 'animate-pulse'
+        }`}
+      />
 
-      <m.div
-        className="gradient-mesh-wrap gradient-mesh-wrap--amber"
-        style={{ y: amberY, willChange: 'transform' }}
-      >
-        <div className="gradient-mesh-orb gradient-mesh-orb--amber orb-slow h-full w-full" />
-      </m.div>
-    </>
+      {/* Mid Emerald Quantitative Node */}
+      <div
+        className={`absolute top-1/3 right-1/4 h-80 w-80 rounded-full bg-[#00FF66]/[0.03] blur-3xl ${
+          prefersReducedMotion ? '' : 'animate-pulse'
+        }`}
+      />
+
+      {/* Bottom Dark Glass Vignette */}
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#08090C] via-[#08090C]/80 to-transparent" />
+    </div>
   );
 }
 
-export function GradientMeshMotion() {
-  const reducedMotion = useReducedMotion();
-  const { scrollProgressRef } = useScrollCinema();
-  const scrollProgress = useMotionValue(0);
-
-  useAnimationFrame(() => {
-    if (reducedMotion) {
-      if (scrollProgress.get() !== 0) scrollProgress.set(0);
-      return;
-    }
-
-    const next = scrollProgressRef.current;
-    if (Math.abs(next - scrollProgress.get()) > 0.0007) {
-      scrollProgress.set(next);
-    }
-  });
-
-  return <DesktopOrbs reducedMotion={Boolean(reducedMotion)} scrollProgress={scrollProgress} />;
-}
+export default GradientMeshMotion;

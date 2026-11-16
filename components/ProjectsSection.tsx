@@ -1,181 +1,370 @@
-import React from "react";
-import Link from "next/link";
-import { ArrowUpRight, Shield, Cpu, Layers } from "lucide-react";
+'use client';
 
-export interface CaseStudySummary {
-  id: string;
+import React, { useState, useCallback } from 'react';
+import Link from 'next/link';
+
+export interface ProjectLedgerEntry {
   slug: string;
   domain: string;
+  status: 'LIVE' | 'PRODUCTION' | 'VERIFIED';
   title: string;
+  summary: string;
+  ledgerTitle: string;
   constraint: string;
   decision: string;
   outcome: string;
-  metrics: string[];
-  accent: "emerald" | "cyan";
+  evidence: string;
+  architectureNotes: ReadonlyArray<string>;
+  contextualStack: ReadonlyArray<{
+    primitive: string;
+    role: string;
+  }>;
+  caseStudyHref: string;
+  sourceHref?: string;
 }
 
-const CASE_STUDIES: CaseStudySummary[] = [
+const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
   {
-    id: "taxbridge",
-    slug: "/work/taxbridge",
-    domain: "COMPLIANCE PLATFORM · FINTECH",
-    title: "TaxBridge",
+    slug: 'taxbridge',
+    domain: 'COMPLIANCE PLATFORM · FINTECH',
+    status: 'LIVE',
+    title: 'TaxBridge',
+    summary:
+      'Tax workflow automation designed to keep tenant boundaries, retries, and audit history explicit — so deadline-driven filing can recover cleanly.',
+    ledgerTitle: 'TAXBRIDGE RELIABILITY LEDGER',
     constraint:
-      "Multi-tenant SME tax filing and ledger reconciliation under strict auditability and intermittent network conditions.",
+      'Multi-tenant SME tax submissions must never leak across tenant boundaries or trigger duplicate fiscalization under NRS API rate limits.',
     decision:
-      "Architected replay-safe idempotency workflows on Fastify 5, PostgreSQL 15 Row-Level Security (RLS), BullMQ, and hash-linked audit chains.",
+      'Database PostgreSQL 15 Row-Level Security (RLS) paired with idempotent BullMQ jobs keyed deterministically to submission content hashes.',
     outcome:
-      "Zero cross-tenant data leakage, deterministic retry recovery, and cryptographically verifiable compliance logs.",
-    metrics: ["PostgreSQL 15 RLS", "Fastify 5 · BullMQ", "Hash-Linked Audit"],
-    accent: "emerald",
+      'Retries resume safely without re-submitting completed filing operations, with offline Android SQLite sync supporting field merchants.',
+    evidence: 'Production architecture record · shared Fastify 5 contracts & Expo SQLite sync.',
+    architectureNotes: [
+      'Strict tenant_id session variables bound inside Fastify 5 transaction hooks before any query executes.',
+      'BullMQ dead-letter queues isolate upstream NRS timeout spikes without blocking healthy tenant workers.',
+      'React Native Expo Android client queues mutations in local SQLite with deterministic conflict resolution.',
+    ],
+    contextualStack: [
+      { primitive: 'Fastify 5', role: 'Schema-Locked API' },
+      { primitive: 'PostgreSQL 15 RLS', role: 'Tenant Isolation' },
+      { primitive: 'BullMQ + Redis 7', role: 'Idempotent Queue' },
+      { primitive: 'Expo SQLite', role: 'Offline Android Sync' },
+      { primitive: 'Next.js App Router', role: 'Admin Console' },
+    ],
+    caseStudyHref: '/work/taxbridge',
+    sourceHref: 'https://github.com/scardubu/taxbridge',
   },
   {
-    id: "sabiscore",
-    slug: "/work/sabiscore",
-    domain: "REAL-TIME ML ANALYTICS · FORECASTING",
-    title: "SabiScore",
+    slug: 'sabiscore',
+    domain: 'ML PLATFORM · QUANTITATIVE OBSERVABILITY',
+    status: 'LIVE',
+    title: 'SabiScore',
+    summary:
+      'An institutional-grade ensemble ML platform that keeps calibrated football prediction delivery resilient through cache failures, retraining, and dependency loss.',
+    ledgerTitle: 'SABISCORE RELIABILITY LEDGER',
     constraint:
-      "Sub-150ms ensemble inference and out-of-core feature aggregation within a strict <512MB RAM container ceiling.",
+      'Inference and model-health signals must remain calibrated and usable under a strict 1.2GB RAM ceiling and through feature-store or cache failure.',
     decision:
-      "Replaced in-memory Pandas/pickle pipelines with zero-pickle meta-learners, DuckDB/Polars out-of-core execution, and Pydantic v2 contracts.",
+      'Out-of-core Polars and DuckDB feature pipelines, stacked XGBoost/LightGBM/CatBoost ensembles, Shin devigging, and versioned Redis fallback serving.',
     outcome:
-      "Deterministic memory profile under peak matchday concurrency with sub-150ms p99 inference latency.",
-    metrics: ["< 512MB RAM Ceiling", "p99 < 150ms", "Polars · DuckDB"],
-    accent: "cyan",
+      'Continuous Murphy Brier decomposition and E5c Dynamic Dixon-Coles + E10 Market-Offset Residual evaluation with zero OOM container evictions.',
+    evidence: 'Live telemetry at sabiscore.app · verified calibration & Brier skill records.',
+    architectureNotes: [
+      'Columnar out-of-core streaming via Polars lazy frames and DuckDB prevents memory spikes during rolling window joins.',
+      'Shin devigging strips bookmaker overround prior to computing market-offset residual folds.',
+      'Real-time Murphy decomposition monitors Reliability, Resolution, and Uncertainty across every matchweek.',
+    ],
+    contextualStack: [
+      { primitive: 'Polars + DuckDB', role: 'Out-of-Core Feature Store' },
+      { primitive: 'XGBoost / LightGBM / CatBoost', role: 'Stacked Ensemble' },
+      { primitive: 'Shin Devigging', role: 'Market Calibration' },
+      { primitive: 'FastAPI + Redis 7', role: 'Versioned Serving' },
+      { primitive: 'Next.js App Router', role: 'Telemetry UI' },
+    ],
+    caseStudyHref: '/work/sabiscore',
+    sourceHref: 'https://sabiscore.app',
   },
   {
-    id: "swarmxq",
-    slug: "/work/swarmxq",
-    domain: "AGENT ORCHESTRATION · MEDIA PIPELINE",
-    title: "SwarmXQ & The Yap Engine",
+    slug: 'yap-engine',
+    domain: 'CONVERSATIONAL COMMERCE · EDGE AI',
+    status: 'PRODUCTION',
+    title: 'YapCommerce',
+    summary:
+      'Edge-native conversational commerce monorepo translating unstructured WhatsApp Pidgin audio and media into single-turn checkouts with zero cloud-LLM spend.',
+    ledgerTitle: 'YAPCOMMERCE RELIABILITY LEDGER',
     constraint:
-      "Orchestrating multi-stage LLM routing and Kokoro TTS voice synthesis across CPU-constrained execution nodes.",
+      'Informal MSME retail margins cannot absorb per-token cloud LLM API billing or multi-turn checkout drop-offs over unstable mobile networks.',
     decision:
-      "Built a DAG-based worker scheduler with circuit-breaking local model routing and deterministic asset checkpointing.",
+      'Self-hosted INT8 faster-whisper ASR paired with cgroup-bounded local GGUF models, Fastify 5 state machines, and NIBSS NIP virtual account escrow.',
     outcome:
-      "Fault-tolerant pipeline resumption without redundant token or audio synthesis compute waste.",
-    metrics: ["DAG Orchestration", "Local LLM Routing", "Kokoro TTS"],
-    accent: "emerald",
+      '$0.00 cloud-LLM operational spend, deterministic intent extraction from Nigerian Pidgin voice notes, and automated NRS B2C fiscalization.',
+    evidence: 'Edge-native monorepo · cgroup memory-capped inference & WhatsApp Flow v7.3.',
+    architectureNotes: [
+      'INT8 quantized faster-whisper transcribes code-switched English/Pidgin audio notes inside strict CPU/RAM cgroup limits.',
+      'Grammar-constrained local GGUF inference guarantees valid JSON checkout payloads on every turn.',
+      'NIBSS NIP webhook workers reconcile virtual account escrow settlements before triggering NRS B2C receipts.',
+    ],
+    contextualStack: [
+      { primitive: 'faster-whisper INT8', role: 'Pidgin Audio ASR' },
+      { primitive: 'Local GGUF', role: '$0 Cloud-LLM Extraction' },
+      { primitive: 'Fastify 5', role: 'Checkout State Machine' },
+      { primitive: 'NIBSS NIP', role: 'Escrow Settlement' },
+      { primitive: 'WhatsApp Flow v7.3', role: 'Single-Turn UX' },
+    ],
+    caseStudyHref: '/work/yap-engine',
+  },
+  {
+    slug: 'ubec',
+    domain: 'FEDERAL INFRASTRUCTURE · DATA ENGINEERING',
+    status: 'VERIFIED',
+    title: 'UBEC Data Pipeline',
+    summary:
+      'Federal education reporting across 36 state sources, designed to keep partial submissions moving without hiding data quality issues.',
+    ledgerTitle: 'UBEC DATA PIPELINE RELIABILITY LEDGER',
+    constraint:
+      'Late and partial state submissions must not block every completed national report or silently corrupt aggregate census metrics.',
+    decision:
+      'Isolated Apache Airflow task groups per state, followed by deterministic cross-state schema and statistical validation gates.',
+    outcome:
+      'Thirty-five state reports proceed cleanly to executive publication while one delayed source remains visibly pending in the audit log.',
+    evidence: 'Private federal engagement · production architecture case study.',
+    architectureNotes: [
+      'State-partitioned DAGs isolate upstream formatting anomalies to individual state staging tables.',
+      'Automated row-level quarantine logs rejected records with explicit remediation codes for state officers.',
+    ],
+    contextualStack: [
+      { primitive: 'Python 3.11', role: 'Ingestion Core' },
+      { primitive: 'Apache Airflow', role: 'State-Isolated DAGs' },
+      { primitive: 'Polars / pandas', role: 'Validation Gates' },
+      { primitive: 'PostgreSQL', role: 'Audit Ledger' },
+    ],
+    caseStudyHref: '/work/ubec',
   },
 ];
 
-export const ProjectsSection: React.FC = () => {
+export function ProjectsSection(): React.JSX.Element {
+  const [expandedSlugs, setExpandedSlugs] = useState<Record<string, boolean>>({
+    taxbridge: false,
+    sabiscore: false,
+    'yap-engine': false,
+    ubec: false,
+  });
+
+  const toggleHowItWorks = useCallback((slug: string) => {
+    setExpandedSlugs((prev) => ({
+      ...prev,
+      [slug]: !prev[slug],
+    }));
+  }, []);
+
   return (
     <section
       id="projects"
-      aria-labelledby="projects-heading"
-      className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16"
+      aria-labelledby="projects-section-heading"
+      className="w-full bg-[#08090C] text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-white/10"
     >
-      {/* Section Header */}
-      <div className="mb-8">
-        <div className="mb-2 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-telemetry">
-          <span className="font-semibold text-accent-emerald">01</span>
-          <span className="text-obsidian-muted">PROJECTS</span>
+      <div className="mx-auto max-w-6xl space-y-10">
+        {/* Section Header */}
+        <div className="space-y-3 max-w-3xl">
+          <div className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
+            <span className="text-[#00FF66] font-bold">01</span>
+            <span className="text-white/60">PROJECTS // PRODUCTION LEDGER</span>
+          </div>
+          <h2
+            id="projects-section-heading"
+            className="font-heading text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+          >
+            Built around real constraints.
+          </h2>
+          <p className="text-base sm:text-lg text-white/75 leading-relaxed">
+            Each case study starts with the operational constraint, explains the architectural decision, and verifies the resulting production behavior and runtime primitives.
+          </p>
         </div>
 
-        <h2
-          id="projects-heading"
-          className="mb-3 font-sans text-3xl font-bold tracking-tight text-obsidian-text sm:text-4xl"
-        >
-          Built around real constraints.
-        </h2>
+        {/* Project Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          {PRODUCTION_PROJECTS.map((project) => {
+            const isExpanded = Boolean(expandedSlugs[project.slug]);
 
-        <p className="max-w-2xl font-sans text-sm leading-relaxed text-obsidian-muted sm:text-base">
-          Each case study starts with the constraint, explains the architecture
-          decision, and shows the resulting behaviour and available evidence.
-        </p>
-      </div>
+            return (
+              <article
+                key={project.slug}
+                className="flex flex-col justify-between border border-white/15 hover:border-[#00D9FF]/40 bg-[#0E0E10]/90 backdrop-blur-xl transition-colors"
+              >
+                <div>
+                  {/* Card Header */}
+                  <div className="p-5 sm:p-6 border-b border-white/10 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-white/60">
+                        {project.domain}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 border border-[#00FF66]/40 bg-[#00FF66]/10 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#00FF66] shrink-0">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#00FF66]" />
+                        {project.status}
+                      </span>
+                    </div>
 
-      {/* Case Study Cards */}
-      <div className="space-y-4">
-        {CASE_STUDIES.map((study) => {
-          const topBarClass =
-            study.accent === "emerald"
-              ? "bg-illuminate-emerald"
-              : "bg-illuminate-cyan";
+                    <h3 className="font-heading text-2xl sm:text-3xl font-bold text-white">
+                      {project.title}
+                    </h3>
 
-          return (
-            <article
-              key={study.id}
-              id={study.id}
-              className="group relative overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-5 transition-colors hover:border-obsidian-subtle sm:p-6"
-            >
-              {/* 1px Top Illumination Boundary */}
-              <div
-                className={`absolute inset-x-0 top-0 h-px opacity-75 transition-opacity group-hover:opacity-100 ${topBarClass}`}
-                aria-hidden="true"
-              />
-
-              {/* Card Kicker & Action Badge */}
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <span className="font-mono text-micro font-medium uppercase tracking-telemetry text-accent-cyan">
-                  {study.domain}
-                </span>
-
-                <Link
-                  href={study.slug}
-                  className="inline-flex min-h-pill items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-elevated px-3 py-1 font-mono text-micro text-obsidian-text transition-colors group-hover:border-accent-emerald group-hover:text-accent-emerald"
-                >
-                  <span>CASE STUDY</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-
-              {/* Project Title */}
-              <h3 className="mb-4 font-sans text-xl font-bold tracking-tight text-obsidian-text sm:text-2xl">
-                {study.title}
-              </h3>
-
-              {/* Constraint -> Decision -> Outcome Breakdown */}
-              <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="rounded-lg border border-obsidian-border bg-obsidian-elevated p-3">
-                  <div className="mb-1 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                    <Shield className="h-3 w-3 text-accent-cyan" />
-                    <span>Constraint</span>
+                    <p className="text-sm sm:text-base text-white/80 leading-relaxed">
+                      {project.summary}
+                    </p>
                   </div>
-                  <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
-                    {study.constraint}
-                  </p>
+
+                  {/* Reliability Ledger Timeline */}
+                  <div className="p-5 sm:p-6 space-y-4">
+                    <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/50">
+                      {project.ledgerTitle}
+                    </div>
+
+                    <ol className="relative border-l border-white/15 ml-2 space-y-4 pl-5">
+                      {/* CONSTRAINT */}
+                      <li className="relative">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-[#00D9FF] bg-[#08090C]"
+                        />
+                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#00D9FF]">
+                          CONSTRAINT
+                        </div>
+                        <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
+                          {project.constraint}
+                        </p>
+                      </li>
+
+                      {/* DECISION */}
+                      <li className="relative">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-[#00D9FF] bg-[#00D9FF]/30"
+                        />
+                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#00D9FF]">
+                          DECISION
+                        </div>
+                        <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
+                          {project.decision}
+                        </p>
+                      </li>
+
+                      {/* OUTCOME */}
+                      <li className="relative">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-[#00FF66] bg-[#00FF66]/30"
+                        />
+                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#00FF66]">
+                          OUTCOME
+                        </div>
+                        <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
+                          {project.outcome}
+                        </p>
+                      </li>
+
+                      {/* EVIDENCE */}
+                      <li className="relative">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-white/40 bg-[#08090C]"
+                        />
+                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-white/70">
+                          EVIDENCE
+                        </div>
+                        <p className="mt-1 text-xs sm:text-sm text-white/65 leading-relaxed">
+                          {project.evidence}
+                        </p>
+                      </li>
+                    </ol>
+
+                    {/* Contextual Tech Stack Matrix */}
+                    <div className="pt-2 space-y-2">
+                      <div className="font-mono text-[11px] uppercase tracking-wider text-white/45">
+                        ARCHITECTURAL PRIMITIVES
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {project.contextualStack.map((item) => (
+                          <div
+                            key={item.primitive}
+                            className="flex items-center justify-between border border-white/10 bg-[#08090C] px-3 py-2"
+                          >
+                            <span className="font-mono text-xs font-semibold text-white">
+                              {item.primitive}
+                            </span>
+                            <span className="font-mono text-[11px] text-[#00D9FF]">
+                              {item.role}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 44px Minimum Touch-Target Expandable Architecture Drawer */}
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleHowItWorks(project.slug)}
+                        aria-expanded={isExpanded}
+                        className="min-h-[44px] w-full sm:w-auto px-4 inline-flex items-center justify-between sm:justify-center gap-2.5 border border-white/15 hover:border-[#00D9FF] bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white/85 hover:text-[#00D9FF] transition-colors"
+                      >
+                        <span>HOW IT WORKS</span>
+                        <span aria-hidden="true" className="text-[#00D9FF]">
+                          {isExpanded ? '↑' : '↓'}
+                        </span>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="mt-3 border border-[#00D9FF]/30 bg-[#08090C] p-4 space-y-2">
+                          <div className="font-mono text-[11px] uppercase tracking-wider text-[#00D9FF]">
+                            CRITICAL PATH IMPLEMENTATION NOTES
+                          </div>
+                          <ul className="space-y-2 text-xs sm:text-sm text-white/80">
+                            {project.architectureNotes.map((note) => (
+                              <li key={note} className="flex items-start gap-2">
+                                <span className="font-mono text-[#00FF66] shrink-0">
+                                  ›
+                                </span>
+                                <span>{note}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="rounded-lg border border-obsidian-border bg-obsidian-elevated p-3">
-                  <div className="mb-1 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                    <Cpu className="h-3 w-3 text-accent-cyan" />
-                    <span>Decision</span>
-                  </div>
-                  <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
-                    {study.decision}
-                  </p>
-                </div>
+                {/* Card Action Footer — Enforces 48px Touch Geometry */}
+                <div className="p-5 sm:p-6 pt-0">
+                  <div className="border-t border-white/10 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <Link
+                      href={project.caseStudyHref}
+                      className="min-h-[48px] flex-1 px-5 inline-flex items-center justify-center gap-2 border border-[#00D9FF] bg-[#00D9FF] text-[#08090C] font-mono text-xs font-bold uppercase tracking-wider hover:bg-[#00D9FF]/90 transition-colors"
+                    >
+                      <span>READ CASE STUDY</span>
+                      <span aria-hidden="true">↗</span>
+                    </Link>
 
-                <div className="rounded-lg border border-obsidian-border bg-obsidian-elevated p-3">
-                  <div className="mb-1 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                    <Layers className="h-3 w-3 text-accent-emerald" />
-                    <span>Outcome</span>
+                    {project.sourceHref && (
+                      <a
+                        href={project.sourceHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-h-[48px] px-5 inline-flex items-center justify-center gap-2 border border-white/20 hover:border-[#00D9FF] bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
+                      >
+                        <span>VIEW SOURCE</span>
+                        <span aria-hidden="true">→</span>
+                      </a>
+                    )}
                   </div>
-                  <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
-                    {study.outcome}
-                  </p>
                 </div>
-              </div>
-
-              {/* Technical Telemetry Pills */}
-              <div className="flex flex-wrap gap-2 border-t border-obsidian-border pt-3.5">
-                {study.metrics.map((metric) => (
-                  <span
-                    key={metric}
-                    className="inline-flex items-center rounded border border-obsidian-border bg-obsidian-base px-2.5 py-1 font-mono text-micro text-obsidian-muted"
-                  >
-                    {metric}
-                  </span>
-                ))}
-              </div>
-            </article>
-          );
-        })}
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
-};
+}
 
 export default ProjectsSection;

@@ -1,93 +1,38 @@
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
+import React from "react";
+import Link from "next/link";
+import { Terminal, ArrowLeft } from "lucide-react";
 
-import type { Metadata } from 'next';
-import Link from 'next/link';
-
-import { anchorUrl } from '@/lib/config';
-
-export const metadata: Metadata = {
-  title: '404 — Page Not Found · Oscar Ndugbu',
-  robots: { index: false, follow: false },
-};
-
-export default function NotFound() {
+export default function NotFoundPage() {
   return (
-    <main
-      className="flex min-h-screen flex-col items-center justify-center px-6"
-      aria-labelledby="not-found-heading"
-    >
-      {/* Ambient glow behind card */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10"
-        // eslint-disable-next-line no-restricted-syntax
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 50% at 50% 40%, oklch(70% 0.21 188 / 0.06) 0%, transparent 65%)',
-        }}
-      />
+    <div className="flex min-h-screen items-center justify-center bg-obsidian-base px-4 py-12 text-obsidian-text">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-6">
+        <div
+          className="absolute inset-x-0 top-0 h-px bg-illuminate-emerald"
+          aria-hidden="true"
+        />
 
-      <div className="glass-surface w-full max-w-md rounded-[var(--radius-2xl)] border-t border-[oklch(70%_0.21_188_/_0.22)] p-8 text-center sm:p-10">
-        {/* Kicker */}
-        <p className="text-color-film-teal mb-6 font-mono text-[10px] tracking-[0.25em] uppercase">
-          404 · Not Found
-        </p>
+        <div className="mb-4 inline-flex items-center gap-2 rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1 font-mono text-micro text-accent-emerald">
+          <Terminal className="h-3.5 w-3.5" />
+          <span>HTTP 404 // ROUTE UNMAPPED</span>
+        </div>
 
-        {/* Headline — CE spec: "This page doesn't exist. The system does." */}
-        <h1
-          id="not-found-heading"
-          className="font-display text-color-text-primary mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl"
-        >
-          This page doesn&apos;t exist.{' '}
-          <span className="text-color-film-teal">The system does.</span>
+        <h1 className="mb-2 font-sans text-2xl font-bold tracking-tight text-obsidian-text">
+          Requested specification not found.
         </h1>
 
-        {/* Didone sub-line */}
-        <p className="font-didone text-color-text-secondary mb-2 text-base italic sm:text-lg">
-          Unlike the systems behind this site, this URL has no uptime record.
+        <p className="mb-6 font-sans text-sm leading-relaxed text-obsidian-muted">
+          The URI does not match any active case study, architectural pattern,
+          or engineering guide in the ledger.
         </p>
 
-        {/* Trust signal */}
-        <p className="text-color-text-muted mb-8 font-mono text-[10px] tracking-widest uppercase">
-          Backend systems · platform reliability · clear recovery paths.
-        </p>
-
-        {/* Divider */}
-        <div className="bg-color-border-subtle mb-8 h-px w-full" aria-hidden="true" />
-
-        {/* Primary CTA */}
         <Link
           href="/"
-          className="cta-primary cta-primary--lg tactile-press w-full justify-center"
-          aria-label="Return to Oscar Ndugbu's portfolio homepage"
+          className="inline-flex min-h-touch w-full items-center justify-center gap-2 rounded-lg border border-accent-emerald bg-accent-emerald px-5 font-sans text-sm font-semibold text-obsidian-base transition-colors hover:bg-accent-cyan hover:border-accent-cyan"
         >
-          <span className="bg-color-success inline-block h-2 w-2 rounded-full" aria-hidden="true" />
-          Back to production
+          <ArrowLeft className="h-4 w-4" />
+          <span>Return to primary portfolio</span>
         </Link>
-
-        {/* Secondary nav strip */}
-        <nav className="mt-6 flex items-center justify-center gap-4" aria-label="Quick navigation">
-          {[
-            { label: 'Projects', href: anchorUrl('section-projects') },
-            { label: 'About', href: anchorUrl('section-about') },
-            { label: 'Contact', href: anchorUrl('section-contact') },
-          ].map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className="text-color-text-muted inline-flex min-h-[44px] items-center font-mono text-[11px] tracking-wider uppercase transition-colors hover:text-white"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
       </div>
-
-      {/* Footer tag */}
-      <p className="mt-8 font-mono text-[10px] tracking-wider text-[oklch(93%_0.006_264_/_0.20)] uppercase">
-        Lagos precision. Global scale.
-      </p>
-    </main>
+    </div>
   );
 }

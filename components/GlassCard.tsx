@@ -1,104 +1,55 @@
-'use client';
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-// Mobile-native: hover animation strictly guard-gated.
+import React from "react";
 
-import { m, useReducedMotion } from 'framer-motion';
-import type { CSSProperties, ReactNode } from 'react';
-
-import { cn } from '@/lib/utils';
-
-type TagName = 'article' | 'div' | 'li' | 'section';
-
-export interface GlassCardProps {
-  children: ReactNode;
-  className?: string;
-  hover?: boolean;
-  chromatic?: boolean;
-  level?: 'full' | 'medium' | 'light';
-  as?: TagName;
-  id?: string;
-  role?: string;
-  style?: CSSProperties;
-  tabIndex?: number;
-  'aria-label'?: string;
-  'data-reveal'?: string;
-  'data-reveal-delay'?: string;
-  'data-project-id'?: string;
+export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  accent?: "cyan" | "emerald" | "dual" | "none";
+  elevated?: boolean;
+  interactive?: boolean;
 }
 
-// Each motion component has a distinct generic (HTMLDivElement, HTMLLIElement,
-// etc.) so they are not mutually assignable to `typeof m.div`.  We keep the
-// map untyped and cast only at the call-site to avoid propagating `any`.
-const TAG_MAP = {
-  article: m.article,
-  div: m.div,
-  li: m.li,
-  section: m.section,
-} as const;
-
-export function GlassCard({
+/**
+ * Obsidian Nocturne v2 replacement for legacy GlassCard.
+ * Enforces #0E0E10 / #14161B OLED surfaces, crisp 1px #1F222A borders,
+ * and zero soft drop shadows.
+ */
+export const GlassCard: React.FC<GlassCardProps> = ({
+  accent = "cyan",
+  elevated = false,
+  interactive = false,
+  className = "",
   children,
-  className,
-  hover = true,
-  chromatic = false,
-  level = 'full',
-  as = 'div',
-  id,
-  role,
-  style,
-  tabIndex,
-  'aria-label': ariaLabel,
-  'data-reveal': dataReveal,
-  'data-reveal-delay': dataRevealDelay,
-  'data-project-id': dataProjectId,
-}: Readonly<GlassCardProps>) {
-  const reducedMotion = useReducedMotion();
+  ...props
+}) => {
+  const surfaceClass = elevated ? "bg-obsidian-elevated" : "bg-obsidian-surface";
+  const hoverClass = interactive
+    ? "transition-colors duration-150 hover:border-accent-cyan/60"
+    : "";
 
-  // Cast to `typeof m.div` — all motion components share the same motion-prop
-  // surface (whileHover, transition, etc.); the HTML-element-specific generics
-  // only affect native DOM attributes which we fully enumerate in GlassCardProps.
-  const Tag = TAG_MAP[as] as typeof m.div;
-
-  const cardClass = cn(
-    'glass',
-    hover ? 'glass-card' : 'glass-no-hover',
-    `glass-${level}`,
-    chromatic && 'glass-chromatic',
-    className
-  );
-
-  // Hover motion: only on pointer:fine + no reduced-motion
-  // CSS class `pointer-fine:` would be ideal but Tailwind requires config.
-  // We rely on framer's reducedMotion and the component-level guard.
-  const hoverProps =
-    hover && !reducedMotion
-      ? {
-          whileHover: { y: -4 } as const,
-          transition: {
-            type: 'spring' as const,
-            stiffness: 360,
-            damping: 28,
-            mass: 0.9,
-          },
-        }
-      : {};
+  const topLineClass =
+    accent === "emerald"
+      ? "bg-illuminate-emerald"
+      : accent === "dual"
+        ? "bg-illuminate-dual"
+        : accent === "cyan"
+          ? "bg-illuminate-cyan"
+          : "hidden";
 
   return (
-    <Tag
-      id={id}
-      role={role}
-      // eslint-disable-next-line no-restricted-syntax
-      style={style}
-      tabIndex={tabIndex}
-      aria-label={ariaLabel}
-      data-reveal={dataReveal}
-      data-reveal-delay={dataRevealDelay}
-      data-project-id={dataProjectId}
-      className={cardClass}
-      {...hoverProps}
+    <div
+      className={`group relative overflow-hidden rounded-xl border border-obsidian-border ${surfaceClass} ${hoverClass} ${className}`}
+      {...props}
     >
+      {accent !== "none" && (
+        <div
+          className={`
+            absolute inset-x-0 top-0 h-px opacity-65 transition-opacity
+            group-hover:opacity-100 ${topLineClass}
+          `}
+          aria-hidden="true"
+        />
+      )}
       {children}
-    </Tag>
+    </div>
   );
-}
+};
+
+export default GlassCard;

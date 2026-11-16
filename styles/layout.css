@@ -1,183 +1,25 @@
-/* ════════════════════════════════════════════════════════════════════════════
-   CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-   Major Reset • Lagos → Global • Production Conviction Architecture
+/*
+ * Obsidian Nocturne v2 — Layout & Container Primitives
+ */
 
-   Fluid layout and typography tokens.
-   Appended to globals.css via @import at build time.
-   These extend (do not override) the existing design-token layer.
-
-   SURGICAL PATCH v2026.15 — BFC Scroll-Trap Elimination
-   ════════════════════════════════════════════════════════════════════════════ */
-
-/* ── Fluid editorial spacing tokens ────────────────────────────────────────
-   Complement the existing --section-py. Use for section-level structural
-   spacing that needs to feel more intentional on wider viewports.
-*/
-:root {
-  --section-space-y:      clamp(5rem, 10vw, 10rem);
-  --container-padding-x:  clamp(1rem, 2vw, 2rem);
-  --headline-xl:          clamp(3.5rem, 10vw, 8rem);
-  --headline-lg:          clamp(2.5rem, 6vw, 5rem);
-  --body-lg:              clamp(1.05rem, 1.4vw, 1.2rem);
+.obsidian-container {
+  width: 100%;
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
-html {
-  /* Ensure anchor scroll doesn't disappear behind fixed nav */
-  scroll-padding-top: clamp(4.5rem, 8vw, 6rem);
-}
-
-/* ── Editorial grid — wider two-column layout on lg+ ─────────────────────
-   Used by SectionHeading + adjacent panel patterns.
-   One narrow content column (prose) + one wider proof column.
-*/
-.editorial-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2rem;
-}
-
-@media (min-width: 1024px) {
-  .editorial-grid {
-    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-    gap: clamp(2rem, 4vw, 4rem);
-    align-items: start;
+@media (min-width: 640px) {
+  .obsidian-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }
 
-/* ── Section shell — for sections that use a contained card aesthetic ──── */
-.section-shell {
-  position: relative;
-
-  /* SURGICAL FIX v2026.15: overflow: hidden → overflow: clip
-     Root cause: `overflow: hidden` creates a Block Formatting Context (BFC).
-     On iOS Safari, a BFC scroll ancestor silently captures touch momentum,
-     requiring 3–5 swipes to traverse the section. `overflow: clip` provides
-     the same visual result (clips overflowing paint) WITHOUT creating a BFC
-     or a new scroll container. Lenis and native iOS momentum pass through cleanly.
-
-     Also fixes the iOS Safari preserve-3d + overflow:hidden interaction (WebKit
-     #178420) where a 3D-transformed ancestor disables overflow clipping on
-     all descendants, causing the portrait card to render without its border-radius. */
-  overflow: clip;
-
-  border-radius: clamp(1.25rem, 2vw, 2rem);
-  border: 1px solid var(--color-border);
-  background: linear-gradient(
-    180deg,
-    oklch(100% 0 0 / 0.03),
-    oklch(100% 0 0 / 0.015)
-  );
-}
-
-/* ── Premium glass surface — composable with existing glass-* classes ───── */
-.surface-card {
-  border: 1px solid var(--color-border);
-  background: linear-gradient(
-    180deg,
-    oklch(100% 0 0 / 0.045),
-    oklch(100% 0 0 / 0.025)
-  );
-  backdrop-filter: blur(14px);
-  box-shadow:
-    0 0 0 1px oklch(70% 0.21 188 / 0.08),
-    0 12px 48px oklch(0% 0 0 / 0.25);
-}
-
-/* ── Focus ring — consistent, accessible, premium ─────────────────────── */
-.focus-ring {
-  outline: none;
-  transition:
-    box-shadow 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease;
-}
-
-.focus-ring:focus-visible {
-  box-shadow:
-    0 0 0 1px oklch(70% 0.21 188 / 0.45),
-    0 0 0 6px oklch(70% 0.21 188 / 0.12);
-}
-
-/* ── Metric display tokens — consistent number+label rhythm ───────────── */
-.metric-number {
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 0.9;
-  letter-spacing: -0.08em;
-  font-weight: 700;
-  font-family: var(--font-display);
-}
-
-.metric-label {
-  margin-top: 0.625rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-}
-
-/* ── Desktop expansion: sections get richer layout, not just bigger ─────
-   This replaces the "blown-up phone screen" pattern on lg+.
-   Sections with enough content get asymmetric columns.
-*/
-@media (min-width: 1024px) {
-  /* Wider reading measure on desktop — prevents over-wide lines */
-  .prose-section p {
-    max-width: 68ch;
-  }
-
-  /* Section intros expand into editorial heading + aside pattern */
-  .section-intro-editorial {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: clamp(3rem, 5vw, 6rem);
-    align-items: end;
-    margin-bottom: clamp(3rem, 5vw, 5rem);
-  }
-}
-
-/* ── Tablet refinements (768px–1023px) ────────────────────────────────── */
-@media (min-width: 768px) and (max-width: 1023px) {
-  /* Tablet: proof carousel becomes 2-col instead of scrolling mobile strip */
-  .proof-carousel-tablet {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  /* Tablet: conviction stat strip spreads out */
-  .conviction-stat-strip {
-    gap: clamp(1.5rem, 3vw, 2.5rem);
-  }
-}
-
-/* ── Overflow safety ──────────────────────────────────────────────────── */
-body {
-  /* CRITICAL FIX v2026.15: overflow-x: hidden → overflow-x: clip
-     Previous value created a BFC on body, which on iOS Safari trapped vertical
-     scroll momentum inside the body's Block Formatting Context. Symptoms:
-       - Page felt sticky/delayed requiring 2–4 swipes per section
-       - Lenis's syncTouch: true could not override the BFC momentum capture
-       - Fixed-position children (navbar, scroll progress) rendered incorrectly
-         in some iOS Safari 16 builds due to BFC stacking context conflicts
-
-     `overflow-x: clip` is visually equivalent — content is clipped at the
-     overflow-clip-edge — but does NOT create a scroll container, BFC, or
-     new stacking context. Native iOS momentum scroll, Lenis scroll, and all
-     absolutely/fixed positioned descendants work correctly.
-
-     Alignment: globals.css, fixes.css, and #hero already use overflow-x: clip.
-     This brings body in layout.css into full alignment with the established pattern. */
-  overflow-x: clip;
-}
-
-/* Prevent any child from breaking horizontal layout — preserve min-width: 0
-   but cap max-width to prevent grid/flex children from exceeding their container. */
-*,
-*::before,
-*::after {
-  min-width: 0;
-  /* Note: max-width: 100% intentionally NOT set globally — it breaks percentage
-     width children that legitimately need to exceed their container for decorative
-     effects (e.g. full-bleed gradient orbs). Containment is handled per-section. */
+.hairline-divider {
+  height: 1px;
+  width: 100%;
+  background-color: #1F222A;
 }

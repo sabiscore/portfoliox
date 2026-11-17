@@ -3,7 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "packageManager": "pnpm@10.24.0",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "prebuild": "node scripts/verify-app-router.mjs",
     "build": "BROWSERSLIST_IGNORE_OLD_DATA=1 next build",
@@ -18,10 +20,15 @@
     "test:mobile": "playwright test --project=mobile-chrome --project=mobile-safari --workers=1",
     "audit:copy": "node scripts/audit-copy.mjs",
     "validate": "bash scripts/validate-build.sh",
-    "prepare": "node -e \"if (process.env.CI || process.env.VERCEL) process.exit(0); require('child_process').execSync('pnpm exec husky', { stdio: 'inherit' })\""
+    "prepare": "node -e \"if (process.env.CI || process.env.VERCEL) process.exit(0); require('child_process').execSync('pnpm exec husky', { stdio: 'inherit' })\"",
+    "verify:ui-contracts": "node scripts/verify-ui-contracts.mjs"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "sharp", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

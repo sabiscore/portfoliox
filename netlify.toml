@@ -1,9 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "corepack pnpm run build"
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
+  PNPM_VERSION = "10.24.0"
   NEXT_TELEMETRY_DISABLED = "1"
 
 [[plugins]]

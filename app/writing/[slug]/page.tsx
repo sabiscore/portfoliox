@@ -222,7 +222,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                             className="mt-5 inline-flex min-h-[44px] items-center justify-between border border-white/10 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs font-medium text-[#00D9FF] transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
                           >
                             <span>READ_ARTICLE</span>
-                            <span aria-hidden="true">→</span>
+                            <span aria-hidden="true">↗</span>
                           </Link>
                         </article>
                       ))}

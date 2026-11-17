@@ -1,83 +1,109 @@
-import type { MDXComponents } from "mdx/types";
-import React from "react";
-import { ArchDecision } from "@/components/ArchDecision";
-import { CodeBlockClient } from "@/components/CodeBlockClient";
-import { MetricBadge } from "@/components/ui/MetricBadge";
+import React, { type ComponentPropsWithoutRef } from 'react';
+import type { MDXComponents } from 'mdx/types';
+
+type HeadingProps = ComponentPropsWithoutRef<'h1'>;
+type ParagraphProps = ComponentPropsWithoutRef<'p'>;
+type ListProps = ComponentPropsWithoutRef<'ul'>;
+type OrderedListProps = ComponentPropsWithoutRef<'ol'>;
+type ListItemProps = ComponentPropsWithoutRef<'li'>;
+type BlockquoteProps = ComponentPropsWithoutRef<'blockquote'>;
+type CodeProps = ComponentPropsWithoutRef<'code'>;
+type TableProps = ComponentPropsWithoutRef<'table'>;
+type ThProps = ComponentPropsWithoutRef<'th'>;
+type TdProps = ComponentPropsWithoutRef<'td'>;
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
-    h1: ({ children }) => (
-      <h1 className="mb-6 mt-8 font-sans text-3xl font-bold tracking-tight text-obsidian-text sm:text-4xl">
+    h1: ({ children, ...props }: HeadingProps) => (
+      <h1
+        className="mt-10 mb-4 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl"
+        {...props}
+      >
         {children}
       </h1>
     ),
-    h2: ({ children }) => (
-      <h2 className="mb-4 mt-10 border-b border-obsidian-border pb-2 font-sans text-2xl font-bold tracking-tight text-obsidian-text">
+    h2: ({ children, ...props }: ComponentPropsWithoutRef<'h2'>) => (
+      <h2
+        className="mt-8 mb-3 border-b border-white/10 pb-2 font-display text-2xl font-bold tracking-tight text-white"
+        {...props}
+      >
         {children}
       </h2>
     ),
-    h3: ({ children }) => (
-      <h3 className="mb-3 mt-6 font-sans text-xl font-semibold tracking-tight text-obsidian-text">
+    h3: ({ children, ...props }: ComponentPropsWithoutRef<'h3'>) => (
+      <h3
+        className="mt-6 mb-2 font-display text-xl font-semibold text-[#00D9FF]"
+        {...props}
+      >
         {children}
       </h3>
     ),
-    p: ({ children }) => (
-      <p className="mb-4 font-sans text-sm leading-relaxed text-obsidian-muted sm:text-base">
+    p: ({ children, ...props }: ParagraphProps) => (
+      <p className="my-4 leading-relaxed text-zinc-300" {...props}>
         {children}
       </p>
     ),
-    ul: ({ children }) => (
-      <ul className="mb-5 list-disc space-y-2 pl-5 font-sans text-sm text-obsidian-muted sm:text-base">
+    ul: ({ children, ...props }: ListProps) => (
+      <ul className="my-4 list-disc space-y-2 pl-6 text-zinc-300" {...props}>
         {children}
       </ul>
     ),
-    ol: ({ children }) => (
-      <ol className="mb-5 list-decimal space-y-2 pl-5 font-sans text-sm text-obsidian-muted sm:text-base">
+    ol: ({ children, ...props }: OrderedListProps) => (
+      <ol className="my-4 list-decimal space-y-2 pl-6 text-zinc-300" {...props}>
         {children}
       </ol>
     ),
-    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-    blockquote: ({ children }) => (
-      <blockquote className="my-5 rounded-r-lg border-l-2 border-accent-cyan bg-obsidian-surface p-4 font-sans text-sm italic text-obsidian-text">
+    li: ({ children, ...props }: ListItemProps) => (
+      <li className="leading-relaxed" {...props}>
+        {children}
+      </li>
+    ),
+    blockquote: ({ children, ...props }: BlockquoteProps) => (
+      <blockquote
+        className="my-6 border-l-2 border-[#00D9FF] bg-[#0E0E10] px-4 py-3 font-mono text-xs text-zinc-200"
+        {...props}
+      >
         {children}
       </blockquote>
     ),
-    code: ({ children, className }) => {
+    code: ({ children, className, ...props }: CodeProps) => {
       const isInline = !className;
       if (isInline) {
         return (
-          <code className="rounded border border-obsidian-border bg-obsidian-elevated px-1.5 py-0.5 font-mono text-caption text-accent-cyan">
+          <code
+            className="border border-white/10 bg-[#0E0E10] px-1.5 py-0.5 font-mono text-xs text-[#00D9FF]"
+            {...props}
+          >
             {children}
           </code>
         );
       }
-      const language = className.replace("language-", "");
       return (
-        <CodeBlockClient
-          code={String(children).trim()}
-          language={language}
-        />
+        <code className={`font-mono text-xs ${className ?? ''}`} {...props}>
+          {children}
+        </code>
       );
     },
-    table: ({ children }) => (
-      <div className="my-6 overflow-x-auto rounded-xl border border-obsidian-border bg-obsidian-surface">
-        <table className="w-full border-collapse text-left font-mono text-caption">
+    table: ({ children, ...props }: TableProps) => (
+      <div className="my-6 w-full overflow-x-auto border border-white/10 bg-[#0E0E10]">
+        <table className="w-full border-collapse text-left font-mono text-xs" {...props}>
           {children}
         </table>
       </div>
     ),
-    th: ({ children }) => (
-      <th className="border-b border-obsidian-border bg-obsidian-elevated px-4 py-2.5 font-mono text-micro font-semibold uppercase tracking-telemetry text-obsidian-text">
+    th: ({ children, ...props }: ThProps) => (
+      <th
+        className="border-b border-white/10 bg-[#08090C] px-4 py-3 font-semibold text-[#00D9FF] uppercase"
+        {...props}
+      >
         {children}
       </th>
     ),
-    td: ({ children }) => (
-      <td className="border-b border-obsidian-border px-4 py-2.5 text-obsidian-muted">
+    td: ({ children, ...props }: TdProps) => (
+      <td className="border-b border-white/10 px-4 py-3 text-zinc-300" {...props}>
         {children}
       </td>
     ),
-    ArchDecision,
-    MetricBadge,
     ...components,
   };
 }

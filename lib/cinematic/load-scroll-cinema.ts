@@ -1,32 +1,53 @@
-let runtimePromise:
-  | Promise<{
-      gsap: typeof import('gsap').gsap;
-      ScrollTrigger: typeof import('gsap/ScrollTrigger').ScrollTrigger;
-    }>
-  | null = null;
-let runtimeReady = false;
+export interface ScrollTriggerInstance {
+  kill: () => void;
+  progress?: number;
+  direction?: number;
+  isActive?: boolean;
+}
 
-export function loadScrollCinemaRuntime() {
-  if (typeof document !== 'undefined') {
-    document.documentElement.dataset.scrollCinemaRuntime = runtimeReady ? 'ready' : 'loading';
-  }
+export interface ScrollTriggerStatic {
+  update: () => void;
+  refresh: (safe?: boolean) => void;
+  getAll: () => ScrollTriggerInstance[];
+  create: (vars: Record<string, unknown>) => ScrollTriggerInstance;
+}
 
-  runtimePromise ??= Promise.all([import('gsap'), import('gsap/ScrollTrigger')])
-    .then(([{ gsap }, { ScrollTrigger }]) => {
+export interface GsapRuntime {
+  registerPlugin: (...plugins: unknown[]) => void;
+  ticker: {
+    add: (callback: (time: number) => void, once?: boolean, prioritize?: boolean) => void;
+    remove: (callback: (time: number) => void) => void;
+    lagSmoothing: (threshold: number, adjustedLag?: number) => void;
+  };
+  to: (targets: unknown, vars: Record<string, unknown>) => unknown;
+  fromTo: (
+    targets: unknown,
+    fromVars: Record<string, unknown>,
+    toVars: Record<string, unknown>
+  ) => unknown;
+  timeline: (vars?: Record<string, unknown>) => unknown;
+  context: (func: () => void, scope?: unknown) => { revert: () => void };
+}
+
+export interface ScrollCinemaRuntime {
+  gsap: GsapRuntime;
+  ScrollTrigger: ScrollTriggerStatic;
+}
+
+let runtimePromise: Promise<ScrollCinemaRuntime> | null = null;
+
+export function loadScrollCinemaRuntime(): Promise<ScrollCinemaRuntime> {
+  runtimePromise ??= Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
+    ([gsapModule, scrollTriggerModule]) => {
+      const gsap = (gsapModule.gsap ?? gsapModule.default ?? gsapModule) as unknown as GsapRuntime;
+      const ScrollTrigger = (scrollTriggerModule.ScrollTrigger ??
+        scrollTriggerModule.default ??
+        scrollTriggerModule) as unknown as ScrollTriggerStatic;
+
       gsap.registerPlugin(ScrollTrigger);
-      runtimeReady = true;
-      if (typeof document !== 'undefined') {
-        document.documentElement.dataset.scrollCinemaRuntime = 'ready';
-      }
       return { gsap, ScrollTrigger };
-    })
-    .catch((error: unknown) => {
-      runtimePromise = null;
-      if (typeof document !== 'undefined') {
-        document.documentElement.dataset.scrollCinemaRuntime = 'failed';
-      }
-      throw error;
-    });
+    }
+  );
 
   return runtimePromise;
 }

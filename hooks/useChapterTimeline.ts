@@ -111,8 +111,8 @@ export function useChapterTimeline({ chapter, rootRef }: UseChapterTimelineArgs)
               toggleActions: 'play none none reverse',
               onEnter: () => setActiveChapter(chapter.id),
               onEnterBack: () => setActiveChapter(chapter.id),
-              onRefresh: (self) => {
-                if (self.isActive || self.progress > 0) revealAll();
+              onRefresh: (self: { progress?: number; isActive?: boolean }) => {
+                if (self.isActive || (self.progress ?? 0) > 0) revealAll();
               },
             },
             defaults: { ease: 'power3.out', duration: 0.7 },

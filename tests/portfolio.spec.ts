@@ -14,7 +14,8 @@ async function gotoHome(page: Page): Promise<void> {
 }
 
 test.describe('Current portfolio interactions', () => {
-  test('primary navigation exposes current destinations', async ({ page }) => {
+  test('primary navigation exposes current destinations', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'The desktop route links are replaced by the mobile drawer.');
     await gotoHome(page);
 
     const nav = page.getByRole('navigation', { name: 'Primary system navigation' });

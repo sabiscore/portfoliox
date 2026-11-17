@@ -11,19 +11,22 @@ fi
 
 export PATH="./node_modules/.bin:$PATH"
 
-echo "━━━ [1/5] Verifying App Router & Component Export Contracts ━━━"
+echo "━━━ [1/6] Verifying App Router & Component Export Contracts ━━━"
 node scripts/verify-app-router.mjs
 
-echo "━━━ [2/5] Running Strict TypeScript Typecheck ━━━"
+echo "━━━ [2/6] Running Strict TypeScript Typecheck ━━━"
 pnpm run type-check
 
-echo "━━━ [3/5] Running ESLint Design-System & AST Rules ━━━"
+echo "━━━ [3/6] Running ESLint Design-System & AST Rules ━━━"
 pnpm run lint
 
-echo "━━━ [4/5] Running Unit Tests ━━━"
+echo "━━━ [4/6] Verifying UI Accessibility & Rendering Contracts ━━━"
+pnpm run verify:ui-contracts
+
+echo "━━━ [5/6] Running Unit Tests ━━━"
 pnpm run test:unit
 
-echo "━━━ [5/5] Executing Production Next.js Build ━━━"
+echo "━━━ [6/6] Executing Production Next.js Build ━━━"
 pnpm run build
 
 echo "✓ Build validation completed successfully."

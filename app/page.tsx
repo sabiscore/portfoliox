@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
-import { IdentityCard } from '@/components/IdentityCard';
 import { ProjectsSection } from '@/components/ProjectsSection';
 import { ProductionPatterns } from '@/components/ProductionPatterns';
 import { GradientMeshMotion } from '@/components/GradientMeshMotion';
@@ -22,9 +21,6 @@ export default function HomePage(): React.JSX.Element {
           }}
         />
         <HeroSection />
-        <div id="identity">
-          <IdentityCard />
-        </div>
         <ProjectsSection />
         <ProductionPatterns />
         <ContactSection />

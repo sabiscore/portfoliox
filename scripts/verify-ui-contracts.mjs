@@ -34,19 +34,13 @@ requireContract(
   'V17: Root layout must declare the dark color scheme.'
 );
 
-// V18 — Telemetry mode transitions are meaningful status changes. Announce
-// that chip politely without making the frequently-changing heartbeat live.
-const liveRegionStart = telemetry.indexOf('aria-live="polite"');
-const liveRegionEnd =
-  liveRegionStart >= 0 ? telemetry.indexOf('</span>', liveRegionStart) : -1;
-const telemetryLiveRegion =
-  liveRegionStart >= 0 && liveRegionEnd > liveRegionStart
-    ? telemetry.slice(liveRegionStart, liveRegionEnd)
-    : '';
+// V18 — Selecting an architecture record must announce the changed summary
+// politely. This is content navigation, not a live operational status feed.
 requireContract(
-  telemetryLiveRegion.includes('aria-atomic="true"') &&
-    telemetryLiveRegion.includes('{telemetryMode}'),
-  'V18: Telemetry mode must be announced through a polite, atomic live region.'
+  /aria-live="polite"[\s\S]{0,180}aria-atomic="true"/.test(telemetry) &&
+    telemetry.includes('{activeNode.architectureSummary}') &&
+    telemetry.includes('Project snapshots from the written engineering record'),
+  'V18: Architecture selection must update an accessible polite live region and disclose that the panel is not live telemetry.'
 );
 
 // V19 — The related-content dismiss control must remain a real 44px touch

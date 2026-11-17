@@ -149,7 +149,7 @@ test.describe('Production portfolio smoke tests', () => {
     await expect(section).toBeAttached();
     await expect(section.getByRole('heading', { name: 'Discuss a system.' })).toBeVisible();
     await expect(section.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
-    await expect(section.locator('#contact-name')).toHaveAccessibleName(/NAME // IDENTIFIER/i);
+    await expect(section.locator('#contact-name')).toHaveAccessibleName(/NAME \/\/ IDENTIFIER/i);
     await expect(section.locator('#contact-email')).toHaveAccessibleName(/RETURN ENDPOINT/i);
     await expect(section.locator('#contact-scope')).toHaveAccessibleName(/SYSTEM DOMAIN/i);
     await expect(section.locator('#contact-message')).toHaveAccessibleName(/CONSTRAINTS & OBJECTIVES/i);

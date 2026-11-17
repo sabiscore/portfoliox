@@ -47,6 +47,12 @@ export default function RootLayout({
         <meta name="color-scheme" content="dark" />
       </head>
       <body className="min-h-screen bg-[#08090C] font-sans text-white antialiased selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:border focus:border-[#00D9FF] focus:bg-[#08090C] focus:px-4 focus:py-3 focus:font-mono focus:text-xs focus:text-white"
+        >
+          Skip to main content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

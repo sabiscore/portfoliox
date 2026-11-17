@@ -1,47 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "🔍 Validating build..."
+echo "━━━ [1/4] Verifying App Router & Component Export Contracts ━━━"
+node scripts/verify-app-router.mjs
 
-# Check blog directory
-if [ ! -d "content/blog" ]; then
-  echo "❌ Error: content/blog directory not found"
-  exit 1
-fi
+echo "━━━ [2/4] Running Strict TypeScript Typecheck ━━━"
+pnpm exec tsc --noEmit
 
-POST_COUNT=$(find content/blog -name "*.mdx" -o -name "*.md" | wc -l)
-echo "✅ Found $POST_COUNT blog posts"
+echo "━━━ [3/4] Running ESLint Design-System & AST Rules ━━━"
+pnpm run lint
 
-# Check components
-COMPONENTS=(
-  "components/BlogProgressWidget.tsx"
-  "components/ProductionPatternsVisualization.tsx"
-  "components/LiveBuildFeed.tsx"
-  "components/ContinueReadingBanner.tsx"
-  "components/BlogReadingProgressTracker.tsx"
-)
+echo "━━━ [4/4] Executing Production Next.js Build ━━━"
+BROWSERSLIST_IGNORE_OLD_DATA=1 pnpm run build
 
-for component in "${COMPONENTS[@]}"; do
-  if [ -f "$component" ]; then
-    echo "✅ $component exists"
-  else
-    echo "❌ Missing: $component"
-    exit 1
-  fi
-done
-
-# Check API routes
-API_ROUTES=(
-  "app/api/recent-blog-posts/route.ts"
-  "app/api/live-metrics/route.ts"
-)
-
-for route in "${API_ROUTES[@]}"; do
-  if [ -f "$route" ]; then
-    echo "✅ $route exists"
-  else
-    echo "❌ Missing: $route"
-    exit 1
-  fi
-done
-
-echo "✅ Build validation complete!"
+echo "✓ Build validation completed with zero errors."

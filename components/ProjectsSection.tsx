@@ -1,166 +1,154 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 
-export interface ProjectLedgerEntry {
+type EvidenceStatus = 'ACTIVE BUILD' | 'PUBLIC DEMO' | 'PUBLIC SOURCE' | 'PRIVATE CASE STUDY';
+
+interface ProjectLedgerEntry {
   slug: string;
   domain: string;
-  status: 'ACTIVE BUILD' | 'PUBLIC DEMO' | 'PUBLIC SOURCE' | 'PRIVATE CASE STUDY';
+  status: EvidenceStatus;
   title: string;
   summary: string;
-  ledgerTitle: string;
   constraint: string;
   decision: string;
-  outcome: string;
+  implementationNote: string;
   evidence: string;
-  architectureNotes: ReadonlyArray<string>;
-  contextualStack: ReadonlyArray<{
+  architectureNotes: readonly string[];
+  contextualStack: readonly {
     primitive: string;
     role: string;
-  }>;
+  }[];
   caseStudyHref: string;
   sourceHref?: string;
 }
 
-const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
+const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
   {
     slug: 'taxbridge',
     domain: 'COMPLIANCE PLATFORM · FINTECH',
     status: 'ACTIVE BUILD',
     title: 'TaxBridge',
     summary:
-      'TaxBridge is a tax workflow platform built around shared API contracts, tenant-scoped data access, background processing, and offline-first mobile sync. NRS DigiTax integration remains in progress.',
-    ledgerTitle: 'TAXBRIDGE RELIABILITY LEDGER',
+      'A tax workflow platform built around shared API contracts, tenant-scoped data access, background processing, and offline-first mobile sync.',
     constraint:
       'SME filings must preserve organization context and avoid duplicate work when mobile connectivity or upstream fiscal services are unreliable.',
     decision:
-      'PostgreSQL row-level security, transaction-scoped organization context, idempotent BullMQ jobs, and an offline-first sync queue.',
-    outcome:
-      'The implementation makes tenant scope, retry semantics, and audit history explicit. This is an engineering direction, not a claim of completed end-to-end production certification.',
-    evidence: 'Active build. NRS DigiTax integration, tenant-policy validation, and provider certification remain in progress.',
+      'The architecture combines PostgreSQL row-level security, transaction-scoped organization context, idempotent background jobs, and a local mobile sync queue.',
+    implementationNote:
+      'Tenant scope, retry semantics, and audit history are explicit design concerns. NRS DigiTax integration and tenant-policy validation remain in progress.',
+    evidence:
+      'Active build. Provider certification and end-to-end fiscalization behavior are not presented as completed.',
     architectureNotes: [
-      'Database access is designed to bind tenant context inside a transaction; policy configuration and transaction lifecycle still require integration validation.',
-      'Idempotent queue keys and bounded retry handling are used to isolate upstream fiscalization failures.',
-      'The Expo client uses a local SQLite queue to preserve pending operations when connectivity is unavailable.'
+      'Database access is designed to bind tenant context within a transaction; policy configuration and transaction lifecycle require integration validation.',
+      'Idempotent queue keys and bounded retry handling isolate upstream fiscalization failures.',
+      'The Expo client uses a local SQLite queue to preserve pending operations when connectivity is unavailable.',
     ],
     contextualStack: [
-      { primitive: 'Fastify 5', role: 'Schema-Locked API' },
-      { primitive: 'PostgreSQL 15 RLS', role: 'Tenant Isolation' },
-      { primitive: 'BullMQ + Redis 7', role: 'Idempotent Queue' },
-      { primitive: 'Expo SQLite', role: 'Offline Android Sync' },
-      { primitive: 'Next.js App Router', role: 'Admin Console' },
+      { primitive: 'Fastify 5', role: 'API contracts' },
+      { primitive: 'PostgreSQL', role: 'Tenant-scoped data' },
+      { primitive: 'BullMQ + Redis', role: 'Background jobs' },
+      { primitive: 'Expo + SQLite', role: 'Offline sync' },
     ],
     caseStudyHref: '/work/taxbridge',
     sourceHref: 'https://github.com/scardubu/taxbridge',
   },
   {
     slug: 'sabiscore',
-    domain: 'ML PLATFORM · QUANTITATIVE OBSERVABILITY',
+    domain: 'QUANTITATIVE ML · DATA PLATFORM',
     status: 'PUBLIC DEMO',
     title: 'SabiScore',
     summary:
-      'A probabilistic football forecasting and market-comparison product spanning data ingestion, feature engineering, ensemble inference, and a research-facing web interface.'
-    ledgerTitle: 'SABISCORE RELIABILITY LEDGER',
+      'A probabilistic football forecasting and market-comparison product spanning data ingestion, feature engineering, ensemble inference, and a research-facing web interface.',
     constraint:
-      'Prediction quality and service behavior must remain legible as market data, model versions, and upstream feed quality change.'
+      'Prediction quality must remain legible as market data, model versions, and upstream feed quality change.',
     decision:
-      'Out-of-core Polars and DuckDB pipelines, model-aware cache namespaces, ensemble evaluation, and an explicit lower-confidence fallback path.'
-    outcome:
-      'The engineering record describes calibration workflows and a fallback path. Public operational uptime and latency measurements are not asserted here.'
-    evidence: 'Public product demo. Private uptime, latency, and model-evaluation artifacts are not represented as public benchmarks.'
+      'Out-of-core Polars and DuckDB pipelines, model-aware cache namespaces, ensemble evaluation, and an explicit lower-confidence fallback path.',
+    implementationNote:
+      'The engineering record documents calibration workflows and market comparison. Private uptime, latency, memory, and model-evaluation reports are not reproduced as public benchmarks.',
+    evidence:
+      'Public product demo. Operational SLOs and measured predictive performance are not asserted on this page.',
     architectureNotes: [
-      'Columnar streaming through Polars lazy frames and DuckDB is used for rolling feature joins under explicit resource constraints.'
-      'Shin devigging strips bookmaker overround prior to computing market-offset residual folds.',
-      'Model evaluation includes calibration and probability-quality checks; private operational reports are not reproduced in this portfolio.'
+      'Columnar streaming through Polars lazy frames and DuckDB is used for rolling feature joins under explicit resource constraints.',
+      'Shin de-vigging is used to remove bookmaker overround before market comparison.',
+      'Model evaluation includes calibration and probability-quality checks; private operational reports are not presented as public evidence.',
     ],
     contextualStack: [
-      { primitive: 'Polars + DuckDB', role: 'Out-of-Core Feature Store' },
-      { primitive: 'XGBoost / LightGBM / CatBoost', role: 'Stacked Ensemble' },
-      { primitive: 'Shin Devigging', role: 'Market Calibration' },
-      { primitive: 'FastAPI + Redis 7', role: 'Versioned Serving' },
-      { primitive: 'Next.js App Router', role: 'Telemetry UI' },
+      { primitive: 'Polars + DuckDB', role: 'Feature processing' },
+      { primitive: 'XGBoost / LightGBM', role: 'Model ensemble' },
+      { primitive: 'FastAPI + Redis', role: 'Serving and cache' },
+      { primitive: 'Next.js', role: 'Research interface' },
     ],
     caseStudyHref: '/work/sabiscore',
     sourceHref: 'https://sabiscore.app',
   },
   {
     slug: 'yap-engine',
-    domain: 'CONVERSATIONAL COMMERCE · EDGE AI',
+    domain: 'AI WORKFLOWS · MEDIA PIPELINE',
     status: 'PUBLIC SOURCE',
-    title: 'YapCommerce',
+    title: 'YapCommerce / Yap Engine',
     summary:
-      'A stage-oriented media and agent workflow combining local model routing, schema-constrained outputs, CPU-aware synthesis, and restartable tasks.'
-    ledgerTitle: 'YAPCOMMERCE RELIABILITY LEDGER',
+      'A stage-oriented media and agent workflow combining local model routing, schema-constrained outputs, CPU-aware synthesis, and restartable tasks.',
     constraint:
-      'Long-running generation stages can be interrupted by provider limits, worker restarts, or resource pressure.'
+      'Long-running generation stages can be interrupted by provider limits, worker restarts, or resource pressure.',
     decision:
-      'Local GGUF model routing, stage-level checkpoints, content hashes, schema validation, and deterministic media assembly.'
-    outcome:
-      'The project documents restart boundaries and intermediate artifact reuse; no throughput, availability, or cost SLO is asserted here.'
-    evidence: 'Public source and architecture record. Deployment-specific performance varies by hardware and model configuration.'
+      'Local model routing, stage-level checkpoints, content hashes, schema validation, and deterministic media assembly.',
+    implementationNote:
+      'The project documents restart boundaries and intermediate artifact reuse. Throughput, availability, and cost SLOs are not claimed.',
+    evidence:
+      'Public source and architecture record. Deployment-specific performance depends on hardware and model configuration.',
     architectureNotes: [
-      'Stage-oriented media processing separates synthesis, assembly, and validation steps.'
-      'Local model routing and schema validation keep model output handling explicit.'
-      'Checkpointed orchestration preserves intermediate stage results and makes recovery points explicit.'
+      'Media processing separates synthesis, assembly, and validation into reviewable stages.',
+      'Local model routing and schema validation keep model output handling explicit.',
+      'Checkpointed orchestration preserves intermediate stage results and makes recovery points explicit.',
     ],
     contextualStack: [
-      { primitive: 'faster-whisper INT8', role: 'Pidgin Audio ASR' },
-      { primitive: 'Local GGUF', role: '$0 Cloud-LLM Extraction' },
-      { primitive: 'Fastify 5', role: 'Checkout State Machine' },
-      { primitive: 'FFmpeg', role: 'Media Assembly' },
-      { primitive: 'Kokoro TTS', role: 'Speech Synthesis' },
-      { primitive: 'Local GGUF', role: 'Model Routing' },
-      { primitive: 'Redis', role: 'Queue State' },
+      { primitive: 'Local GGUF', role: 'Model routing' },
+      { primitive: 'Fastify + TypeScript', role: 'Workflow API' },
+      { primitive: 'FFmpeg', role: 'Media assembly' },
+      { primitive: 'Kokoro TTS', role: 'Speech synthesis' },
+      { primitive: 'Redis', role: 'Queue state' },
     ],
     caseStudyHref: '/work/swarmxq',
-  },
-  { // UBEC
-      { primitive: 'WhatsApp Flow v7.3', role: 'Single-Turn UX' },
-    ],
-    caseStudyHref: '/work/swarmxq',
+    sourceHref: 'https://github.com/scardubu',
   },
   {
     slug: 'ubec',
-    domain: 'FEDERAL INFRASTRUCTURE · DATA ENGINEERING',
+    domain: 'PUBLIC SECTOR · DATA ENGINEERING',
     status: 'PRIVATE CASE STUDY',
     title: 'UBEC Data Pipeline',
     summary:
-      'State-partitioned data ingestion and validation workflows for federal education reporting, described at a non-sensitive architectural level.'
-    ledgerTitle: 'UBEC DATA PIPELINE RELIABILITY LEDGER',
+      'A state-partitioned data ingestion and validation workflow for federal education reporting, described at a non-sensitive architectural level.',
     constraint:
-      'Incomplete or inconsistent state submissions need to remain identifiable without blocking independent reporting work.'
+      'Incomplete or inconsistent submissions need to remain identifiable without blocking independent reporting work.',
     decision:
-      'Partitioned ingestion tasks, canonical schemas, validation stages, and traceable exception records.'
-    outcome:
-      'The case study describes the data workflow at a high level; confidential outcomes and operational figures are not published.'
-    evidence: 'Private engagement case study. No confidential artifacts or performance claims are included.'
+      'Partitioned ingestion tasks, canonical schemas, validation stages, and traceable exception records.',
+    implementationNote:
+      'The case study describes the data workflow at a high level. Confidential outcomes, datasets, and operational figures are not published.',
+    evidence:
+      'Private engagement. No confidential artifacts or unverified performance claims are included.',
     architectureNotes: [
-      'State-partitioned DAGs isolate upstream formatting anomalies to individual state staging tables.',
-      'Automated row-level quarantine logs rejected records with explicit remediation codes for state officers.',
+      'State-partitioned ingestion isolates upstream formatting anomalies to individual staging areas.',
+      'Validation and exception records preserve traceability for rejected or incomplete rows.',
     ],
     contextualStack: [
-      { primitive: 'Python 3.11', role: 'Ingestion Core' },
-      { primitive: 'Apache Airflow', role: 'State-Isolated DAGs' },
-      { primitive: 'Polars / pandas', role: 'Validation Gates' },
-      { primitive: 'PostgreSQL', role: 'Audit Ledger' },
+      { primitive: 'Python', role: 'Ingestion core' },
+      { primitive: 'Apache Airflow', role: 'Workflow orchestration' },
+      { primitive: 'Polars / pandas', role: 'Data validation' },
+      { primitive: 'PostgreSQL', role: 'Audit records' },
     ],
     caseStudyHref: '/work/ubec',
   },
 ];
 
 export function ProjectsSection(): React.JSX.Element {
-  const [expandedSlugs, setExpandedSlugs] = useState<Record<string, boolean>>({
-    taxbridge: false,
-    sabiscore: false,
-    'yap-engine': false,
-    ubec: false,
-  });
+  const [expandedSlugs, setExpandedSlugs] = useState<Record<string, boolean>>({});
 
   const toggleHowItWorks = useCallback((slug: string) => {
-    setExpandedSlugs((prev) => ({
-      ...prev,
-      [slug]: !prev[slug],
+    setExpandedSlugs((current) => ({
+      ...current,
+      [slug]: !current[slug],
     }));
   }, []);
 
@@ -168,202 +156,159 @@ export function ProjectsSection(): React.JSX.Element {
     <section
       id="projects"
       aria-labelledby="projects-section-heading"
-      className="w-full bg-[#08090C] text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-white/10"
+      className="w-full border-b border-white/10 bg-[#08090C] px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
     >
       <div className="mx-auto max-w-6xl space-y-10">
-        {/* Section Header */}
-        <div className="space-y-3 max-w-3xl">
-          <div className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
-            <span className="text-[#00FF66] font-bold">01</span>
-            <span className="text-white/60">PROJECTS // SELECTED WORK</span>
-          </div>
+        <header className="max-w-3xl space-y-3">
+          <p className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
+            <span className="font-bold text-[#00D9FF]">01</span>
+            <span className="text-zinc-400">PROJECTS // SELECTED WORK</span>
+          </p>
           <h2
             id="projects-section-heading"
-            className="font-heading text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.08]"
+            className="font-display text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl"
           >
             Built around real constraints.
           </h2>
-          <p className="text-base sm:text-lg text-white/75 leading-relaxed">
-            Each case study explains the operating constraint and architectural decisions, then states whether supporting evidence is public, private, or still in progress.
+          <p className="text-base leading-relaxed text-zinc-300 sm:text-lg">
+            Each project explains the operating constraint and architectural decisions, then states
+            whether its supporting evidence is public, private, or still in progress.
           </p>
-        </div>
+        </header>
 
-        {/* Project Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-          {PRODUCTION_PROJECTS.map((project) => {
-            const isExpanded = Boolean(expandedSlugs[project.slug]);
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
+          {SELECTED_PROJECTS.map((project) => {
+            const expanded = Boolean(expandedSlugs[project.slug]);
+            const detailsId = `project-details-${project.slug}`;
 
             return (
               <article
                 key={project.slug}
-                className="flex flex-col justify-between border border-white/15 hover:border-[#00D9FF]/40 bg-[#0E0E10]/90 backdrop-blur-xl transition-colors"
+                className="flex min-w-0 flex-col border border-white/10 bg-[#0E0E10] transition-colors hover:border-[#00D9FF]/35"
               >
-                <div>
-                  {/* Card Header */}
-                  <div className="p-5 sm:p-6 border-b border-white/10 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-[11px] uppercase tracking-widest text-white/60">
-                        {project.domain}
-                      </span>
-                      <span className="inline-flex shrink-0 items-center border border-white/15 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-300">
-                        {project.status}
-                      </span>
-                    </div>
-
-                    <h3 className="font-heading text-2xl sm:text-3xl font-bold text-white">
-                      {project.title}
-                    </h3>
-
-                    <p className="text-sm sm:text-base text-white/80 leading-relaxed">
-                      {project.summary}
+                <div className="flex-1 p-5 sm:p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                      {project.domain}
                     </p>
+                    <span className="inline-flex min-h-6 items-center border border-white/15 bg-white/[0.03] px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-300">
+                      {project.status}
+                    </span>
                   </div>
 
-                  {/* Reliability Ledger Timeline */}
-                  <div className="p-5 sm:p-6 space-y-4">
-                    <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/50">
-                      {project.ledgerTitle}
+                  <h3 className="mt-4 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                    {project.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-zinc-300 sm:text-base">
+                    {project.summary}
+                  </p>
+
+                  <dl className="mt-6 space-y-4 border-y border-white/10 py-5">
+                    <div>
+                      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#00D9FF]">
+                        Constraint
+                      </dt>
+                      <dd className="mt-1 text-sm leading-6 text-zinc-300">{project.constraint}</dd>
                     </div>
-
-                    <ol className="relative border-l border-white/15 ml-2 space-y-4 pl-5">
-                      {/* CONSTRAINT */}
-                      <li className="relative">
-                        <span
-                          aria-hidden="true"
-                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-[#00D9FF] bg-[#08090C]"
-                        />
-                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#00D9FF]">
-                          CONSTRAINT
-                        </div>
-                        <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
-                          {project.constraint}
-                        </p>
-                      </li>
-
-                      {/* DECISION */}
-                      <li className="relative">
-                        <span
-                          aria-hidden="true"
-                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-[#00D9FF] bg-[#00D9FF]/30"
-                        />
-                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#00D9FF]">
-                          DECISION
-                        </div>
-                        <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
-                          {project.decision}
-                        </p>
-                      </li>
-
-                      {/* IMPLEMENTATION NOTE */}
-                      <li className="relative">
-                        <span
-                          aria-hidden="true"
-                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-[#00FF66] bg-[#00FF66]/30"
-                        />
-                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#00FF66]">
-                          OUTCOME
-                        </div>
-                        <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
-                          {project.outcome}
-                        </p>
-                      </li>
-
-                      {/* EVIDENCE */}
-                      <li className="relative">
-                        <span
-                          aria-hidden="true"
-                          className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border border-white/40 bg-[#08090C]"
-                        />
-                        <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-white/70">
-                          EVIDENCE
-                        </div>
-                        <p className="mt-1 text-xs sm:text-sm text-white/65 leading-relaxed">
-                          {project.evidence}
-                        </p>
-                      </li>
-                    </ol>
-
-                    {/* Contextual Tech Stack Matrix */}
-                    <div className="pt-2 space-y-2">
-                      <div className="font-mono text-[11px] uppercase tracking-wider text-white/45">
-                        ARCHITECTURAL PRIMITIVES
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {project.contextualStack.map((item) => (
-                          <div
-                            key={item.primitive}
-                            className="flex items-center justify-between border border-white/10 bg-[#08090C] px-3 py-2"
-                          >
-                            <span className="font-mono text-xs font-semibold text-white">
-                              {item.primitive}
-                            </span>
-                            <span className="font-mono text-[11px] text-[#00D9FF]">
-                              {item.role}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                    <div>
+                      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#00D9FF]">
+                        Architecture decision
+                      </dt>
+                      <dd className="mt-1 text-sm leading-6 text-zinc-300">{project.decision}</dd>
                     </div>
-
-                    {/* 44px Minimum Touch-Target Expandable Architecture Drawer */}
-                    <div className="pt-2">
-                      <button
-                        type="button"
-                        onClick={() => toggleHowItWorks(project.slug)}
-                        aria-expanded={isExpanded}
-                        className="min-h-[44px] w-full sm:w-auto px-4 inline-flex items-center justify-between sm:justify-center gap-2.5 border border-white/15 hover:border-[#00D9FF] bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white/85 hover:text-[#00D9FF] transition-colors"
-                      >
-                        <span>HOW IT WORKS</span>
-                        <span aria-hidden="true" className="text-[#00D9FF]">
-                          {isExpanded ? '↑' : '↓'}
-                        </span>
-                      </button>
-
-                      {isExpanded && (
-                        <div className="mt-3 border border-[#00D9FF]/30 bg-[#08090C] p-4 space-y-2">
-                          <div className="font-mono text-[11px] uppercase tracking-wider text-[#00D9FF]">
-                            CRITICAL PATH IMPLEMENTATION NOTES
-                          </div>
-                          <ul className="space-y-2 text-xs sm:text-sm text-white/80">
-                            {project.architectureNotes.map((note) => (
-                              <li key={note} className="flex items-start gap-2">
-                                <span className="font-mono text-[#00FF66] shrink-0">
-                                  ›
-                                </span>
-                                <span>{note}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                    <div>
+                      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
+                        Implementation note
+                      </dt>
+                      <dd className="mt-1 text-sm leading-6 text-zinc-300">
+                        {project.implementationNote}
+                      </dd>
                     </div>
+                  </dl>
+
+                  <div className="mt-5">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                      Evidence boundary
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-400">{project.evidence}</p>
                   </div>
-                </div>
 
-                {/* Card Action Footer — Enforces 48px Touch Geometry */}
-                <div className="p-5 sm:p-6 pt-0">
-                  <div className="border-t border-white/10 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <Link
-                      href={project.caseStudyHref}
-                      className="min-h-[48px] flex-1 px-5 inline-flex items-center justify-center gap-2 border border-[#00D9FF] bg-[#00D9FF] text-[#08090C] font-mono text-xs font-bold uppercase tracking-wider hover:bg-[#00D9FF]/90 transition-colors"
+                  <div className="mt-5">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                      Runtime and data stack
+                    </p>
+                    <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {project.contextualStack.map((item) => (
+                        <li
+                          key={item.primitive}
+                          className="flex min-w-0 flex-col gap-1 border border-white/10 bg-[#08090C] px-3 py-2.5"
+                        >
+                          <span className="break-words font-mono text-xs font-semibold text-white">
+                            {item.primitive}
+                          </span>
+                          <span className="font-mono text-[10px] leading-4 text-[#00D9FF]">
+                            {item.role}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      onClick={() => toggleHowItWorks(project.slug)}
+                      aria-expanded={expanded}
+                      aria-controls={detailsId}
+                      className="inline-flex min-h-[44px] w-full items-center justify-between border border-white/15 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-200 transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] sm:w-auto sm:justify-center sm:gap-3"
                     >
-                      <span>READ CASE STUDY</span>
-                      <span aria-hidden="true">↗</span>
-                    </Link>
+                      <span>How it works</span>
+                      <span aria-hidden="true" className="text-[#00D9FF]">
+                        {expanded ? '−' : '+'}
+                      </span>
+                    </button>
 
-                    {project.sourceHref && (
-                      <a
-                        href={project.sourceHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="min-h-[48px] px-5 inline-flex items-center justify-center gap-2 border border-white/20 hover:border-[#00D9FF] bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
+                    {expanded ? (
+                      <div
+                        id={detailsId}
+                        className="mt-3 border border-[#00D9FF]/25 bg-[#08090C] p-4"
                       >
-                        <span>VIEW SOURCE</span>
-                        <span aria-hidden="true">↗</span>
-                      </a>
-                    )}
+                        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#00D9FF]">
+                          Implementation details
+                        </p>
+                        <ul className="mt-3 space-y-2">
+                          {project.architectureNotes.map((note) => (
+                            <li key={note} className="flex items-start gap-2 text-sm leading-6 text-zinc-300">
+                              <span aria-hidden="true" className="mt-0.5 text-[#00D9FF]">—</span>
+                              <span>{note}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
+
+                <footer className="flex flex-col gap-3 border-t border-white/10 p-5 sm:flex-row sm:p-6">
+                  <Link
+                    href={project.caseStudyHref}
+                    className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 bg-[#00D9FF] px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[#08090C] transition-colors hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E10]"
+                  >
+                    <span>Read case study</span>
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                  {project.sourceHref ? (
+                    <a
+                      href={project.sourceHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[48px] items-center justify-center gap-2 border border-white/20 bg-[#08090C] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                    >
+                      <span>View source</span>
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  ) : null}
+                </footer>
               </article>
             );
           })}

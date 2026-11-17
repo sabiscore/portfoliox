@@ -190,7 +190,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                   <div className="glass-no-hover rounded-(--radius-xl) border border-white/10 p-5">
                     <span className="label">Topics</span>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {(post.frontmatter.tags ?? []).map((tag) => (
+                      {(post.frontmatter.tags ?? []).map((tag: string) => (
                         <span key={tag} className="pill">
                           {tag}
                         </span>

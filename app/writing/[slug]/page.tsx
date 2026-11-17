@@ -7,7 +7,6 @@ import { ReadingProgress } from '@/components/ReadingProgress';
 import { StaticSectionIntro } from '@/components/shared/StaticSectionIntro';
 import { getWritingPost, getWritingPosts } from '@/lib/content';
 import { SITE_URL } from '@/lib/config';
-import { SITE_URL } from '@/lib/config';
 import { formatDate } from '@/lib/utils';
 
 interface WritingPostSummary {

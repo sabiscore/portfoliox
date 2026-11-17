@@ -9,6 +9,8 @@ type CommandPaletteGlobal = typeof globalThis & {
   __commandPaletteRequested?: boolean;
 };
 
+type AxeViolation = Awaited<ReturnType<AxeBuilder['analyze']>>['violations'][number];
+
 async function goto(page: Page) {
   await page.goto('/');
   // Live activity and metrics endpoints can keep requests open briefly.
@@ -136,7 +138,7 @@ test.describe('Portfolio smoke tests', () => {
       await page.waitForLoadState('load');
 
       const results = await new AxeBuilder({ page }).include('body').analyze();
-      const blockingViolations = results.violations.filter((violation) => {
+      const blockingViolations = results.violations.filter((violation: AxeViolation) => {
         return violation.impact === 'serious' || violation.impact === 'critical';
       });
 

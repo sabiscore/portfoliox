@@ -6,7 +6,7 @@ import Link from 'next/link';
 export interface ProjectLedgerEntry {
   slug: string;
   domain: string;
-  status: 'LIVE' | 'PRODUCTION' | 'VERIFIED';
+  status: 'ACTIVE BUILD' | 'PUBLIC DEMO' | 'PUBLIC SOURCE' | 'PRIVATE CASE STUDY';
   title: string;
   summary: string;
   ledgerTitle: string;
@@ -27,22 +27,22 @@ const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
   {
     slug: 'taxbridge',
     domain: 'COMPLIANCE PLATFORM · FINTECH',
-    status: 'LIVE',
+    status: 'ACTIVE BUILD',
     title: 'TaxBridge',
     summary:
-      'Tax workflow automation designed to keep tenant boundaries, retries, and audit history explicit — so deadline-driven filing can recover cleanly.',
+      'TaxBridge is a tax workflow platform built around shared API contracts, tenant-scoped data access, background processing, and offline-first mobile sync. NRS DigiTax integration remains in progress.',
     ledgerTitle: 'TAXBRIDGE RELIABILITY LEDGER',
     constraint:
-      'Multi-tenant SME tax submissions must never leak across tenant boundaries or trigger duplicate fiscalization under NRS API rate limits.',
+      'SME filings must preserve organization context and avoid duplicate work when mobile connectivity or upstream fiscal services are unreliable.',
     decision:
-      'Database PostgreSQL 15 Row-Level Security (RLS) paired with idempotent BullMQ jobs keyed deterministically to submission content hashes.',
+      'PostgreSQL row-level security, transaction-scoped organization context, idempotent BullMQ jobs, and an offline-first sync queue.',
     outcome:
-      'Retries resume safely without re-submitting completed filing operations, with offline Android SQLite sync supporting field merchants.',
-    evidence: 'Production architecture record · shared Fastify 5 contracts & Expo SQLite sync.',
+      'The implementation makes tenant scope, retry semantics, and audit history explicit. This is an engineering direction, not a claim of completed end-to-end production certification.',
+    evidence: 'Active build. NRS DigiTax integration, tenant-policy validation, and provider certification remain in progress.',
     architectureNotes: [
-      'Strict tenant_id session variables bound inside Fastify 5 transaction hooks before any query executes.',
-      'BullMQ dead-letter queues isolate upstream NRS timeout spikes without blocking healthy tenant workers.',
-      'React Native Expo Android client queues mutations in local SQLite with deterministic conflict resolution.',
+      'Database access is designed to bind tenant context inside a transaction; policy configuration and transaction lifecycle still require integration validation.',
+      'Idempotent queue keys and bounded retry handling are used to isolate upstream fiscalization failures.',
+      'The Expo client uses a local SQLite queue to preserve pending operations when connectivity is unavailable.'
     ],
     contextualStack: [
       { primitive: 'Fastify 5', role: 'Schema-Locked API' },
@@ -57,22 +57,22 @@ const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
   {
     slug: 'sabiscore',
     domain: 'ML PLATFORM · QUANTITATIVE OBSERVABILITY',
-    status: 'LIVE',
+    status: 'PUBLIC DEMO',
     title: 'SabiScore',
     summary:
-      'An institutional-grade ensemble ML platform that keeps calibrated football prediction delivery resilient through cache failures, retraining, and dependency loss.',
+      'A probabilistic football forecasting and market-comparison product spanning data ingestion, feature engineering, ensemble inference, and a research-facing web interface.'
     ledgerTitle: 'SABISCORE RELIABILITY LEDGER',
     constraint:
-      'Inference and model-health signals must remain calibrated and usable under a strict 1.2GB RAM ceiling and through feature-store or cache failure.',
+      'Prediction quality and service behavior must remain legible as market data, model versions, and upstream feed quality change.'
     decision:
-      'Out-of-core Polars and DuckDB feature pipelines, stacked XGBoost/LightGBM/CatBoost ensembles, Shin devigging, and versioned Redis fallback serving.',
+      'Out-of-core Polars and DuckDB pipelines, model-aware cache namespaces, ensemble evaluation, and an explicit lower-confidence fallback path.'
     outcome:
-      'Continuous Murphy Brier decomposition and E5c Dynamic Dixon-Coles + E10 Market-Offset Residual evaluation with zero OOM container evictions.',
-    evidence: 'Live telemetry at sabiscore.app · verified calibration & Brier skill records.',
+      'The engineering record describes calibration workflows and a fallback path. Public operational uptime and latency measurements are not asserted here.'
+    evidence: 'Public product demo. Private uptime, latency, and model-evaluation artifacts are not represented as public benchmarks.'
     architectureNotes: [
-      'Columnar out-of-core streaming via Polars lazy frames and DuckDB prevents memory spikes during rolling window joins.',
+      'Columnar streaming through Polars lazy frames and DuckDB is used for rolling feature joins under explicit resource constraints.'
       'Shin devigging strips bookmaker overround prior to computing market-offset residual folds.',
-      'Real-time Murphy decomposition monitors Reliability, Resolution, and Uncertainty across every matchweek.',
+      'Model evaluation includes calibration and probability-quality checks; private operational reports are not reproduced in this portfolio.'
     ],
     contextualStack: [
       { primitive: 'Polars + DuckDB', role: 'Out-of-Core Feature Store' },
@@ -87,28 +87,35 @@ const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
   {
     slug: 'yap-engine',
     domain: 'CONVERSATIONAL COMMERCE · EDGE AI',
-    status: 'PRODUCTION',
+    status: 'PUBLIC SOURCE',
     title: 'YapCommerce',
     summary:
-      'Edge-native conversational commerce monorepo translating unstructured WhatsApp Pidgin audio and media into single-turn checkouts with zero cloud-LLM spend.',
+      'A stage-oriented media and agent workflow combining local model routing, schema-constrained outputs, CPU-aware synthesis, and restartable tasks.'
     ledgerTitle: 'YAPCOMMERCE RELIABILITY LEDGER',
     constraint:
-      'Informal MSME retail margins cannot absorb per-token cloud LLM API billing or multi-turn checkout drop-offs over unstable mobile networks.',
+      'Long-running generation stages can be interrupted by provider limits, worker restarts, or resource pressure.'
     decision:
-      'Self-hosted INT8 faster-whisper ASR paired with cgroup-bounded local GGUF models, Fastify 5 state machines, and NIBSS NIP virtual account escrow.',
+      'Local GGUF model routing, stage-level checkpoints, content hashes, schema validation, and deterministic media assembly.'
     outcome:
-      '$0.00 cloud-LLM operational spend, deterministic intent extraction from Nigerian Pidgin voice notes, and automated NRS B2C fiscalization.',
-    evidence: 'Edge-native monorepo · cgroup memory-capped inference & WhatsApp Flow v7.3.',
+      'The project documents restart boundaries and intermediate artifact reuse; no throughput, availability, or cost SLO is asserted here.'
+    evidence: 'Public source and architecture record. Deployment-specific performance varies by hardware and model configuration.'
     architectureNotes: [
-      'INT8 quantized faster-whisper transcribes code-switched English/Pidgin audio notes inside strict CPU/RAM cgroup limits.',
-      'Grammar-constrained local GGUF inference guarantees valid JSON checkout payloads on every turn.',
-      'NIBSS NIP webhook workers reconcile virtual account escrow settlements before triggering NRS B2C receipts.',
+      'Stage-oriented media processing separates synthesis, assembly, and validation steps.'
+      'Local model routing and schema validation keep model output handling explicit.'
+      'Checkpointed orchestration preserves intermediate stage results and makes recovery points explicit.'
     ],
     contextualStack: [
       { primitive: 'faster-whisper INT8', role: 'Pidgin Audio ASR' },
       { primitive: 'Local GGUF', role: '$0 Cloud-LLM Extraction' },
       { primitive: 'Fastify 5', role: 'Checkout State Machine' },
-      { primitive: 'NIBSS NIP', role: 'Escrow Settlement' },
+      { primitive: 'FFmpeg', role: 'Media Assembly' },
+      { primitive: 'Kokoro TTS', role: 'Speech Synthesis' },
+      { primitive: 'Local GGUF', role: 'Model Routing' },
+      { primitive: 'Redis', role: 'Queue State' },
+    ],
+    caseStudyHref: '/work/swarmxq',
+  },
+  { // UBEC
       { primitive: 'WhatsApp Flow v7.3', role: 'Single-Turn UX' },
     ],
     caseStudyHref: '/work/swarmxq',
@@ -116,18 +123,18 @@ const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
   {
     slug: 'ubec',
     domain: 'FEDERAL INFRASTRUCTURE · DATA ENGINEERING',
-    status: 'VERIFIED',
+    status: 'PRIVATE CASE STUDY',
     title: 'UBEC Data Pipeline',
     summary:
-      'Federal education reporting across 36 state sources, designed to keep partial submissions moving without hiding data quality issues.',
+      'State-partitioned data ingestion and validation workflows for federal education reporting, described at a non-sensitive architectural level.'
     ledgerTitle: 'UBEC DATA PIPELINE RELIABILITY LEDGER',
     constraint:
-      'Late and partial state submissions must not block every completed national report or silently corrupt aggregate census metrics.',
+      'Incomplete or inconsistent state submissions need to remain identifiable without blocking independent reporting work.'
     decision:
-      'Isolated Apache Airflow task groups per state, followed by deterministic cross-state schema and statistical validation gates.',
+      'Partitioned ingestion tasks, canonical schemas, validation stages, and traceable exception records.'
     outcome:
-      'Thirty-five state reports proceed cleanly to executive publication while one delayed source remains visibly pending in the audit log.',
-    evidence: 'Private federal engagement · production architecture case study.',
+      'The case study describes the data workflow at a high level; confidential outcomes and operational figures are not published.'
+    evidence: 'Private engagement case study. No confidential artifacts or performance claims are included.'
     architectureNotes: [
       'State-partitioned DAGs isolate upstream formatting anomalies to individual state staging tables.',
       'Automated row-level quarantine logs rejected records with explicit remediation codes for state officers.',
@@ -168,7 +175,7 @@ export function ProjectsSection(): React.JSX.Element {
         <div className="space-y-3 max-w-3xl">
           <div className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
             <span className="text-[#00FF66] font-bold">01</span>
-            <span className="text-white/60">PROJECTS // PRODUCTION LEDGER</span>
+            <span className="text-white/60">PROJECTS // SELECTED WORK</span>
           </div>
           <h2
             id="projects-section-heading"
@@ -177,7 +184,7 @@ export function ProjectsSection(): React.JSX.Element {
             Built around real constraints.
           </h2>
           <p className="text-base sm:text-lg text-white/75 leading-relaxed">
-            Each case study starts with the operational constraint, explains the architectural decision, and verifies the resulting production behavior and runtime primitives.
+            Each case study explains the operating constraint and architectural decisions, then states whether supporting evidence is public, private, or still in progress.
           </p>
         </div>
 
@@ -198,8 +205,7 @@ export function ProjectsSection(): React.JSX.Element {
                       <span className="font-mono text-[11px] uppercase tracking-widest text-white/60">
                         {project.domain}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 border border-[#00FF66]/40 bg-[#00FF66]/10 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#00FF66] shrink-0">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#00FF66]" />
+                      <span className="inline-flex shrink-0 items-center border border-white/15 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-300">
                         {project.status}
                       </span>
                     </div>
@@ -248,7 +254,7 @@ export function ProjectsSection(): React.JSX.Element {
                         </p>
                       </li>
 
-                      {/* OUTCOME */}
+                      {/* IMPLEMENTATION NOTE */}
                       <li className="relative">
                         <span
                           aria-hidden="true"

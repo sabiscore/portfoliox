@@ -7,7 +7,7 @@ describe('command palette Yap Engine wiring', () => {
     const yapEngineItem = STATIC_PALETTE_ITEMS.find((item) => item.id === 'proj-yap-engine');
 
     expect(yapEngineItem).toBeDefined();
-    expect(yapEngineItem?.href).toBe('/work/yap-engine');
+    expect(yapEngineItem?.href).toBe('/work/swarmxq');
   });
 
   it('builds a visible Yap Engine case-study command', () => {
@@ -15,7 +15,7 @@ describe('command palette Yap Engine wiring', () => {
       id: 'cs-proj-yap-engine',
       label: 'The Yap Engine case study',
       group: 'Case Studies',
-      href: '/work/yap-engine',
+      href: '/work/swarmxq',
     });
   });
 

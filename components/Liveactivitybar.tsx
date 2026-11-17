@@ -267,4 +267,11 @@ export function LiveActivityBar({
   );
 }
 
+/**
+ * Backward-compatible named export retained for legacy component consumers.
+ * Both names reference the same component; no duplicate state or rendering path
+ * is introduced.
+ */
+export const Liveactivitybar = LiveActivityBar;
+
 export default LiveActivityBar;

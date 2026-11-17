@@ -12,6 +12,16 @@ export interface ScrollTriggerStatic {
   create: (vars: Record<string, unknown>) => ScrollTriggerInstance;
 }
 
+export interface GsapTimeline {
+  to: (
+    targets: unknown,
+    vars: Record<string, unknown>,
+    position?: number | string
+  ) => GsapTimeline;
+  progress: () => number;
+  isActive: () => boolean;
+}
+
 export interface GsapRuntime {
   registerPlugin: (...plugins: unknown[]) => void;
   ticker: {
@@ -19,13 +29,17 @@ export interface GsapRuntime {
     remove: (callback: (time: number) => void) => void;
     lagSmoothing: (threshold: number, adjustedLag?: number) => void;
   };
+  utils: {
+    selector: (scope: Element | string) => (selector: string) => Element[];
+  };
+  set: (targets: unknown, vars: Record<string, unknown>) => unknown;
   to: (targets: unknown, vars: Record<string, unknown>) => unknown;
   fromTo: (
     targets: unknown,
     fromVars: Record<string, unknown>,
     toVars: Record<string, unknown>
   ) => unknown;
-  timeline: (vars?: Record<string, unknown>) => unknown;
+  timeline: (vars?: Record<string, unknown>) => GsapTimeline;
   context: (func: () => void, scope?: unknown) => { revert: () => void };
 }
 

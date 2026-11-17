@@ -1,24 +1,53 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { ReactNode } from 'react';
 
 import { ReadingProgress } from '@/components/ReadingProgress';
 import { StaticSectionIntro } from '@/components/shared/StaticSectionIntro';
 import { getWritingPost, getWritingPosts } from '@/lib/content';
 import { formatDate } from '@/lib/utils';
 
+interface WritingPostSummary {
+  slug: string;
+  title: string;
+  summary: string;
+  date: string;
+  readingTime: number | string;
+  tags: string[];
+}
+
+interface RankedWritingPost extends WritingPostSummary {
+  sharedTags: number;
+}
+
+interface WritingPostFrontmatter {
+  title: string;
+  summary: string;
+  date: string;
+  tags?: string[];
+}
+
+interface WritingPostDetail {
+  frontmatter: WritingPostFrontmatter;
+  readingTime: number | string;
+  content: ReactNode;
+}
+
 function getRelatedPosts(
   currentSlug: string,
   currentTags: string[],
-  posts: Awaited<ReturnType<typeof getWritingPosts>>
-) {
+  posts: WritingPostSummary[]
+): RankedWritingPost[] {
   return posts
-    .filter((entry) => entry.slug !== currentSlug)
-    .map((entry) => ({
-      ...entry,
-      sharedTags: entry.tags.filter((tag) => currentTags.includes(tag)).length,
-    }))
-    .sort((left, right) => {
+    .filter((entry: WritingPostSummary) => entry.slug !== currentSlug)
+    .map(
+      (entry: WritingPostSummary): RankedWritingPost => ({
+        ...entry,
+        sharedTags: (entry.tags ?? []).filter((tag: string) => currentTags.includes(tag)).length,
+      })
+    )
+    .sort((left: RankedWritingPost, right: RankedWritingPost) => {
       if (right.sharedTags !== left.sharedTags) {
         return right.sharedTags - left.sharedTags;
       }
@@ -34,14 +63,14 @@ type WritingPageProps = Readonly<{
   }>;
 }>;
 
-export async function generateStaticParams() {
-  const posts = await getWritingPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const posts = (await getWritingPosts()) as WritingPostSummary[];
+  return posts.map((post: WritingPostSummary) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: WritingPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getWritingPost(slug);
+  const post = (await getWritingPost(slug)) as WritingPostDetail | null;
 
   if (!post) {
     return { title: 'Writing' };
@@ -78,26 +107,31 @@ function articleJsonLd(title: string, summary: string, date: string, slug: strin
 
 export default async function WritingPostPage({ params }: WritingPageProps) {
   const { slug } = await params;
-  const post = await getWritingPost(slug);
-  const allPosts = await getWritingPosts();
+  const post = (await getWritingPost(slug)) as WritingPostDetail | null;
+  const allPosts = (await getWritingPosts()) as WritingPostSummary[];
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = getRelatedPosts(slug, post.frontmatter.tags ?? [], allPosts);
-  const articleMeta = [
+  const tags: string[] = post.frontmatter.tags ?? [];
+  const relatedPosts = getRelatedPosts(slug, tags, allPosts);
+  const articleMeta: Array<{ label: string; value: string }> = [
     { label: 'Published', value: formatDate(post.frontmatter.date) },
     { label: 'Reading time', value: `${post.readingTime} min read` },
-    { label: 'Surface', value: 'Technical writing' },
+    { label: 'Surface', value: 'Technical Monograph' },
   ];
 
   return (
     <>
       <ReadingProgress />
-      <main id="main-content" tabIndex={-1}>
-        <section className="pt-[calc(var(--nav-height)+var(--space-12))]">
-          <div className="container">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-screen bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
+      >
+        <section className="pt-[calc(var(--nav-height,72px)+3rem)] pb-20">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{
@@ -111,58 +145,84 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                 ),
               }}
             />
-            <Link href="/writing" className="pill pill-cyan">
-              Back to writing
+
+            {/* Strict 44px Minimum Touch Geometry Back Link */}
+            <Link
+              href="/writing"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 border border-white/10 bg-[#0E0E10]/90 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-[#00D9FF] uppercase backdrop-blur-md transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+            >
+              <span aria-hidden="true">←</span>
+              <span>BACK_TO_WRITING</span>
             </Link>
-            <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
+
+            <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
               <div className="min-w-0">
-                <header className="mt-(--space-8) mb-(--space-10) max-w-[60ch]">
+                <header className="mb-10 max-w-[65ch] border-b border-white/10 pb-8">
                   <StaticSectionIntro
-                    eyebrowLabel="Writing"
+                    eyebrowLabel="Engineering Monograph"
                     headingId="writing-article-heading"
                     title={<>{post.frontmatter.title}</>}
                     description={post.frontmatter.summary}
-                    titleClassName="text-color-text-primary mt-(--space-2)"
-                    descriptionClassName="text-color-text-secondary mt-(--space-4) text-(length:--text-lg)"
+                    titleClassName="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl mt-2"
+                    descriptionClassName="text-zinc-300 mt-4 text-base sm:text-lg leading-relaxed"
                   />
-                  <div className="mt-(--space-6) flex flex-wrap gap-(--space-3) text-(--color-text-muted)">
-                    <time dateTime={post.frontmatter.date}>
+                  <div className="mt-6 flex flex-wrap items-center gap-3 font-mono text-xs text-zinc-400">
+                    <time dateTime={post.frontmatter.date} className="text-[#00D9FF]">
                       {formatDate(post.frontmatter.date)}
                     </time>
-                    <span aria-hidden="true">•</span>
-                    <span>{post.readingTime} min read</span>
+                    <span aria-hidden="true" className="text-white/20">
+                      //
+                    </span>
+                    <span className="border border-[#00FF66]/30 bg-[#00FF66]/10 px-2 py-0.5 text-[#00FF66]">
+                      {post.readingTime} MIN READ
+                    </span>
                   </div>
                 </header>
 
-                <article className="prose max-w-none pb-(--space-20)">{post.content}</article>
+                <article className="prose prose-invert max-w-none pb-16">
+                  {post.content}
+                </article>
 
-                {relatedPosts.length ? (
+                {relatedPosts.length > 0 ? (
                   <aside
                     aria-labelledby="related-writing-heading"
-                    className="glass-no-hover mb-(--space-20) rounded-(--radius-xl) border border-white/10 p-6"
+                    className="mb-16 border border-white/10 bg-[#0E0E10]/90 p-6 backdrop-blur-xl"
                   >
-                    <span className="label">Continue reading</span>
-                    <h2 id="related-writing-heading" className="mt-(--space-2)">
-                      Related articles
+                    <span className="font-mono text-xs tracking-widest text-[#00D9FF] uppercase">
+                      CONTINUE_READING // RELATED_MONOGRAPHS
+                    </span>
+                    <h2
+                      id="related-writing-heading"
+                      className="mt-2 font-display text-2xl font-bold text-white"
+                    >
+                      Related Architectural Analyses
                     </h2>
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
-                      {relatedPosts.map((entry) => (
+                      {relatedPosts.map((entry: RankedWritingPost) => (
                         <article
                           key={entry.slug}
-                          className="rounded-(--radius-lg) border border-white/10 p-5"
+                          className="flex flex-col justify-between border border-white/10 bg-[#08090C]/90 p-5 transition-colors hover:border-[#00D9FF]/40"
                         >
-                          <div className="flex flex-wrap items-center gap-3 text-sm text-white/50">
-                            <time dateTime={entry.date}>{formatDate(entry.date)}</time>
-                            <span aria-hidden="true">•</span>
-                            <span>{entry.readingTime} min read</span>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-zinc-400">
+                              <time dateTime={entry.date}>{formatDate(entry.date)}</time>
+                              <span aria-hidden="true">•</span>
+                              <span className="text-[#00FF66]">{entry.readingTime} min read</span>
+                            </div>
+                            <h3 className="mt-3 font-display text-lg font-bold text-white">
+                              {entry.title}
+                            </h3>
+                            <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+                              {entry.summary}
+                            </p>
                           </div>
-                          <h3 className="mt-3 text-white">{entry.title}</h3>
-                          <p className="mt-3 text-sm leading-7 text-white/65">{entry.summary}</p>
+
                           <Link
                             href={`/writing/${entry.slug}`}
-                            className="mt-5 inline-flex items-center gap-2 text-sm text-cyan-200 transition hover:text-white"
+                            className="mt-5 inline-flex min-h-[44px] items-center justify-between border border-white/10 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs font-medium text-[#00D9FF] transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
                           >
-                            Read article →
+                            <span>READ_ARTICLE</span>
+                            <span aria-hidden="true">→</span>
                           </Link>
                         </article>
                       ))}
@@ -171,27 +231,35 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                 ) : null}
               </div>
 
-              <aside className="space-y-4 xl:sticky xl:top-[calc(var(--nav-height)+var(--space-8))]">
-                <div className="glass-no-hover rounded-(--radius-xl) border border-white/10 p-5">
-                  <span className="label">At a glance</span>
-                  <div className="mt-4 space-y-4">
-                    {articleMeta.map((item) => (
+              {/* Right Telemetry & Metadata Sidebar */}
+              <aside className="space-y-4 xl:sticky xl:top-[calc(var(--nav-height,72px)+2rem)]">
+                <div className="border border-white/10 bg-[#0E0E10]/90 p-5 backdrop-blur-xl">
+                  <span className="font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase">
+                    TELEMETRY // AT_A_GLANCE
+                  </span>
+                  <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
+                    {articleMeta.map((item: { label: string; value: string }) => (
                       <div key={item.label} className="space-y-1">
-                        <p className="text-color-text-muted text-xs tracking-[0.14em] uppercase">
+                        <p className="font-mono text-[10px] tracking-[0.14em] text-zinc-400 uppercase">
                           {item.label}
                         </p>
-                        <p className="text-sm text-white/80">{item.value}</p>
+                        <p className="font-mono text-xs font-semibold text-white">{item.value}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {(post.frontmatter.tags ?? []).length ? (
-                  <div className="glass-no-hover rounded-(--radius-xl) border border-white/10 p-5">
-                    <span className="label">Topics</span>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {(post.frontmatter.tags ?? []).map((tag: string) => (
-                        <span key={tag} className="pill">
+                {tags.length > 0 ? (
+                  <div className="border border-white/10 bg-[#0E0E10]/90 p-5 backdrop-blur-xl">
+                    <span className="font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase">
+                      INDEXED_TOPICS
+                    </span>
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-4">
+                      {tags.map((tag: string) => (
+                        <span
+                          key={tag}
+                          className="inline-flex min-h-[32px] items-center border border-white/10 bg-[#08090C] px-2.5 py-1 font-mono text-xs text-zinc-200"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -199,8 +267,11 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                   </div>
                 ) : null}
 
-                <Link href="/writing" className="pill pill-cyan inline-flex w-full justify-center">
-                  Browse all writing
+                <Link
+                  href="/writing"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase transition-colors hover:bg-[#00D9FF]/20 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+                >
+                  BROWSE_ALL_WRITING
                 </Link>
               </aside>
             </div>

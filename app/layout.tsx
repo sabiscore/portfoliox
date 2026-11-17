@@ -3,6 +3,7 @@ import { JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from './providers';
+import { SITE_URL } from '@/lib/config';
 import './globals.css';
 
 const spaceGrotesk = Space_Grotesk({
@@ -26,10 +27,29 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scardubu.dev'),
-  title: 'Oscar Ndugbu (@Scardubu) — Principal Systems Architect & Quant Strategist',
+  metadataBase: new URL(SITE_URL),
+  title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
   description:
-    'Editorial anthology of fail-closed quantitative systems, memory-bounded Polars/DuckDB pipelines, and edge-native Nigerian fintech infrastructure.',
+    'Staff Backend and Platform Engineer in Lagos, Nigeria. Engineering reliable backend services, data-intensive platforms, AI infrastructure, and resilient fintech systems.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'Oscar Ndugbu — Staff Backend and Platform Engineer',
+    title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
+    description:
+      'Backend, platform, AI infrastructure, and production reliability engineering. Lagos, Nigeria · Remote.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Oscar Ndugbu — Staff Backend and Platform Engineer' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
+    description:
+      'Backend, platform, AI infrastructure, and production reliability engineering. Lagos, Nigeria · Remote.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({

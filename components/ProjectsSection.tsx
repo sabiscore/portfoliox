@@ -111,7 +111,7 @@ const PRODUCTION_PROJECTS: ReadonlyArray<ProjectLedgerEntry> = [
       { primitive: 'NIBSS NIP', role: 'Escrow Settlement' },
       { primitive: 'WhatsApp Flow v7.3', role: 'Single-Turn UX' },
     ],
-    caseStudyHref: '/work/yap-engine',
+    caseStudyHref: '/work/swarmxq',
   },
   {
     slug: 'ubec',

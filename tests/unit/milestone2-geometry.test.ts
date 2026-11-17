@@ -44,7 +44,7 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     expect(writingPage).toContain('getWritingPosts()');
     expect(writingPage).toContain('href={`/writing/${featured.slug}`}');
     expect(writingPage).toContain('href={`/writing/${post.slug}`}');
-    expect(writingPage).toContain('id="writing-list-heading"');
+    expect(writingPage).toContain('headingId="writing-list-heading"');
   });
 
   it('keeps both hero calls to action at a 48px minimum height', () => {
@@ -70,14 +70,13 @@ describe('Current portfolio geometry and accessibility contracts', () => {
 
   it('keeps the identity ledger portrait and profile grid within their mobile geometry', () => {
     const identity = read('components/IdentityCard.tsx');
-    const styles = read('components/identityCardStyles.ts');
-
     expect(identity).toContain('aria-label="Principal Architect Identity Ledger"');
-    expect(identity).toContain('IDENTITY_CARD_PROFILE_GRID_CLASSNAME');
-    expect(identity).toContain('IDENTITY_CARD_PORTRAIT_CLASSNAME');
-    expect(styles).toContain('grid-cols-[7.25rem_minmax(0,1fr)]');
-    expect(styles).toContain('aspect-[4/5]');
-    expect(styles).toContain('max-w-[25rem]');
+    // The current identity ledger deliberately uses a compact 64px square
+    // portrait beside a shrink-safe text column instead of the retired card grid.
+    expect(identity).toContain('className="mt-5 flex items-center gap-4"');
+    expect(identity).toContain('className="relative h-16 w-16 shrink-0');
+    expect(identity).toContain('className="min-w-0 flex-1"');
+    expect(identity).toContain('sizes="64px"');
   });
 
   it('keeps the app-level theme tokens and dark color-scheme contract', () => {

@@ -1,23 +1,12 @@
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
+// Production smoke suite for the current App Router portfolio.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 
 import { CONTACT_EMAIL } from '@/lib/config';
 
-type CommandPaletteGlobal = typeof globalThis & {
-  __commandPaletteRequested?: boolean;
-};
-
-type AxeViolation = Awaited<ReturnType<AxeBuilder['analyze']>>['violations'][number];
-
 async function goto(page: Page): Promise<void> {
   const response = await page.goto('/');
-
   expect(response?.ok(), 'Homepage should return a successful HTTP response').toBe(true);
-
-  // Live activity and metrics endpoints can keep requests open briefly.
-  // `load` is enough for structural smoke checks and avoids flaky idle waits.
   await page.waitForLoadState('load');
 }
 
@@ -26,9 +15,6 @@ async function expectNoOverflowAtWidth(browser: Browser, width: number): Promise
 
   try {
     const page = await context.newPage();
-
-    // 'load' is sufficient for CSS layout; 'networkidle' times out because
-    // live activity / GitHub stats APIs hold persistent connections.
     const response = await page.goto('/');
     expect(response?.ok(), `Homepage should load successfully at ${width}px`).toBe(true);
     await page.waitForLoadState('load');
@@ -39,7 +25,6 @@ async function expectNoOverflowAtWidth(browser: Browser, width: number): Promise
         documentElement.scrollWidth,
         document.body?.scrollWidth ?? 0
       );
-
       return documentWidth > documentElement.clientWidth;
     });
 
@@ -48,193 +33,154 @@ async function expectNoOverflowAtWidth(browser: Browser, width: number): Promise
       `Horizontal overflow detected at a viewport width of ${width}px`
     ).toBe(false);
   } finally {
-    // Explicitly close manually created contexts, including on assertion or
-    // navigation failures, so browser resources are not leaked between widths.
     await context.close();
   }
 }
 
-test.describe('Portfolio smoke tests', () => {
-  test.beforeEach(async ({ browserName }) => {
-    if (browserName === 'firefox') {
-      test.skip();
-    }
-  });
-
-  test('skip nav is first focusable element', async ({ page }) => {
+test.describe('Production portfolio smoke tests', () => {
+  test('skip navigation is the first keyboard focus target', async ({ page }) => {
     await goto(page);
 
-    const firstFocusableClassName = await page.evaluate(() => {
-      const selectors = [
-        'a[href]',
-        'button:not([disabled])',
-        'input:not([disabled])',
-        'select:not([disabled])',
-        'textarea:not([disabled])',
-        '[tabindex]:not([tabindex="-1"])',
-      ].join(',');
+    const skipLink = page.getByRole('link', { name: 'Skip to main content' });
+    await expect(skipLink).toHaveAttribute('href', '#main-content');
 
-      const firstFocusable = Array.from(document.querySelectorAll<HTMLElement>(selectors)).find(
-        (element) => {
-          const style = window.getComputedStyle(element);
-          return style.display !== 'none' && style.visibility !== 'hidden';
-        }
-      );
-
-      return firstFocusable?.className ?? '';
-    });
-
-    expect(firstFocusableClassName).toContain('skip-nav');
+    await page.keyboard.press('Tab');
+    await expect(skipLink).toBeFocused();
   });
 
-  test('hero loads with conviction headline and canonical role', async ({ page }) => {
+  test('homepage renders the current positioning and one primary heading', async ({ page }) => {
     await goto(page);
 
-    await expect(page.locator('#hero')).toBeVisible();
-    await expect(page.locator('h1')).toHaveAttribute('aria-label', /The system has to work at 2am/);
-    await expect(page.locator('#hero')).toContainText('Staff Backend and Platform Engineer');
-    await expect(page.locator('#hero')).not.toContainText(/Updated June 2026/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      'Fail-Closed Quantitative Systems'
+    );
+    await expect(page.locator('body')).toContainText(
+      'PRINCIPAL SYSTEMS ARCHITECT & QUANT STRATEGIST'
+    );
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   });
 
   test('root theme defaults to dark semantics', async ({ page }) => {
     await goto(page);
 
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-
-    const hasLightClass = await page.evaluate(() => {
-      return document.documentElement.classList.contains('light');
-    });
-
-    expect(hasLightClass).toBe(false);
+    await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'dark');
+    expect(
+      await page.evaluate(() => document.documentElement.classList.contains('light'))
+    ).toBe(false);
   });
 
-  test('home has no horizontal overflow at 320px, 360px, 375px, 390px, and 430px', async ({
-    browser,
-  }) => {
-    await expectNoOverflowAtWidth(browser, 320);
-    await expectNoOverflowAtWidth(browser, 360);
-    await expectNoOverflowAtWidth(browser, 375);
-    await expectNoOverflowAtWidth(browser, 390);
-    await expectNoOverflowAtWidth(browser, 430);
+  test('home has no horizontal overflow at supported mobile widths', async ({ browser }) => {
+    for (const width of [320, 360, 375, 390, 430]) {
+      await expectNoOverflowAtWidth(browser, width);
+    }
   });
 
-  test('desktop nav exposes projects hash target', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'Desktop primary nav is hidden on mobile by design.');
-
+  test('primary navigation exposes the projects destination', async ({ page }) => {
     await goto(page);
 
-    const projectsLink = page
-      .locator('nav[aria-label="Primary"]')
-      .getByRole('link', { name: 'Projects', exact: true });
-
+    const navigation = page.getByRole('navigation', { name: 'Primary system navigation' });
+    const projectsLink = navigation.getByRole('link', { name: /PROJECTS/i });
     await expect(projectsLink).toBeVisible();
-    await expect(projectsLink).toHaveAttribute('href', /#section-projects$/);
+    await expect(projectsLink).toHaveAttribute('href', '/#projects');
   });
 
-  test('live activity is announced politely', async ({ page }) => {
+  test('mobile navigation opens and closes with accessible state', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'This test is scoped to the mobile navigation layout.');
     await goto(page);
 
-    const strictStatusLocator = page.locator(
-      '[role="status"][aria-label="Recent GitHub activity"]'
+    const menuButton = page.getByRole('button', { name: 'Open navigation menu' });
+    await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+    await menuButton.click();
+    await expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#mobile-navigation-drawer')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Close navigation menu' }).click();
+    await expect(page.getByRole('button', { name: 'Open navigation menu' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
     );
-    await expect(strictStatusLocator).toHaveCount(1, { timeout: 20000 });
   });
 
-  test('representative routes have no serious accessibility violations', async ({ page }) => {
-    const routes = [
+  test('live telemetry mode is announced through a polite atomic region', async ({ page }) => {
+    await goto(page);
+
+    const modeAnnouncement = page.locator(
+      '#telemetry [aria-live="polite"][aria-atomic="true"]'
+    );
+    await expect(modeAnnouncement).toBeVisible({ timeout: 20_000 });
+    await expect(modeAnnouncement).toContainText(/LIVE_EDGE|DETERMINISTIC_CACHE/);
+  });
+
+  test('representative routes have no serious or critical accessibility violations', async ({
+    page,
+  }) => {
+    for (const route of [
       '/',
       '/writing',
       '/work/sabiscore',
       '/writing/building-sabiscore',
-    ] as const;
-
-    for (const route of routes) {
+    ]) {
       const response = await page.goto(route);
       expect(response?.ok(), `${route} should return a successful HTTP response`).toBe(true);
       await page.waitForLoadState('load');
 
       const results = await new AxeBuilder({ page }).include('body').analyze();
-      const blockingViolations = results.violations.filter((violation: AxeViolation) => {
-        return violation.impact === 'serious' || violation.impact === 'critical';
-      });
-
+      const blockingViolations = results.violations.filter(
+        (violation) => violation.impact === 'serious' || violation.impact === 'critical'
+      );
       expect(blockingViolations, `${route} has serious or critical Axe violations`).toEqual([]);
     }
   });
 
-  test('command palette opens and closes from its global trigger', async ({ page }) => {
-    await goto(page);
-
-    await page.addInitScript(() => {
-      (globalThis as CommandPaletteGlobal).__commandPaletteRequested = true;
-    });
-    await page.reload({ waitUntil: 'load' });
-
-    const dialog = page.getByRole('dialog', { name: /command palette/i });
-    const isOpen = await dialog.isVisible();
-    if (!isOpen) {
-      test.skip();
-    }
-
-    await expect(dialog).toBeVisible();
-    await expect(page.getByRole('textbox', { name: /command search/i })).toBeVisible();
-
-    await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
-  });
-
-  test('main landmark and scroll progress are present', async ({ page }) => {
+  test('main landmark and primary architecture sections are present', async ({ page }) => {
     await goto(page);
 
     await expect(page.locator('main#main-content')).toHaveCount(1);
-    await expect(page.locator('[data-testid="scroll-progress"]')).toBeAttached();
+    await expect(page.locator('#telemetry')).toBeAttached();
+    await expect(page.locator('#deployments')).toBeAttached();
   });
 
-  test('contact section exposes canonical email and form', async ({ page }) => {
+  test('contact section exposes the canonical email and labelled brief form', async ({ page }) => {
     await goto(page);
 
-    const section = page.locator('section#section-contact[aria-labelledby="contact-heading"]');
-    const emailLink = section.locator(`a[href="mailto:${CONTACT_EMAIL}"]`).first();
-    const form = page.locator('form[aria-label="Contact Oscar Ndugbu"]');
-
+    const section = page.locator('section#contact[aria-labelledby="contact-section-heading"]');
     await expect(section).toBeAttached();
-    await section.scrollIntoViewIfNeeded();
-    await emailLink.scrollIntoViewIfNeeded();
-    await form.scrollIntoViewIfNeeded();
-    await expect(emailLink).toBeVisible();
-    await expect(form).toBeVisible();
+    await expect(section.getByRole('heading', { name: 'Discuss a system.' })).toBeVisible();
+    await expect(section.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
+    await expect(section.locator('#contact-name')).toHaveAccessibleName(/NAME // IDENTIFIER/i);
+    await expect(section.locator('#contact-email')).toHaveAccessibleName(/RETURN ENDPOINT/i);
+    await expect(section.locator('#contact-scope')).toHaveAccessibleName(/SYSTEM DOMAIN/i);
+    await expect(section.locator('#contact-message')).toHaveAccessibleName(/CONSTRAINTS & OBJECTIVES/i);
   });
 
-  test('resume download points to the canonical asset', async ({ page }) => {
+  test('resume link points to the canonical PDF asset', async ({ page }) => {
     await goto(page);
-
-    const resumeLink = page
-      .locator('a[href="/cv/oscar-ndugbu-resume.pdf"][download]')
-      .filter({ visible: true })
-      .first();
-    await resumeLink.scrollIntoViewIfNeeded();
+    const resumeLink = page.locator('a[href="/cv/oscar-ndugbu-resume.pdf"]').first();
     await expect(resumeLink).toBeVisible();
-    await expect(resumeLink).toHaveAttribute('download', '');
+    await expect(resumeLink).toHaveAttribute('target', '_blank');
   });
 
-  test('writing section renders on the home page', async ({ page }) => {
-    await goto(page);
+  test('writing index renders on its dedicated route', async ({ page }) => {
+    const response = await page.goto('/writing');
+    expect(response?.ok(), 'Writing index should return a successful HTTP response').toBe(true);
+    await page.waitForLoadState('load');
 
-    const section = page.locator('section#section-writing[aria-labelledby="writing-heading"]');
-    await expect(section).toBeAttached();
-    // Scroll to trigger the GSAP ScrollTrigger reveal before asserting visibility.
-    await section.scrollIntoViewIfNeeded();
     await expect(
       page.getByRole('heading', { name: /Writing that makes engineering decisions clear/i })
-    ).toBeVisible({ timeout: 8000 });
+    ).toBeVisible();
+    await expect(page.getByText(/articles$/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /Read article/i }).first()).toHaveAttribute(
+      'href',
+      /\/writing\//
+    );
   });
 
-  test('all target blank links include noopener and noreferrer', async ({ page }) => {
+  test('all external target-blank links include noopener and noreferrer', async ({ page }) => {
     await goto(page);
 
     const targetBlankLinks = page.locator('a[target="_blank"]');
     await expect(targetBlankLinks).not.toHaveCount(0);
-
     const relTokens = await targetBlankLinks.evaluateAll((nodes) =>
       nodes.map((node) =>
         (node.getAttribute('rel') ?? '')
@@ -250,23 +196,33 @@ test.describe('Portfolio smoke tests', () => {
     }
   });
 
-  test('activity API returns JSON with ago field', async ({ page }) => {
+  test('activity API returns uncached JSON with a relative-time field', async ({ page }) => {
+    await goto(page);
+
     const response = await page.request.get('/api/activity');
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toContain('application/json');
+    expect(response.headers()['cache-control']).toContain('no-store');
 
     const body: unknown = await response.json();
     expect(body).toEqual(expect.objectContaining({ ago: expect.any(String) }));
   });
 
-  test('footer trust strip renders canonical copy', async ({ page }) => {
+  test('footer renders its current operating statement and external destinations', async ({ page }) => {
     await goto(page);
 
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
     await expect(footer).toContainText(
-      'Backend · Platform · AI infrastructure · Production reliability'
+      'FAIL-CLOSED SYSTEMS · ZERO-USD EDGE AI · QUANTITATIVE INFRASTRUCTURE'
     );
-    await expect(footer).toContainText('scardubu.dev');
+    await expect(footer.getByRole('link', { name: /GITHUB/i })).toHaveAttribute(
+      'href',
+      'https://github.com/scardubu'
+    );
+    await expect(footer.getByRole('link', { name: /SABISCORE.APP/i })).toHaveAttribute(
+      'href',
+      'https://sabiscore.app'
+    );
   });
 });

@@ -7,7 +7,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "prebuild": "node scripts/verify-app-router.mjs",
+    "prebuild": "node scripts/verify-app-router.mjs && node scripts/verify-ui-contracts.mjs",
     "build": "BROWSERSLIST_IGNORE_OLD_DATA=1 next build",
     "dev": "next dev",
     "start": "next start",

@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { ReadingProgress } from '@/components/ReadingProgress';
 import { StaticSectionIntro } from '@/components/shared/StaticSectionIntro';
 import { getWritingPost, getWritingPosts } from '@/lib/content';
+import { SITE_URL } from '@/lib/config';
 import { formatDate } from '@/lib/utils';
 
 interface WritingPostSummary {
@@ -79,11 +80,11 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
   return {
     title: post.frontmatter.title,
     description: post.frontmatter.summary,
-    alternates: { canonical: `https://www.scardubu.dev/writing/${slug}` },
+    alternates: { canonical: `${SITE_URL}/writing/${slug}` },
     openGraph: {
       title: `${post.frontmatter.title} · Oscar Ndugbu (Scardubu)`,
       description: post.frontmatter.summary,
-      url: `https://www.scardubu.dev/writing/${slug}`,
+      url: `${SITE_URL}/writing/${slug}`,
       type: 'article',
     },
   };
@@ -96,11 +97,11 @@ function articleJsonLd(title: string, summary: string, date: string, slug: strin
     headline: title,
     description: summary,
     datePublished: date,
-    url: `https://www.scardubu.dev/writing/${slug}`,
+    url: `${SITE_URL}/writing/${slug}`,
     author: {
       '@type': 'Person',
       name: 'Oscar Ndugbu (Scardubu)',
-      url: 'https://www.scardubu.dev',
+      url: SITE_URL,
     },
   };
 }

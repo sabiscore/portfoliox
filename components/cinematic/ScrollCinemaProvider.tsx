@@ -18,6 +18,10 @@ import type { ChapterId } from '@/lib/cinematic/chapters';
 import { CHAPTERS } from '@/lib/cinematic/chapters';
 import { loadScrollCinemaRuntime } from '@/lib/cinematic/load-scroll-cinema';
 
+interface ScrollTriggerInstance {
+  kill: () => void;
+}
+
 type ScrollCinemaContextValue = {
   reducedMotion: boolean;
   activeChapter: ChapterId;
@@ -31,7 +35,7 @@ type ScrollCinemaContextValue = {
 
 const ScrollCinemaContext = createContext<ScrollCinemaContextValue | null>(null);
 
-function getSectionOffset() {
+function getSectionOffset(): number {
   if (typeof window === 'undefined') return -88;
   const navHeightToken = getComputedStyle(document.documentElement)
     .getPropertyValue('--nav-height')
@@ -40,7 +44,7 @@ function getSectionOffset() {
   return Number.isFinite(navHeight) ? -(navHeight + 16) : -88;
 }
 
-export function useScrollCinema() {
+export function useScrollCinema(): ScrollCinemaContextValue {
   const value = useContext(ScrollCinemaContext);
   if (!value) throw new Error('useScrollCinema must be used within ScrollCinemaProvider');
   return value;
@@ -211,10 +215,6 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
         }
 
         try {
-          // Resolve the element to a numeric document coordinate before the
-          // animation starts. Deferred sections can change their containing
-          // geometry during a smooth scroll; a moving HTMLElement target can
-          // therefore settle above or below the sticky-nav safe zone.
           activeLenis.resize();
 
           const settleTarget = (settleAttempt: number) => {
@@ -225,9 +225,6 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
                 activeLenis.scrollTo(correctedTop, { immediate: true, force: true });
               }
 
-              // Below-fold chapters can release content-visibility containment or
-              // finish font/layout work after the first correction frame. Recheck
-              // for a short bounded window instead of letting the anchor drift.
               if (settleAttempt < 4) {
                 settleTimerRef.current = window.setTimeout(() => {
                   settleTimerRef.current = null;
@@ -341,9 +338,6 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
     const compactViewportAtBoot = window.matchMedia('(max-width: 767px)').matches;
     const touchAtBoot = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
 
-    // Mobile/reduced-motion is intentionally resolved before any GSAP/ScrollTrigger
-    // download, registration, or refresh. Native scrolling is the product contract
-    // on touch and for people who request reduced motion.
     if (
       reducedMotion ||
       reducedMotionAtBoot ||
@@ -371,14 +365,8 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
           import('lenis'),
         ]);
 
-        // Route transitions and capability changes may clean up this effect while
-        // the chunks are still in flight. Never initialize against an unmounted tree.
         if (cancelled) return;
 
-        // Lenis is the single desktop wheel owner. ScrollTrigger remains synchronized
-        // from Lenis' scroll event, but does not install normalizeScroll(), which would
-        // independently intercept the same wheel input on the JavaScript thread.
-        // Touch/coarse-pointer devices never reach this branch and keep native scrolling.
         gsap.ticker.lagSmoothing(0);
 
         const safeRefresh = (force = false) => {
@@ -400,10 +388,6 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
             smoothWheel: true,
             syncTouch: false,
             wheelMultiplier: 1,
-            // Lenis' built-in anchor path accounts for both CSS scroll-margin and
-            // root scroll-padding. The app's canonical target uses a direct sticky-nav
-            // offset instead, so compensate here and make both click paths converge on
-            // the same final coordinate rather than launching competing destinations.
             anchors: { offset: -sectionOffset },
             stopInertiaOnNavigate: true,
             prevent: (node: HTMLElement) => {
@@ -482,7 +466,7 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
         let resizeObserver: ResizeObserver | null = null;
         if (typeof ResizeObserver !== 'undefined' && lenis) {
           let previousHeight = 0;
-          resizeObserver = new ResizeObserver((entries) => {
+          resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
             for (const entry of entries) {
               const newHeight = entry.contentRect.height;
               if (Math.abs(newHeight - previousHeight) > 4) {
@@ -540,7 +524,8 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
           if (refreshTimer !== null) clearTimeout(refreshTimer);
           document.removeEventListener('visibilitychange', onVisibility);
           try {
-            ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+            const activeTriggers = ScrollTrigger.getAll() as ScrollTriggerInstance[];
+            activeTriggers.forEach((trigger: ScrollTriggerInstance) => trigger.kill());
           } catch (error) {
             warnDev('ScrollTrigger cleanup failed.', error);
           }
@@ -552,11 +537,6 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
       }
     };
 
-    // Keep the first paint free of GSAP/Lenis bootstrap work. The hero is
-    // fully usable with native scrolling; desktop cinematic scrolling is an
-    // enhancement that can safely start after the browser has had a chance to
-    // paint the critical content. A bounded timeout keeps the enhancement from
-    // being postponed indefinitely on a busy main thread.
     const schedule = window.setTimeout(() => {
       void initializeDesktopEngine();
     }, 600);

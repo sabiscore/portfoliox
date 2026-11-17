@@ -1,22 +1,50 @@
-export const OBSIDIAN_NOCTURNE_V2 = {
-  backgrounds: {
-    base: "#08090C",     // Pure OLED black base canvas
-    surface: "#0E0E10",  // Elevated structural cards & bars
-    elevated: "#14161B", // Nested metric cells & interactive pills
-  },
-  borders: {
-    default: "#1F222A",  // Crisp 1px structural hairline
-    subtle: "#2A2E39",   // Hover / focus hairline state
-  },
-  accents: {
-    cyan: "#00D9FF",     // Electric cyan for telemetry, badges & focus borders
-    emerald: "#00FF66",  // Emerald green for primary CTAs & live indicators
-  },
-  text: {
-    primary: "#F3F4F6",  // High-contrast primary headings & copy
-    muted: "#9CA3AF",    // Secondary analytical prose
-    dim: "#6B7280",      // Monospace metadata & coordinates
-  },
-} as const;
+export interface PaletteItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  href: string;
+  category: 'project' | 'writing' | 'navigation' | 'system';
+  keywords: string[];
+}
 
-export type ObsidianPalette = typeof OBSIDIAN_NOCTURNE_V2;
+export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
+  {
+    id: 'proj-sabiscore',
+    title: 'SabiScore Quantitative Platform',
+    subtitle: 'Polars, DuckDB, Shin Devigging & 0.25x Fractional Kelly',
+    href: '/work/sabiscore',
+    category: 'project',
+    keywords: ['sabiscore', 'quant', 'football', 'polars', 'duckdb', 'kelly'],
+  },
+  {
+    id: 'proj-yap-engine',
+    title: 'YapCommerce // The Yap Engine',
+    subtitle: 'Zero-USD Cloud-LLM Multi-Agent Local GGUF Pipeline',
+    href: '/work/yap-engine',
+    category: 'project',
+    keywords: ['yap', 'gguf', 'fastify', 'agents', 'tiktok', 'yapcommerce'],
+  },
+  {
+    id: 'proj-taxbridge',
+    title: 'TaxBridge Compliance Architecture',
+    subtitle: 'Offline-First Nigerian Fintech Fiscal Ledger',
+    href: '/work/taxbridge',
+    category: 'project',
+    keywords: ['taxbridge', 'fintech', 'nigeria', 'offline', 'zod', 'crdt'],
+  },
+  {
+    id: 'nav-writing',
+    title: 'Engineering Monographs & Writing',
+    subtitle: 'Deep dives into low-memory ML and emerging-market systems',
+    href: '/writing',
+    category: 'navigation',
+    keywords: ['blog', 'writing', 'articles', 'monographs'],
+  },
+];
+
+export function getProjectPaletteCommand(slug: string): PaletteItem | undefined {
+  const normalized = slug.trim().toLowerCase();
+  return STATIC_PALETTE_ITEMS.find(
+    (item) => item.id === `proj-${normalized}` || item.href === `/work/${normalized}`
+  );
+}

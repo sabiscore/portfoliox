@@ -18,6 +18,7 @@ jobs:
       - run: pnpm run type-check
       - run: pnpm run test:unit
       - run: pnpm run audit:copy
+      - run: pnpm run verify:ui-contracts
       - run: pnpm build
       - uses: actions/upload-artifact@v4
         with:

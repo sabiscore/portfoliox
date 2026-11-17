@@ -11,32 +11,47 @@ type CommandPaletteGlobal = typeof globalThis & {
 
 type AxeViolation = Awaited<ReturnType<AxeBuilder['analyze']>>['violations'][number];
 
-async function goto(page: Page) {
-  await page.goto('/');
+async function goto(page: Page): Promise<void> {
+  const response = await page.goto('/');
+
+  expect(response?.ok(), 'Homepage should return a successful HTTP response').toBe(true);
+
   // Live activity and metrics endpoints can keep requests open briefly.
   // `load` is enough for structural smoke checks and avoids flaky idle waits.
   await page.waitForLoadState('load');
 }
 
-async function expectNoOverflowAtWidth(browser: Browser, width: number) {
+async function expectNoOverflowAtWidth(browser: Browser, width: number): Promise<void> {
   const context = await browser.newContext({ viewport: { width, height: 812 } });
-  const page = await context.newPage();
 
-  // 'load' is sufficient for CSS layout; 'networkidle' times out because
-  // live activity / GitHub stats APIs hold persistent connections.
-  await page.goto('/');
-  await page.waitForLoadState('load');
+  try {
+    const page = await context.newPage();
 
-  const overflow = await page.evaluate(() => {
-    const startX = window.scrollX;
-    window.scrollTo({ left: window.innerWidth * 2, top: window.scrollY, behavior: 'auto' });
-    const canScrollHorizontally = window.scrollX > startX;
-    window.scrollTo({ left: startX, top: window.scrollY, behavior: 'auto' });
-    return canScrollHorizontally;
-  });
+    // 'load' is sufficient for CSS layout; 'networkidle' times out because
+    // live activity / GitHub stats APIs hold persistent connections.
+    const response = await page.goto('/');
+    expect(response?.ok(), `Homepage should load successfully at ${width}px`).toBe(true);
+    await page.waitForLoadState('load');
 
-  expect(overflow).toBe(false);
-  await context.close();
+    const hasHorizontalOverflow = await page.evaluate(() => {
+      const documentElement = document.documentElement;
+      const documentWidth = Math.max(
+        documentElement.scrollWidth,
+        document.body?.scrollWidth ?? 0
+      );
+
+      return documentWidth > documentElement.clientWidth;
+    });
+
+    expect(
+      hasHorizontalOverflow,
+      `Horizontal overflow detected at a viewport width of ${width}px`
+    ).toBe(false);
+  } finally {
+    // Explicitly close manually created contexts, including on assertion or
+    // navigation failures, so browser resources are not leaked between widths.
+    await context.close();
+  }
 }
 
 test.describe('Portfolio smoke tests', () => {
@@ -134,7 +149,8 @@ test.describe('Portfolio smoke tests', () => {
     ] as const;
 
     for (const route of routes) {
-      await page.goto(route);
+      const response = await page.goto(route);
+      expect(response?.ok(), `${route} should return a successful HTTP response`).toBe(true);
       await page.waitForLoadState('load');
 
       const results = await new AxeBuilder({ page }).include('body').analyze();
@@ -155,7 +171,7 @@ test.describe('Portfolio smoke tests', () => {
     await page.reload({ waitUntil: 'load' });
 
     const dialog = page.getByRole('dialog', { name: /command palette/i });
-    const isOpen = await dialog.isVisible().catch(() => false);
+    const isOpen = await dialog.isVisible();
     if (!isOpen) {
       test.skip();
     }
@@ -208,30 +224,39 @@ test.describe('Portfolio smoke tests', () => {
     await expect(section).toBeAttached();
     // Scroll to trigger the GSAP ScrollTrigger reveal before asserting visibility.
     await section.scrollIntoViewIfNeeded();
-    await expect(page.getByRole('heading', { name: /Writing that makes engineering decisions clear/i })).toBeVisible({
-      timeout: 8000,
-    });
+    await expect(
+      page.getByRole('heading', { name: /Writing that makes engineering decisions clear/i })
+    ).toBeVisible({ timeout: 8000 });
   });
 
   test('all target blank links include noopener and noreferrer', async ({ page }) => {
     await goto(page);
 
-    const relValues = await page
-      .locator('a[target="_blank"]')
-      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('rel') ?? ''));
+    const targetBlankLinks = page.locator('a[target="_blank"]');
+    await expect(targetBlankLinks).not.toHaveCount(0);
 
-    for (const rel of relValues) {
-      expect(rel).toContain('noopener');
-      expect(rel).toContain('noreferrer');
+    const relTokens = await targetBlankLinks.evaluateAll((nodes) =>
+      nodes.map((node) =>
+        (node.getAttribute('rel') ?? '')
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean)
+      )
+    );
+
+    for (const tokens of relTokens) {
+      expect(tokens).toContain('noopener');
+      expect(tokens).toContain('noreferrer');
     }
   });
 
   test('activity API returns JSON with ago field', async ({ page }) => {
     const response = await page.request.get('/api/activity');
     expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('application/json');
 
-    const body = (await response.json()) as { ago: string };
-    expect(typeof body.ago).toBe('string');
+    const body: unknown = await response.json();
+    expect(body).toEqual(expect.objectContaining({ ago: expect.any(String) }));
   });
 
   test('footer trust strip renders canonical copy', async ({ page }) => {

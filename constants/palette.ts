@@ -20,7 +20,7 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
     id: 'proj-yap-engine',
     title: 'YapCommerce // The Yap Engine',
     subtitle: 'Zero-USD Cloud-LLM Multi-Agent Local GGUF Pipeline',
-    href: '/work/yap-engine',
+    href: '/work/swarmxq',
     category: 'project',
     keywords: ['yap', 'gguf', 'fastify', 'agents', 'tiktok', 'yapcommerce'],
   },

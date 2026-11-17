@@ -60,19 +60,24 @@ test.describe('Current portfolio interactions', () => {
       'href',
       '/writing'
     );
-    await expect(page.getByLabel('Principal Architect Identity Ledger')).toBeVisible();
+    await expect(page.getByLabel('Staff Backend and Platform Engineer profile')).toBeVisible();
     await expect(page.locator(`a[href="/cv/oscar-ndugbu-resume.pdf"]`).first()).toBeVisible();
   });
 
-  test('telemetry node selector switches the active system readout', async ({ page }) => {
+  test('architecture index switches project records without claiming live telemetry', async ({ page }) => {
     await gotoHome(page);
 
-    const telemetry = page.locator('#telemetry');
-    const yapNode = telemetry.getByRole('button', { name: /YAP_ENGINE_ORCHESTRATOR/i });
-    await expect(yapNode).toBeVisible({ timeout: 20_000 });
+    const index = page.locator('#architecture-index');
+    await expect(
+      index.getByRole('heading', { name: 'Systems, constraints, and implementation choices' })
+    ).toBeVisible();
+    await expect(index).toContainText('not a live production monitor');
+
+    const yapNode = index.getByRole('button', { name: /Yap Engine/i });
     await yapNode.click();
-    await expect(telemetry).toContainText('edge.local.wsl2');
-    await expect(telemetry).toContainText('ZERO_USD_CLOUD_LLM_VERIFIED');
+    await expect(yapNode).toHaveAttribute('aria-pressed', 'true');
+    await expect(index).toContainText('content-addressed stage inputs');
+    await expect(index).toContainText('No production latency SLO is claimed here.');
   });
 
   test('project cards link to their case-study routes', async ({ page }) => {
@@ -178,13 +183,14 @@ test.describe('Current portfolio interactions', () => {
     );
   });
 
-  test('homepage remains horizontally contained at narrow mobile width', async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 712 });
-    await gotoHome(page);
-
-    const hasOverflow = await page.evaluate(
-      () => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > window.innerWidth
-    );
-    expect(hasOverflow).toBe(false);
+  test('homepage remains horizontally contained across the supported viewport matrix', async ({ page }) => {
+    for (const width of [320, 360, 375, 390, 430, 768, 1024, 1280, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      await gotoHome(page);
+      const hasOverflow = await page.evaluate(
+        () => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > window.innerWidth
+      );
+      expect(hasOverflow, `Horizontal overflow at ${width}px`).toBe(false);
+    }
   });
 });

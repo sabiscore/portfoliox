@@ -70,7 +70,7 @@ describe('Current portfolio geometry and accessibility contracts', () => {
 
   it('keeps the identity ledger portrait and profile grid within their mobile geometry', () => {
     const identity = read('components/IdentityCard.tsx');
-    expect(identity).toContain('aria-label="Principal Architect Identity Ledger"');
+    expect(identity).toContain('aria-label="Staff Backend and Platform Engineer profile"');
     // The current identity ledger deliberately uses a compact 64px square
     // portrait beside a shrink-safe text column instead of the retired card grid.
     expect(identity).toContain('className="mt-5 flex items-center gap-4"');

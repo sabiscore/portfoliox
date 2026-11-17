@@ -223,7 +223,7 @@ export function LiveActivityBar({
           <span
             aria-live="polite"
             aria-atomic="true"
-            className="hidden border border-[#00FF66]/30 bg-[#00FF66]/10 px-2 py-0.5 font-mono text-[11px] text-[#00FF66] sm:inline-block"
+            className="inline-block border border-[#00FF66]/30 bg-[#00FF66]/10 px-2 py-0.5 font-mono text-[11px] text-[#00FF66]"
           >
             {telemetryMode}
           </span>

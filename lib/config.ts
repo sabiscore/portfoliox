@@ -21,7 +21,9 @@
  * nav click. That function is removed. Use anchorUrl() instead.
  */
 
-export const SITE_URL: string = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://scardubu.dev';
+// Canonical hostname: the apex host redirects to www, so all indexable
+// metadata, structured data, feeds, and sitemaps use the redirect destination.
+export const SITE_URL = 'https://www.scardubu.dev';
 
 export const BLOG_BASE: string = `${SITE_URL}/blog`;
 export const CV_ASSET_PATH = '/cv/oscar-ndugbu-resume.pdf';
@@ -93,7 +95,7 @@ export function anchorUrl(anchor: string): string {
  * Absolute canonical URL — for <meta>, og:url, sitemap, JSON-LD only.
  * Do NOT use in Next.js <Link href> or <a href> for navigation.
  *
- * Returns: 'https://scardubu.dev/#section-id'
+ * Returns: 'https://www.scardubu.dev/#section-id'
  */
 export function canonicalSectionUrl(anchor: string): string {
   return `${SITE_URL}/#${anchor}`;

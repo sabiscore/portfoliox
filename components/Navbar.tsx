@@ -39,7 +39,7 @@ export function Navbar(): React.JSX.Element {
         aria-label="Primary system navigation"
         className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16"
       >
-        {/* Brand Wordmark & Live Telemetry Pulse */}
+        {/* Brand Wordmark */}
         <div className="flex items-center gap-4">
           <Link
             href="/"
@@ -48,9 +48,8 @@ export function Navbar(): React.JSX.Element {
             <span>SCARDUBU</span>
           </Link>
 
-          <span className="hidden sm:inline-flex items-center gap-1.5 border border-[#00FF66]/30 bg-[#0E0E10] px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#00FF66]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#00FF66] animate-pulse" />
-            NOMINAL
+          <span className="hidden sm:inline-flex items-center border border-white/10 bg-[#0E0E10] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-400">
+            ENGINEERING PORTFOLIO
           </span>
         </div>
 

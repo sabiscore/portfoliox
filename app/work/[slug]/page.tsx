@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { JSX } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: WorkPageProps): Promise<Metad
   };
 }
 
-export default async function WorkCasePage({ params }: WorkPageProps): Promise<React.JSX.Element> {
+export default async function WorkCasePage({ params }: WorkPageProps): Promise<JSX.Element> {
   const { slug } = await params;
   const [workCase, workCases] = await Promise.all([getWorkCase(slug), getWorkCases()]);
 

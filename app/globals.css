@@ -26,3 +26,13 @@ body {
   outline: 2px solid #00d9ff;
   outline-offset: 2px;
 }
+
+/*
+ * Isolate the full-viewport decorative mesh from page layout and promote its
+ * transform to a compositor layer. The root has explicit fixed dimensions,
+ * so strict containment does not collapse its layout box.
+ */
+.gradient-mesh-motion {
+  contain: strict;
+  transform: translateZ(0);
+}

@@ -25,7 +25,7 @@
 // metadata, structured data, feeds, and sitemaps use the redirect destination.
 export const SITE_URL = 'https://www.scardubu.dev';
 
-export const BLOG_BASE: string = `${SITE_URL}/blog`;
+export const BLOG_BASE: string = `${SITE_URL}/writing`;
 export const CV_ASSET_PATH = '/cv/oscar-ndugbu-resume.pdf';
 
 // ─── Contact ──────────────────────────────────────────────────────────────────
@@ -64,8 +64,8 @@ export const SENDER_EMAIL = 'noreply@scardubu.dev';
 // ─── Blog URLs ────────────────────────────────────────────────────────────────
 
 /**
- * Canonical URL for a blog post.
- * Used in BlogBridge, FeaturedArticle, blog-articles.ts.
+ * Canonical URL for an editorial post.
+ * The public editorial route is /writing; legacy /blog URLs redirect there.
  * These are external links — absolute URLs are correct here.
  */
 export function blogUrl(slug: string): string {

@@ -32,7 +32,7 @@ const FEATURED_PROJECTS: readonly FeaturedProject[] = [
     architectureSummary:
       'Local quantized GGUF inference and deterministic multi-agent orchestration over Fastify, eliminating external API token burn while maintaining strict schema guarantees.',
     embeddedStack: ['GGUF Local LLM', 'Fastify', 'TypeScript', 'Zod', 'PM2'],
-    evidenceStatus: 'PUBLIC DEMO',
+    evidenceStatus: 'PUBLIC SOURCE',
   },
   {
     slug: 'taxbridge',

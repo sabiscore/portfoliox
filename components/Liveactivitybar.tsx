@@ -81,6 +81,71 @@ export interface LiveActivityBarProps {
   initialActiveId?: TelemetryNode['id'];
 }
 
+export function LiveActivityBarSkeleton(): React.JSX.Element {
+  const shimmer = 'animate-pulse rounded bg-white/10';
+
+  return (
+    <section
+      aria-label="Live Deployment Telemetry"
+      aria-busy="true"
+      className="w-full rounded-none border border-white/10 bg-[#0E0E10]/90 backdrop-blur-xl"
+    >
+      <span className="sr-only">Loading live deployment telemetry</span>
+
+      <div
+        aria-hidden="true"
+        className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#08090C]/80 px-4 py-2.5"
+      >
+        <div className="flex items-center gap-3">
+          <span className={`${shimmer} h-2.5 w-2.5 rounded-full`} />
+          <span className={`${shimmer} h-3 w-64 max-w-[60vw]`} />
+          <span className={`${shimmer} hidden h-5 w-24 sm:inline-block`} />
+        </div>
+        <span className={`${shimmer} h-11 w-28`} />
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="grid grid-cols-1 divide-y divide-white/10 border-b border-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+      >
+        {Array.from({ length: 3 }, (_, index) => (
+          <div key={index} className="flex min-h-[48px] items-center justify-between px-4 py-3">
+            <span className={`${shimmer} h-3 w-40 max-w-[65%]`} />
+            <span className={`${shimmer} h-5 w-14`} />
+          </div>
+        ))}
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-12 lg:items-center"
+      >
+        <div className="space-y-2 lg:col-span-4">
+          <span className={`${shimmer} block h-3 w-44`} />
+          <span className={`${shimmer} block h-5 w-56 max-w-full`} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 border-y border-white/10 py-3 sm:py-0 lg:col-span-4 lg:border-x lg:border-y-0 lg:px-4">
+          <div className="space-y-2">
+            <span className={`${shimmer} block h-2.5 w-28`} />
+            <span className={`${shimmer} block h-4 w-36 max-w-full`} />
+          </div>
+          <div className="space-y-2">
+            <span className={`${shimmer} block h-2.5 w-24`} />
+            <span className={`${shimmer} block h-4 w-24 max-w-full`} />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 lg:col-span-4 lg:justify-end">
+          {Array.from({ length: 4 }, (_, index) => (
+            <span key={index} className={`${shimmer} h-7 w-16`} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function LiveActivityBar({
   className = '',
   initialActiveId = 'sabiscore',

@@ -76,7 +76,8 @@ test.describe('Production portfolio smoke tests', () => {
     }
   });
 
-  test('primary navigation exposes the projects destination', async ({ page }) => {
+  test('primary navigation exposes the projects destination', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'The desktop route links are replaced by the mobile drawer.');
     await goto(page);
 
     const navigation = page.getByRole('navigation', { name: 'Primary system navigation' });

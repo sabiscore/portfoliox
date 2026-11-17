@@ -263,7 +263,7 @@ export function ContactSection(): React.JSX.Element {
               <span>
                 {status === 'SUBMITTING'
                   ? 'TRANSMITTING PAYLOAD...'
-                  : 'DISPATCH ARCHITECTURAL BRIEF →'}
+                  : 'DISPATCH ARCHITECTURAL BRIEF ↗'}
               </span>
             </button>
           </form>

@@ -20,7 +20,7 @@ const FEATURED_PROJECTS: readonly FeaturedProject[] = [
     domainRole: 'Quantitative Football Markets & Probabilistic Forecasting',
     evidenceNote: 'Public product demo · private performance artifacts are not published here',
     architectureSummary:
-      'Out-of-core Polars & DuckDB feature engineering, Shin devigging, Dirichlet simplex calibration, and 0.25x fractional Kelly allocation inside a strict 512MB cgroup.',
+      'Out-of-core Polars and DuckDB feature processing, odds de-vigging, ensemble evaluation, and a version-aware fallback path.',
     embeddedStack: ['Polars', 'DuckDB', 'PyArrow', 'FastAPI', 'Next.js 15'],
     evidenceStatus: 'PUBLIC DEMO',
   },
@@ -30,7 +30,7 @@ const FEATURED_PROJECTS: readonly FeaturedProject[] = [
     domainRole: 'Autonomous Multi-Agent Media & Social Commerce Pipeline',
     evidenceNote: 'Public architecture record · no production throughput SLO is claimed',
     architectureSummary:
-      'Local quantized GGUF inference and deterministic multi-agent orchestration over Fastify, eliminating external API token burn while maintaining strict schema guarantees.',
+      'Local model routing and stage-oriented agent orchestration, with schema validation and content-addressed checkpoints for restartable media workflows.',
     embeddedStack: ['GGUF Local LLM', 'Fastify', 'TypeScript', 'Zod', 'PM2'],
     evidenceStatus: 'PUBLIC SOURCE',
   },
@@ -40,7 +40,7 @@ const FEATURED_PROJECTS: readonly FeaturedProject[] = [
     domainRole: 'Offline-First Nigerian Fintech & Fiscal Compliance Ledger',
     evidenceNote: 'Active build · NRS DigiTax integration and policy validation remain in progress',
     architectureSummary:
-      'Resilient revenue collection and tax reconciliation engine engineered for intermittent connectivity across Southeast Nigeria with cryptographic audit trails.',
+      'Tax workflow architecture for intermittent connectivity, explicit organization context, background processing, and append-oriented audit records.',
     embeddedStack: ['Fastify', 'DuckDB', 'Zod', 'SQLite CRDT', 'Tailwind'],
     evidenceStatus: 'ACTIVE BUILD',
   },
@@ -78,7 +78,7 @@ export function HeroSection(): React.JSX.Element {
           <nav aria-label="Primary Jump Links" className="flex flex-wrap items-center gap-2">
             {[
               { href: '#deployments', label: '01.DEPLOYMENTS' },
-              { href: '#telemetry', label: '02.TELEMETRY' },
+              { href: '#architecture-index', label: '02.ARCHITECTURE INDEX' },
               { href: '/writing', label: '03.EDITORIAL' },
               { href: '/cv/oscar-ndugbu-resume.pdf', label: '04.DOSSIER_PDF' },
             ].map((item) => (

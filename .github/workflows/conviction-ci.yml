@@ -159,8 +159,8 @@ jobs:
 
       - name: Smoke — conviction strings present
         run: |
-          grep -rEn "The system has to work at 2am" --include="*.tsx" --include="*.ts" . | grep -q "." || (echo "✗ Conviction signal missing" && exit 1)
-          grep -rEn "Staff Backend and Platform Engineer" --include="*.tsx" --include="*.ts" app components lib | grep -q "." || (echo "✗ Canonical role missing" && exit 1)
+          grep -rEn "Fail-Closed Quantitative Systems" --include="*.tsx" --include="*.ts" app components lib | grep -q "." || (echo "✗ Conviction signal missing" && exit 1)
+          grep -rEn "PRINCIPAL SYSTEMS ARCHITECT & QUANT STRATEGIST" --include="*.tsx" --include="*.ts" app components lib | grep -q "." || (echo "✗ Canonical role missing" && exit 1)
           echo "✓ Conviction strings verified"
 
       - name: Smoke — UI accessibility and rendering contracts

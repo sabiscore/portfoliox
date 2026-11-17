@@ -43,6 +43,9 @@ export default function RootLayout({
       data-theme="dark"
       className={`dark ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <meta name="color-scheme" content="dark" />
+      </head>
       <body className="min-h-screen bg-[#08090C] font-sans text-white antialiased selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]">
         <Providers>{children}</Providers>
       </body>

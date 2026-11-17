@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
-import { fetchWithCache } from "@/lib/fetch-utils";
+import { NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 interface GitHubUserResponse {
-  public_repos: number;
-  followers: number;
+  public_repos?: number;
+  followers?: number;
 }
 
 interface ContributionDay {
@@ -16,58 +18,70 @@ interface ContributionsResponse {
   contributions?: ContributionDay[];
 }
 
-export async function GET() {
-  try {
-    const [userJson, contributionsJson] = await Promise.all([
-      fetchWithCache<GitHubUserResponse>(
-        "https://api.github.com/users/Scardubu",
-        {
-          revalidate: 86400,
-          tags: ["github-user"],
-        }
-      ),
-      fetchWithCache<ContributionsResponse>(
-        "https://github-contributions-api.deno.dev/Scardubu.json",
-        {
-          revalidate: 86400,
-          tags: ["github-contributions"],
-        }
-      ).catch(() => null),
-    ]);
+type GitHubStatsPayload = {
+  publicRepos: number | null;
+  followers: number | null;
+  currentYearContributions: number | null;
+  availability: 'complete' | 'partial' | 'unavailable';
+};
 
-    const currentYear = new Date().getFullYear();
-    const currentYearContributions =
-      contributionsJson?.contributions?.reduce((sum, day) => {
+export async function GET(): Promise<NextResponse<GitHubStatsPayload>> {
+  const [userResult, contributionsResult] = await Promise.allSettled([
+    fetch('https://api.github.com/users/Scardubu', {
+      headers: { Accept: 'application/vnd.github+json' },
+      next: { revalidate: 3600, tags: ['github-user'] },
+      signal: AbortSignal.timeout(5000),
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(`GitHub profile request failed: ${response.status}`);
+      return (await response.json()) as GitHubUserResponse;
+    }),
+    fetch('https://github-contributions-api.deno.dev/Scardubu.json', {
+      headers: { Accept: 'application/json' },
+      next: { revalidate: 3600, tags: ['github-contributions'] },
+      signal: AbortSignal.timeout(5000),
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(`Contribution request failed: ${response.status}`);
+      return (await response.json()) as ContributionsResponse;
+    }),
+  ]);
+
+  const user = userResult.status === 'fulfilled' ? userResult.value : null;
+  const contributionData =
+    contributionsResult.status === 'fulfilled' ? contributionsResult.value : null;
+  const currentYear = new Date().getFullYear();
+
+  const currentYearContributions = Array.isArray(contributionData?.contributions)
+    ? contributionData.contributions.reduce((sum, day) => {
         const year = new Date(day.date).getFullYear();
-        return year === currentYear ? sum + (day.count || 0) : sum;
-      }, 0) ?? 350;
+        return year === currentYear && Number.isFinite(day.count) ? sum + day.count : sum;
+      }, 0)
+    : contributionData?.totalContributions ?? null;
 
-    const payload = {
-      publicRepos: userJson.public_repos ?? 12,
-      followers: userJson.followers ?? 45,
-      currentYearContributions,
-    };
+  const values = {
+    publicRepos:
+      typeof user?.public_repos === 'number' && Number.isFinite(user.public_repos)
+        ? user.public_repos
+        : null,
+    followers:
+      typeof user?.followers === 'number' && Number.isFinite(user.followers)
+        ? user.followers
+        : null,
+    currentYearContributions,
+  };
+  const availableCount = Object.values(values).filter((value) => value !== null).length;
+  const payload: GitHubStatsPayload = {
+    ...values,
+    availability:
+      availableCount === 3 ? 'complete' : availableCount > 0 ? 'partial' : 'unavailable',
+  };
 
-    return NextResponse.json(payload, {
-      status: 200,
-      headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=300",
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching GitHub stats", error);
-    return NextResponse.json(
-      {
-        publicRepos: 12,
-        followers: 45,
-        currentYearContributions: 350,
-      },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=300",
-        },
-      }
-    );
-  }
+  return NextResponse.json(payload, {
+    status: 200,
+    headers: {
+      'Cache-Control':
+        payload.availability === 'complete'
+          ? 'public, s-maxage=3600, stale-while-revalidate=300'
+          : 'public, s-maxage=60, stale-while-revalidate=120',
+    },
+  });
 }

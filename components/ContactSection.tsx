@@ -1,81 +1,86 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import {
-  Terminal,
-  Send,
-  Copy,
-  Check,
-  ShieldCheck,
-  AlertCircle,
-  FileText,
-} from "lucide-react";
+import React, { useState, useCallback } from 'react';
 
-type SubmissionState = "idle" | "submitting" | "success" | "error";
+interface InquiryPayload {
+  name: string;
+  email: string;
+  scope: string;
+  message: string;
+}
 
-const ADVISORY_SCOPES = [
-  "Distributed Backend & Platform Architecture",
-  "AI / ML Infrastructure (<512MB / Low-Latency)",
-  "Fintech Compliance & Multi-Tenant RLS Audit",
-  "Staff / Principal Engineering Advisory",
-] as const;
+const INITIAL_PAYLOAD: InquiryPayload = {
+  name: '',
+  email: '',
+  scope: 'Fintech / Compliance Architecture',
+  message: '',
+};
 
-export const ContactSection: React.FC = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [scope, setScope] = useState<string>(ADVISORY_SCOPES[0]);
-  const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<SubmissionState>("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [copiedEmail, setCopiedEmail] = useState(false);
+const ARCHITECTURAL_SCOPES: ReadonlyArray<string> = [
+  'Fintech / Compliance Architecture',
+  'Quantitative ML & Out-of-Core Pipelines',
+  'Zero-USD Edge AI / Conversational Commerce',
+  'Advisory / Principal Engineering Role',
+];
 
-  const directEmail = "oscar@scardubu.dev";
+export function ContactSection(): React.JSX.Element {
+  const [formState, setFormState] = useState<InquiryPayload>(INITIAL_PAYLOAD);
+  const [status, setStatus] = useState<'IDLE' | 'SUBMITTING' | 'SENT' | 'ERROR'>('IDLE');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
 
-  const handleCopyEmail = async () => {
+  const directEmail = 'oscar@scardubu.dev';
+
+  const handleCopyEmail = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(directEmail);
       setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2000);
+      setTimeout(() => setCopiedEmail(false), 2500);
     } catch {
-      // Fail-closed fallback
+      setCopiedEmail(false);
     }
-  };
+  }, [directEmail]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    setErrorMsg("");
+    setErrorMessage('');
 
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      setStatus("error");
-      setErrorMsg("All required contract fields must be populated.");
+    const trimmedName = formState.name.trim();
+    const trimmedEmail = formState.email.trim();
+    const trimmedMessage = formState.message.trim();
+
+    if (trimmedName.length < 2 || !trimmedEmail.includes('@') || trimmedMessage.length < 10) {
+      setStatus('ERROR');
+      setErrorMessage(
+        'SCHEMA_VALIDATION_ERROR: Provide a valid name, email address, and architectural brief (min 10 chars).'
+      );
       return;
     }
 
-    setStatus("submitting");
+    setStatus('SUBMITTING');
+
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          subject: scope,
-          message: message.trim(),
+          name: trimmedName,
+          email: trimmedEmail,
+          subject: formState.scope,
+          message: trimmedMessage,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Endpoint returned non-200 status.");
+        throw new Error(`HTTP_${response.status}`);
       }
 
-      setStatus("success");
-      setName("");
-      setEmail("");
-      setMessage("");
+      setStatus('SENT');
+      setFormState(INITIAL_PAYLOAD);
     } catch {
-      setStatus("error");
-      setErrorMsg(
-        "Direct dispatch interrupted. Use the one-tap email copy or mailto link.",
+      setStatus('ERROR');
+      setErrorMessage(
+        'TRANSMISSION_FALLBACK: Endpoint rate-limited or offline. Copy direct email below to dispatch immediately.'
       );
     }
   };
@@ -83,226 +88,189 @@ export const ContactSection: React.FC = () => {
   return (
     <section
       id="contact"
-      aria-labelledby="contact-heading"
-      className="border-t border-obsidian-border bg-obsidian-base"
+      aria-labelledby="contact-section-heading"
+      className="w-full bg-[#08090C] text-white py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-white/10"
     >
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          {/* Left Column: Advisory Context & Direct Endpoints */}
-          <div className="lg:col-span-5">
-            <div className="mb-2 inline-flex items-center gap-2 font-mono text-caption uppercase tracking-telemetry">
-              <span className="font-semibold text-accent-cyan">04</span>
-              <span className="text-obsidian-muted">DISCUSS A SYSTEM</span>
+      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+        {/* Left Column: Direct Dispatch & Operating Window */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="space-y-3">
+            <div className="font-mono text-xs uppercase tracking-[0.2em] text-[#00D9FF]">
+              03 // INITIATE CHANNEL
             </div>
-
             <h2
-              id="contact-heading"
-              className="mb-3 font-sans text-3xl font-bold tracking-tight text-obsidian-text sm:text-4xl"
+              id="contact-section-heading"
+              className="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight"
             >
-              Initiate an architectural review.
+              Discuss a system.
             </h2>
-
-            <p className="mb-6 font-sans text-sm leading-relaxed text-obsidian-muted sm:text-base">
-              Available for Staff/Principal Backend &amp; Platform roles,
-              high-reliability infrastructure consulting, and architectural
-              reviews for early-stage fintech and AI teams.
+            <p className="text-sm sm:text-base text-white/75 leading-relaxed">
+              Available for Staff/Principal backend architecture engagements, quantitative research systems, and high-throughput fintech infrastructure across Nigeria and global remote teams.
             </p>
-
-            {/* Direct Telemetry Card */}
-            <div className="mb-4 rounded-xl border border-obsidian-border bg-obsidian-surface p-4">
-              <div className="mb-2 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                DIRECT DISPATCH ENDPOINT
-              </div>
-
-              <div className="flex items-center justify-between gap-2 rounded-lg border border-obsidian-border bg-obsidian-elevated px-3 py-2.5">
-                <a
-                  href={`mailto:${directEmail}`}
-                  className="truncate font-mono text-caption text-accent-cyan hover:underline"
-                >
-                  {directEmail}
-                </a>
-
-                <button
-                  type="button"
-                  onClick={handleCopyEmail}
-                  aria-label="Copy direct email address"
-                  className="inline-flex min-h-pill items-center gap-1.5 rounded border border-obsidian-border bg-obsidian-surface px-2.5 py-1 font-mono text-micro text-obsidian-text transition-colors hover:border-accent-emerald hover:text-accent-emerald"
-                >
-                  {copiedEmail ? (
-                    <>
-                      <Check className="h-3.5 w-3.5 text-accent-emerald" />
-                      <span>COPIED</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-3.5 w-3.5 text-obsidian-muted" />
-                      <span>COPY</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Downloadable Engineering Dossier / Resume */}
-            <a
-              href="/cv/oscar-ndugbu-resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex min-h-touch w-full items-center justify-between rounded-xl border border-obsidian-border bg-obsidian-surface px-4 py-3 font-mono text-caption text-obsidian-text transition-colors hover:border-accent-cyan hover:text-accent-cyan"
-            >
-              <span className="flex items-center gap-2.5">
-                <FileText className="h-4 w-4 text-accent-emerald" />
-                <span>Download Engineering Resume (PDF)</span>
-              </span>
-              <span className="text-micro text-obsidian-dim">VERIFIED</span>
-            </a>
           </div>
 
-          {/* Right Column: Touch-Safe Intake Form */}
-          <div className="lg:col-span-7">
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="relative overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-5 sm:p-6"
-            >
-              <div
-                className="absolute inset-x-0 top-0 h-px bg-illuminate-dual"
-                aria-hidden="true"
-              />
+          <div className="border border-white/15 bg-[#0E0E10]/90 backdrop-blur-xl p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <span className="font-mono text-xs uppercase tracking-wider text-white/60">
+                DIRECT TELEMETRY ENDPOINT
+              </span>
+              <span className="font-mono text-[11px] font-semibold text-[#00FF66]">
+                ● WAT (UTC+1)
+              </span>
+            </div>
 
-              <div className="mb-5 flex items-center justify-between border-b border-obsidian-border pb-3">
-                <span className="inline-flex items-center gap-2 font-mono text-micro uppercase tracking-telemetry text-obsidian-text">
-                  <Terminal className="h-3.5 w-3.5 text-accent-cyan" />
-                  <span>SYSTEM SPECIFICATION INTAKE</span>
-                </span>
-                <span className="font-mono text-micro text-accent-emerald">
-                  TLS 1.3 · FAIL-CLOSED
-                </span>
+            <div className="space-y-1">
+              <div className="font-mono text-xs text-white/50">PRIMARY ELECTRONIC MAIL</div>
+              <div className="font-mono text-sm sm:text-base font-bold text-white break-all">
+                {directEmail}
               </div>
+            </div>
 
-              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="contact-name"
-                    className="mb-1.5 block font-mono text-micro uppercase tracking-telemetry text-obsidian-muted"
-                  >
-                    Name / Organization *
-                  </label>
-                  <input
-                    id="contact-name"
-                    name="name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Adaobi — CTO, PayStack"
-                    className="w-full min-h-touch rounded-lg border border-obsidian-border bg-obsidian-base px-3.5 py-2.5 font-sans text-sm text-obsidian-text placeholder:text-obsidian-dim focus:border-accent-cyan focus:outline-none"
-                  />
-                </div>
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="min-h-[44px] flex-1 px-4 inline-flex items-center justify-center gap-2 border border-white/20 hover:border-[#00D9FF] bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
+              >
+                <span>{copiedEmail ? 'COPIED TO CLIPBOARD ✓' : 'COPY ADDRESS'}</span>
+              </button>
 
-                <div>
-                  <label
-                    htmlFor="contact-email"
-                    className="mb-1.5 block font-mono text-micro uppercase tracking-telemetry text-obsidian-muted"
-                  >
-                    Return Endpoint (Email) *
-                  </label>
-                  <input
-                    id="contact-email"
-                    name="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="engineer@company.com"
-                    className="w-full min-h-touch rounded-lg border border-obsidian-border bg-obsidian-base px-3.5 py-2.5 font-mono text-caption text-obsidian-text placeholder:text-obsidian-dim focus:border-accent-cyan focus:outline-none"
-                  />
-                </div>
-              </div>
+              <a
+                href={`mailto:${directEmail}`}
+                className="min-h-[44px] px-4 inline-flex items-center justify-center gap-2 border border-[#00D9FF]/40 bg-[#00D9FF]/10 font-mono text-xs font-semibold uppercase tracking-wider text-[#00D9FF] hover:bg-[#00D9FF]/20 transition-colors"
+              >
+                <span>MAIL CLIENT ↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
 
-              <div className="mb-4">
+        {/* Right Column: Fail-Closed Architectural Brief Form */}
+        <div className="lg:col-span-7 border border-white/15 bg-[#0E0E10]/90 backdrop-blur-xl p-5 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <label
-                  htmlFor="contact-scope"
-                  className="mb-1.5 block font-mono text-micro uppercase tracking-telemetry text-obsidian-muted"
+                  htmlFor="contact-name"
+                  className="block font-mono text-xs uppercase tracking-wider text-white/75"
                 >
-                  Primary Architectural Scope
+                  NAME // IDENTIFIER *
                 </label>
-                <select
-                  id="contact-scope"
-                  name="scope"
-                  value={scope}
-                  onChange={(e) => setScope(e.target.value)}
-                  className="w-full min-h-touch rounded-lg border border-obsidian-border bg-obsidian-base px-3.5 py-2.5 font-mono text-caption text-obsidian-text focus:border-accent-cyan focus:outline-none"
-                >
-                  {ADVISORY_SCOPES.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-5">
-                <label
-                  htmlFor="contact-message"
-                  className="mb-1.5 block font-mono text-micro uppercase tracking-telemetry text-obsidian-muted"
-                >
-                  Operational Constraints &amp; Objectives *
-                </label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  rows={4}
+                <input
+                  id="contact-name"
+                  name="name"
+                  type="text"
                   required
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Describe your current throughput bottlenecks, latency targets, or compliance requirements..."
-                  className="w-full rounded-lg border border-obsidian-border bg-obsidian-base p-3.5 font-sans text-sm text-obsidian-text placeholder:text-obsidian-dim focus:border-accent-cyan focus:outline-none"
+                  value={formState.name}
+                  onChange={(e) =>
+                    setFormState((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="Adaobi Okafor"
+                  className="min-h-[44px] w-full border border-white/15 focus:border-[#00D9FF] bg-[#08090C] px-3.5 py-2.5 font-mono text-sm text-white placeholder:text-white/30 focus:outline-none"
                 />
               </div>
 
-              {/* Validation & Telemetry Feedback */}
-              {status === "error" && (
-                <div
-                  role="alert"
-                  className="mb-4 flex items-center gap-2 rounded-lg border border-accent-cyan bg-obsidian-elevated p-3 font-mono text-micro text-obsidian-text"
+              <div className="space-y-2">
+                <label
+                  htmlFor="contact-email"
+                  className="block font-mono text-xs uppercase tracking-wider text-white/75"
                 >
-                  <AlertCircle className="h-4 w-4 shrink-0 text-accent-cyan" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+                  RETURN ENDPOINT (EMAIL) *
+                </label>
+                <input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formState.email}
+                  onChange={(e) =>
+                    setFormState((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  placeholder="cto@organization.com"
+                  className="min-h-[44px] w-full border border-white/15 focus:border-[#00D9FF] bg-[#08090C] px-3.5 py-2.5 font-mono text-sm text-white placeholder:text-white/30 focus:outline-none"
+                />
+              </div>
+            </div>
 
-              {status === "success" && (
-                <div
-                  role="status"
-                  className="mb-4 flex items-center gap-2 rounded-lg border border-accent-emerald bg-obsidian-elevated p-3 font-mono text-micro text-accent-emerald"
-                >
-                  <ShieldCheck className="h-4 w-4 shrink-0" />
-                  <span>
-                    Payload verified and logged. Expect a deterministic response
-                    within 24 hours.
-                  </span>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={status === "submitting"}
-                className="inline-flex min-h-touch w-full items-center justify-center gap-2 rounded-lg border border-accent-emerald bg-accent-emerald px-6 font-sans text-sm font-semibold text-obsidian-base transition-colors hover:border-accent-cyan hover:bg-accent-cyan disabled:opacity-50"
+            <div className="space-y-2">
+              <label
+                htmlFor="contact-scope"
+                className="block font-mono text-xs uppercase tracking-wider text-white/75"
               >
-                <Send className="h-4 w-4" />
-                <span>
-                  {status === "submitting"
-                    ? "Dispatching payload..."
-                    : "Transmit system inquiry"}
-                </span>
-              </button>
-            </form>
-          </div>
+                SYSTEM DOMAIN
+              </label>
+              <select
+                id="contact-scope"
+                name="scope"
+                value={formState.scope}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, scope: e.target.value }))
+                }
+                className="min-h-[44px] w-full border border-white/15 focus:border-[#00D9FF] bg-[#08090C] px-3.5 py-2.5 font-mono text-sm text-white focus:outline-none"
+              >
+                {ARCHITECTURAL_SCOPES.map((scopeOption) => (
+                  <option key={scopeOption} value={scopeOption} className="bg-[#08090C] text-white">
+                    {scopeOption}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="contact-message"
+                className="block font-mono text-xs uppercase tracking-wider text-white/75"
+              >
+                CONSTRAINTS &amp; OBJECTIVES *
+              </label>
+              <textarea
+                id="contact-message"
+                name="message"
+                rows={4}
+                required
+                value={formState.message}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, message: e.target.value }))
+                }
+                placeholder="Outline throughput targets, regulatory constraints, or system bottlenecks..."
+                className="w-full border border-white/15 focus:border-[#00D9FF] bg-[#08090C] p-3.5 font-mono text-sm text-white placeholder:text-white/30 focus:outline-none"
+              />
+            </div>
+
+            {status === 'ERROR' && (
+              <div
+                role="alert"
+                className="border border-red-500/50 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-300"
+              >
+                {errorMessage}
+              </div>
+            )}
+
+            {status === 'SENT' && (
+              <div
+                role="status"
+                className="border border-[#00FF66]/50 bg-[#00FF66]/10 px-4 py-3 font-mono text-xs text-[#00FF66]"
+              >
+                ACK_RECEIVED: Architectural inquiry logged deterministically.
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={status === 'SUBMITTING'}
+              className="min-h-[48px] w-full px-6 inline-flex items-center justify-center gap-2 border border-[#00D9FF] bg-[#00D9FF] text-[#08090C] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider hover:bg-[#00D9FF]/90 disabled:opacity-50 transition-colors"
+            >
+              <span>
+                {status === 'SUBMITTING'
+                  ? 'TRANSMITTING PAYLOAD...'
+                  : 'DISPATCH ARCHITECTURAL BRIEF →'}
+              </span>
+            </button>
+          </form>
         </div>
       </div>
     </section>
   );
-};
+}
 
 export default ContactSection;

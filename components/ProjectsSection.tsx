@@ -353,7 +353,7 @@ export function ProjectsSection(): React.JSX.Element {
                         className="min-h-[48px] px-5 inline-flex items-center justify-center gap-2 border border-white/20 hover:border-[#00D9FF] bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
                       >
                         <span>VIEW SOURCE</span>
-                        <span aria-hidden="true">→</span>
+                        <span aria-hidden="true">↗</span>
                       </a>
                     )}
                   </div>

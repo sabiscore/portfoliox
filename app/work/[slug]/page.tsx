@@ -85,7 +85,7 @@ const CASE_STUDY_REGISTRY: Record<string, CaseStudySpec> = {
     subtitle:
       "Institutional-grade football forecasting and market comparison engine executing under a strict 512MB RAM ceiling.",
     constraint:
-      "Delivering sub-150ms ensemble inference and live market odds comparison across European leagues within a constrained 512MB RAM container budget.",
+      "Delivering calibrated ensemble inference and live market odds comparison across European leagues within a constrained 512MB RAM container budget.",
     decision:
       "Eliminated in-memory Pandas and pickle deserialization in favor of out-of-core Polars and DuckDB pipelines, zero-pickle meta-learners, and strict Pydantic v2 boundary contracts.",
     outcome:
@@ -155,7 +155,7 @@ const CASE_STUDY_REGISTRY: Record<string, CaseStudySpec> = {
       decision:
         "Hash every stage input contract and persist immutable intermediate artifacts before advancing the DAG cursor.",
       tradeoffs:
-        "Additional local disk I/O for intermediate artifact manifests.",
+        "Additional local disk reads and writes for intermediate artifact manifests.",
       consequences:
         "Failed runs resume from the exact failed node in <50ms without re-synthesizing completed audio segments.",
     },

@@ -52,10 +52,10 @@ test.describe('Production portfolio smoke tests', () => {
     await goto(page);
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'Fail-Closed Quantitative Systems'
+      'Systems you can trust at'
     );
     await expect(page.locator('body')).toContainText(
-      'PRINCIPAL SYSTEMS ARCHITECT & QUANT STRATEGIST'
+      'STAFF BACKEND & PLATFORM ENGINEER'
     );
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   });
@@ -71,7 +71,7 @@ test.describe('Production portfolio smoke tests', () => {
   });
 
   test('home has no horizontal overflow at supported mobile widths', async ({ browser }) => {
-    for (const width of [320, 360, 375, 390, 430]) {
+    for (const width of [320, 360, 375, 390, 430, 768, 1024, 1280, 1440, 1920]) {
       await expectNoOverflowAtWidth(browser, width);
     }
   });
@@ -103,14 +103,18 @@ test.describe('Production portfolio smoke tests', () => {
     );
   });
 
-  test('live telemetry mode is announced through a polite atomic region', async ({ page }) => {
+  test('architecture selection uses an accessible live region without claiming live telemetry', async ({ page }) => {
     await goto(page);
 
-    const modeAnnouncement = page.locator(
-      '#telemetry [aria-live="polite"][aria-atomic="true"]'
-    );
-    await expect(modeAnnouncement).toBeVisible({ timeout: 20_000 });
-    await expect(modeAnnouncement).toContainText(/LIVE_EDGE|DETERMINISTIC_CACHE/);
+    const architectureIndex = page.locator('#architecture-index');
+    const announcement = architectureIndex.locator('[aria-live="polite"][aria-atomic="true"]');
+    await expect(announcement).toBeVisible();
+    await expect(architectureIndex).toContainText('not a live production monitor');
+
+    const yapEngine = architectureIndex.getByRole('button', { name: /Yap Engine/i });
+    await yapEngine.click();
+    await expect(yapEngine).toHaveAttribute('aria-pressed', 'true');
+    await expect(announcement).toContainText('content-addressed stage inputs');
   });
 
   test('representative routes have no serious or critical accessibility violations', async ({
@@ -138,7 +142,7 @@ test.describe('Production portfolio smoke tests', () => {
     await goto(page);
 
     await expect(page.locator('main#main-content')).toHaveCount(1);
-    await expect(page.locator('#telemetry')).toBeAttached();
+    await expect(page.locator('#architecture-index')).toBeAttached();
     await expect(page.locator('#deployments')).toBeAttached();
   });
 
@@ -160,6 +164,25 @@ test.describe('Production portfolio smoke tests', () => {
     const resumeLink = page.locator('a[href="/cv/oscar-ndugbu-resume.pdf"]').first();
     await expect(resumeLink).toBeVisible();
     await expect(resumeLink).toHaveAttribute('target', '_blank');
+  });
+
+  test('all seven published case studies resolve from the MDX content registry', async ({ page }) => {
+    const caseStudies = [
+      '/work/taxbridge',
+      '/work/sabiscore',
+      '/work/swarmxq',
+      '/work/yap-engine',
+      '/work/hashablanca',
+      '/work/ubec',
+      '/work/ml-consulting',
+    ];
+
+    for (const route of caseStudies) {
+      const response = await page.goto(route);
+      expect(response?.status(), `${route} should resolve`).toBe(200);
+      await expect(page.locator('main#main-content h1')).toBeVisible();
+      await expect(page.locator('main#main-content h1')).not.toBeEmpty();
+    }
   });
 
   test('writing index renders on its dedicated route', async ({ page }) => {

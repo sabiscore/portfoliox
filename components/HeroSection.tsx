@@ -166,7 +166,7 @@ export function HeroSection() {
               >
                 <span>INSPECT_SYSTEM_ARCHITECTURE</span>
                 <span aria-hidden="true" className="text-[#00D9FF]">
-                  →
+                  ↗
                 </span>
               </Link>
 
@@ -284,7 +284,7 @@ export function HeroSection() {
                     className="inline-flex min-h-[44px] w-full items-center justify-between border border-white/10 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-medium text-white transition-colors hover:border-[#00D9FF]/40 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
                   >
                     <span>OPEN_CASE_DOSSIER</span>
-                    <span aria-hidden="true">→</span>
+                    <span aria-hidden="true">↗</span>
                   </Link>
                 </div>
               </article>

@@ -199,7 +199,7 @@ export const PROJECTS: readonly Project[] = [
       'Kokoro TTS',
     ],
     githubUrl: 'https://github.com/sabiscore/the-yap-engine',
-    caseStudy: '/work/yap-engine',
+    caseStudy: '/work/swarmxq',
   },
   {
     slug: 'hashablanca',

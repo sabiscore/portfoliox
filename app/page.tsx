@@ -7,6 +7,7 @@ import { ProductionPatterns } from '@/components/ProductionPatterns';
 import { GradientMeshMotion } from '@/components/GradientMeshMotion';
 import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
+import { generatePersonSchema } from '@/app/lib/structured-data';
 
 export default function HomePage(): React.JSX.Element {
   return (
@@ -14,6 +15,12 @@ export default function HomePage(): React.JSX.Element {
       <GradientMeshMotion />
       <Navbar />
       <main id="main-content">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generatePersonSchema()).replace(/</g, '\\u003c'),
+          }}
+        />
         <HeroSection />
         <div id="identity">
           <IdentityCard />

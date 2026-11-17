@@ -1,308 +1,140 @@
-import React from "react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Shield,
-  Cpu,
-  Layers,
-  CheckCircle2,
-} from "lucide-react";
-import { ArchDecision } from "@/components/ArchDecision";
-import { Footer } from "@/components/Footer";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-interface CaseStudySpec {
-  slug: string;
-  domain: string;
-  title: string;
-  subtitle: string;
-  constraint: string;
-  decision: string;
-  outcome: string;
-  metrics: { label: string; value: string }[];
-  stack: string[];
-  adr: {
-    id: string;
-    title: string;
-    context: string;
-    decision: string;
-    tradeoffs: string;
-    consequences: string;
-  };
-  architectureNotes: string[];
-  liveUrl?: string;
-}
+import { Footer } from '@/components/Footer';
+import { getWorkCase, getWorkCases } from '@/lib/content';
+import { SITE_URL } from '@/lib/config';
 
-const CASE_STUDY_REGISTRY: Record<string, CaseStudySpec> = {
-  taxbridge: {
-    slug: "taxbridge",
-    domain: "COMPLIANCE PLATFORM · FINTECH",
-    title: "TaxBridge",
-    subtitle:
-      "Replay-safe multi-tenant SME tax compliance and ledger reconciliation platform.",
-    constraint:
-      "Concurrent multi-organization tax filings and webhook ingestion over intermittent West African mobile networks with zero tolerance for cross-tenant leakage or duplicate ledger entries.",
-    decision:
-      "Architected on Fastify 5, PostgreSQL 15 with strict Row-Level Security (RLS) tenant scoping, Redis 7 + BullMQ idempotent background workers, and SHA-256 hash-linked audit trails.",
-    outcome:
-      "100% tenant isolation enforced at the database engine layer, deterministic retry recovery, and cryptographically verifiable compliance exports.",
-    metrics: [
-      { label: "TENANT ISOLATION", value: "PostgreSQL 15 RLS" },
-      { label: "AUDIT INTEGRITY", value: "SHA-256 Hash Chain" },
-      { label: "WORKER RETRY", value: "Idempotent BullMQ" },
-    ],
-    stack: [
-      "Fastify 5",
-      "TypeScript",
-      "PostgreSQL 15 RLS",
-      "Redis 7",
-      "BullMQ",
-      "GraphQL",
-      "Docker",
-    ],
-    adr: {
-      id: "ADR-TB-01",
-      title: "Enforce Tenant Scoping via PostgreSQL RLS Over Application Filters",
-      context:
-        "Relying solely on ORM WHERE clauses in a multi-tenant financial compliance platform creates catastrophic blast radius if a single query omits tenant_id.",
-      decision:
-        "Bind every transaction to a verified session tenant context via SET LOCAL app.current_tenant_id and enforce restrictive PostgreSQL 15 RLS policies.",
-      tradeoffs:
-        "Requires connection-pool transaction wrapping and strict migration discipline.",
-      consequences:
-        "Zero cross-tenant data leakage even under developer query regressions; fail-closed rejection when tenant context is unset.",
-    },
-    architectureNotes: [
-      "Every state mutation appends a SHA-256 digest linking the previous record hash, actor identity, and payload diff.",
-      "BullMQ workers execute with deterministic idempotency keys so network retries never double-post tax assessments.",
-    ],
-  },
-  sabiscore: {
-    slug: "sabiscore",
-    domain: "REAL-TIME ML ANALYTICS · FORECASTING",
-    title: "SabiScore",
-    subtitle:
-      "Institutional-grade football forecasting and market comparison engine executing under a strict 512MB RAM ceiling.",
-    constraint:
-      "Delivering calibrated ensemble inference and live market odds comparison across European leagues within a constrained 512MB RAM container budget.",
-    decision:
-      "Eliminated in-memory Pandas and pickle deserialization in favor of out-of-core Polars and DuckDB pipelines, zero-pickle meta-learners, and strict Pydantic v2 boundary contracts.",
-    outcome:
-      "Sustained 112ms p99 inference latency and 384MB peak memory footprint during peak weekend matchday concurrency.",
-    metrics: [
-      { label: "MEMORY CEILING", value: "<= 512 MB RAM" },
-      { label: "INFERENCE LATENCY", value: "112 ms p99" },
-      { label: "SERIALIZATION", value: "Zero-Pickle" },
-    ],
-    stack: [
-      "Python",
-      "FastAPI",
-      "Polars",
-      "DuckDB",
-      "Pydantic v2",
-      "Next.js",
-      "PostgreSQL",
-    ],
-    adr: {
-      id: "ADR-SS-01",
-      title: "Zero-Pickle Meta-Learners & Out-of-Core DuckDB/Polars Execution",
-      context:
-        "Standard scikit-learn/pickle model loading and Pandas DataFrames caused memory spikes above 1.2GB and cold-start latency bottlenecks.",
-      decision:
-        "Export model weights as deterministic typed coefficients and execute feature aggregations out-of-core via DuckDB and Polars lazy frames.",
-      tradeoffs:
-        "Custom serialization pipeline required for training-to-serving artifact promotion.",
-      consequences:
-        "Eliminated arbitrary code execution risk from pickle files and locked container memory under 400MB.",
-    },
-    architectureNotes: [
-      "All incoming odds feeds and worker payloads are validated through strict Pydantic v2 schemas before touching the inference engine.",
-      "Deterministic fallback heuristics activate automatically if upstream telemetry feeds degrade.",
-    ],
-    liveUrl: "https://sabiscore.app",
-  },
-  swarmxq: {
-    slug: "swarmxq",
-    domain: "AGENT ORCHESTRATION · MEDIA PIPELINE",
-    title: "SwarmXQ & The Yap Engine",
-    subtitle:
-      "Fault-tolerant multi-agent DAG orchestration and CPU-bounded Kokoro TTS synthesis pipeline.",
-    constraint:
-      "Coordinating multi-step LLM script generation, visual assembly, and Kokoro TTS voice synthesis on CPU-constrained infrastructure without losing progress on transient failures.",
-    decision:
-      "Built a checkpointed DAG orchestrator with local LLM routing, per-stage content hashing, and circuit-broken fallback providers.",
-    outcome:
-      "Deterministic stage resumption on crash recovery with zero redundant LLM token or TTS synthesis compute waste.",
-    metrics: [
-      { label: "ORCHESTRATION", value: "Checkpointed DAG" },
-      { label: "VOICE ENGINE", value: "Kokoro TTS (CPU)" },
-      { label: "RECOVERY", value: "Stage-Level Resume" },
-    ],
-    stack: [
-      "Python",
-      "TypeScript",
-      "SwarmXQ DAG",
-      "Kokoro TTS",
-      "Local LLM Routing",
-      "Redis",
-    ],
-    adr: {
-      id: "ADR-SX-01",
-      title: "Content-Addressed Stage Checkpointing for Media & Agent DAGs",
-      context:
-        "Long-running audio and video generation pipelines fail mid-flight when upstream LLM APIs rate-limit or CPU workers preempt.",
-      decision:
-        "Hash every stage input contract and persist immutable intermediate artifacts before advancing the DAG cursor.",
-      tradeoffs:
-        "Additional local disk reads and writes for intermediate artifact manifests.",
-      consequences:
-        "Failed runs resume from the exact failed node in <50ms without re-synthesizing completed audio segments.",
-    },
-    architectureNotes: [
-      "Local model router evaluates token budget and latency SLAs before dispatching to local or remote inference endpoints.",
-    ],
-  },
-};
-
-export async function generateStaticParams() {
-  return Object.keys(CASE_STUDY_REGISTRY).map((slug) => ({ slug }));
-}
-
-export default async function CaseStudyDetailPage({
-  params,
-}: {
+type WorkPageProps = Readonly<{
   params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const study = CASE_STUDY_REGISTRY[slug];
+}>;
 
-  if (!study) {
+export const dynamicParams = false;
+
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const workCases = await getWorkCases();
+  return workCases.map(({ slug }) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: WorkPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const workCase = await getWorkCase(slug);
+
+  if (!workCase) {
+    return { title: 'Case study not found' };
+  }
+
+  const title = workCase.frontmatter.title;
+  const description = workCase.frontmatter.summary;
+  const canonical = `${SITE_URL}/work/${slug}`;
+
+  return {
+    title: `${title} — Engineering Case Study`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title: `${title} · Oscar Ndugbu`,
+      description,
+      url: canonical,
+      siteName: 'Oscar Ndugbu — Staff Backend and Platform Engineer',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} · Oscar Ndugbu`,
+      description,
+    },
+  };
+}
+
+export default async function WorkCasePage({ params }: WorkPageProps): Promise<React.JSX.Element> {
+  const { slug } = await params;
+  const [workCase, workCases] = await Promise.all([getWorkCase(slug), getWorkCases()]);
+
+  if (!workCase) {
     notFound();
   }
 
+  const { title, summary, tags = [] } = workCase.frontmatter;
+  const moreCases = workCases.filter((entry) => entry.slug !== slug).slice(0, 3);
+
   return (
     <>
-      <main className="min-h-screen bg-obsidian-base text-obsidian-text pb-20">
-        {/* Top Sub-Route Navigation Bar */}
-        <div className="border-b border-obsidian-border bg-obsidian-surface">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-            <Link
-              href="/#projects"
-              className="inline-flex min-h-pill items-center gap-2 rounded-lg border border-obsidian-border bg-obsidian-elevated px-3 py-1.5 font-mono text-caption text-obsidian-text transition-colors hover:border-accent-cyan hover:text-accent-cyan"
-            >
-              <ArrowLeft className="h-3.5 w-3.5 text-accent-cyan" />
-              <span>Back to Production Evidence</span>
-            </Link>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-screen bg-[#08090C] pb-20 text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
+      >
+        <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12 lg:px-8">
+          <Link
+            href="/#projects"
+            className="inline-flex min-h-[44px] items-center gap-2 border border-white/15 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs tracking-wider text-[#00D9FF] transition-colors hover:border-[#00D9FF]/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090C]"
+          >
+            <span aria-hidden="true">←</span>
+            <span>BACK TO PROJECTS</span>
+          </Link>
 
-            {study.liveUrl && (
-              <a
-                href={study.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-pill items-center gap-1.5 rounded-lg border border-accent-emerald bg-accent-emerald px-3.5 py-1.5 font-mono text-micro font-semibold text-obsidian-base transition-colors hover:bg-accent-cyan hover:border-accent-cyan"
+          <header className="mt-10 max-w-4xl border-b border-white/10 pb-10 sm:mt-14 sm:pb-12">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#00D9FF]">
+              ENGINEERING CASE STUDY
+            </p>
+            <h1 className="mt-4 max-w-[18ch] font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              {title}
+            </h1>
+            <p className="mt-5 max-w-[68ch] text-base leading-8 text-zinc-300 sm:text-lg">
+              {summary}
+            </p>
+            {tags.length > 0 ? (
+              <ul aria-label="Technologies and topics" className="mt-7 flex flex-wrap gap-2">
+                {tags.map((tag: string) => (
+                  <li
+                    key={tag}
+                    className="inline-flex min-h-[32px] items-center border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] text-zinc-300"
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </header>
+
+          <div className="grid gap-12 pt-10 lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-16 lg:pt-14">
+            <article className="prose prose-invert max-w-[72ch] prose-headings:font-display prose-headings:tracking-tight prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-3 prose-h2:text-white prose-h3:text-[#00D9FF] prose-p:leading-8 prose-p:text-zinc-300 prose-li:text-zinc-300 prose-strong:text-white prose-a:text-[#00D9FF] prose-a:underline-offset-4 hover:prose-a:text-white prose-pre:overflow-x-auto prose-pre:border prose-pre:border-white/10 prose-pre:bg-[#0E0E10] prose-code:before:content-none prose-code:after:content-none">
+              {workCase.content}
+            </article>
+
+            <aside className="h-fit border-t border-white/10 pt-6 lg:sticky lg:top-24 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                PROJECT INDEX
+              </p>
+              <nav aria-label="Other engineering case studies" className="mt-4">
+                <ul className="space-y-2">
+                  {moreCases.map((entry) => (
+                    <li key={entry.slug}>
+                      <Link
+                        href={`/work/${entry.slug}`}
+                        className="block min-h-[44px] border-b border-white/10 py-3 text-sm text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                      >
+                        {entry.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+              <Link
+                href="/#contact"
+                className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-3 font-mono text-[11px] font-semibold tracking-wider text-[#00D9FF] transition-colors hover:bg-[#00D9FF]/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
               >
-                <span>LIVE PRODUCTION SYSTEM</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            )}
+                DISCUSS A SYSTEM
+              </Link>
+              <p className="mt-4 text-xs leading-6 text-zinc-500">
+                Implementation notes and evidence boundaries are stated in the project record. Private
+                operational artifacts are not presented as public benchmarks.
+              </p>
+            </aside>
           </div>
         </div>
-
-        {/* Case Study Header */}
-        <article className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-12">
-          <div className="mb-3 font-mono text-micro font-semibold uppercase tracking-telemetry text-accent-cyan">
-            {study.domain}
-          </div>
-
-          <h1 className="mb-3 font-sans text-3xl font-bold tracking-tight text-obsidian-text sm:text-5xl">
-            {study.title}
-          </h1>
-
-          <p className="mb-6 max-w-3xl font-sans text-base leading-relaxed text-obsidian-muted sm:text-lg">
-            {study.subtitle}
-          </p>
-
-          {/* Key Telemetry Badges */}
-          <div className="mb-8 flex flex-wrap gap-2.5">
-            {study.metrics.map((m) => (
-              <div
-                key={m.label}
-                className="rounded-lg border border-obsidian-border bg-obsidian-surface px-3.5 py-2 font-mono text-micro tabular-nums"
-              >
-                <span className="block text-obsidian-dim">{m.label}</span>
-                <span className="font-semibold text-accent-emerald">
-                  {m.value}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* 3-Column Constraint -> Decision -> Outcome Specification */}
-          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-obsidian-border bg-obsidian-surface p-4">
-              <div className="mb-2 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                <Shield className="h-3.5 w-3.5 text-accent-cyan" />
-                <span>01 // Constraint</span>
-              </div>
-              <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
-                {study.constraint}
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-obsidian-border bg-obsidian-surface p-4">
-              <div className="mb-2 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                <Cpu className="h-3.5 w-3.5 text-accent-cyan" />
-                <span>02 // Decision</span>
-              </div>
-              <p className="font-sans text-caption leading-relaxed text-obsidian-text">
-                {study.decision}
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-obsidian-border bg-obsidian-surface p-4">
-              <div className="mb-2 flex items-center gap-1.5 font-mono text-micro uppercase tracking-telemetry text-obsidian-dim">
-                <Layers className="h-3.5 w-3.5 text-accent-emerald" />
-                <span>03 // Outcome</span>
-              </div>
-              <p className="font-sans text-caption leading-relaxed text-obsidian-muted">
-                {study.outcome}
-              </p>
-            </div>
-          </div>
-
-          {/* Primary Architecture Decision Record */}
-          <ArchDecision {...study.adr} />
-
-          {/* Implementation Notes */}
-          <div className="mt-8 rounded-xl border border-obsidian-border bg-obsidian-surface p-5 sm:p-6">
-            <h2 className="mb-4 font-sans text-xl font-bold text-obsidian-text">
-              Operational Verification &amp; Runtime Invariants
-            </h2>
-            <ul className="space-y-2.5">
-              {study.architectureNotes.map((note) => (
-                <li
-                  key={note}
-                  className="flex items-start gap-2.5 font-sans text-sm leading-relaxed text-obsidian-muted"
-                >
-                  <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-accent-emerald" />
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 flex flex-wrap gap-2 border-t border-obsidian-border pt-4">
-              {study.stack.map((tech) => (
-                <span
-                  key={tech}
-                  className="rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1 font-mono text-micro text-obsidian-text"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-          </div>
-        </article>
       </main>
       <Footer />
     </>

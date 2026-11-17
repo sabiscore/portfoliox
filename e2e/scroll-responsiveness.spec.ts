@@ -69,14 +69,17 @@ test.describe('Scroll responsiveness contract', () => {
     await gotoHome(page);
     await waitForEngine(page, 'lenis');
 
-    await page.locator('nav[aria-label="Primary"]').getByRole('link', { name: 'Projects' }).click();
-    await expect(page).toHaveURL(/#section-projects$/);
+    await page
+      .locator('nav[aria-label="Primary system navigation"]')
+      .getByRole('link', { name: /PROJECTS/i })
+      .click();
+    await expect(page).toHaveURL(/#projects$/);
 
     await page.waitForFunction(
       () => {
-        const target = document.getElementById('section-projects');
-        const heading = document.getElementById('projects-heading');
-        const nav = document.querySelector<HTMLElement>('.glass-nav');
+        const target = document.getElementById('projects');
+        const heading = document.getElementById('projects-section-heading');
+        const nav = document.querySelector<HTMLElement>('header.sticky');
         if (!target || !heading || !nav) return false;
 
         const navBottom = nav.getBoundingClientRect().bottom;

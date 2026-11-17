@@ -46,7 +46,7 @@ const FAILURE_BOUNDARY_PATTERNS: ReadonlyArray<FailureBoundaryPattern> = [
       'Local faster-whisper INT8 and grammar-locked GGUF models extract structured checkout intents offline, holding settlement state in NIBSS NIP virtual account escrow.',
     recoverySlo: '$0.00 Cloud LLM Spend · Single-Turn Checkout',
     verificationRecord: 'YapCommerce Edge Worker',
-    href: '/work/yap-engine',
+    href: '/work/swarmxq',
   },
 ];
 

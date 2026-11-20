@@ -1,6 +1,6 @@
 ---
 title: 'SwarmXQ'
-summary: 'Self-improving multi-agent orchestration platform built for reliability under resource constraints — autonomous evolution, live fleet dashboard, checkpoint-based fault recovery.'
+summary: 'Multi-agent orchestration platform built around outcome-scored strategy experiments, checkpoint-based recovery, and an operator dashboard.'
 tags:
   - 'FastAPI'
   - 'Python'
@@ -26,13 +26,13 @@ The dispatch layer routes tasks to agents based on current load, capability inde
 
 Fault recovery uses checkpoints instead of full restarts. Every agent boundary writes an idempotency record before executing. If a sub-task fails, the replay logic restarts from the last consistent checkpoint state — not from the beginning of the workflow.
 
-The live dashboard exposes real-time fleet visibility: task queue depth by type, agent health signals, completion rates, and evolution cycle status. State is streamed via WebSocket so operators see changes as they happen, without page refresh.
+The operator dashboard is designed to expose fleet signals such as task queue depth, agent health, completion state, and strategy-evaluation status. WebSocket updates are used to reflect changing state without requiring a page refresh.
 
 ## Key decisions
 
 **Autonomous evolution over manual configuration**
 
-Static agent configurations require a domain expert to tune parameters for every task type that enters the system. As task variety grows, manual tuning becomes a maintenance bottleneck. The evolution layer removes this ceiling: strategies are scored against real outcomes and rewritten automatically. Quality improves between runs without engineering time.
+Static agent configurations require a domain expert to tune parameters for every task type that enters the system. As task variety grows, manual tuning becomes a maintenance bottleneck. The evolution layer is designed to reduce repetitive manual tuning: strategies are scored against configured outcome criteria, and candidate changes are validated before promotion. The public record does not publish a measured quality-uplift rate.
 
 **Checkpoint-based replay over full workflow restart**
 
@@ -48,6 +48,6 @@ Agents must hold correctness under Lagos network conditions: unreliable connecti
 
 ## Delivery signal
 
-SwarmXQ demonstrates that an agent fleet can improve itself without manual intervention — the architecture answer to the question every AI-native team eventually faces: how do you maintain quality as task variety grows beyond what any individual can monitor?
+SwarmXQ explores how an agent fleet can evaluate and evolve candidate strategies without requiring manual configuration for every task type. The documented architecture describes the control loop; it does not claim a measured improvement rate.
 
-The checkpoint-based fault model and live dashboard reflect production-grade reliability thinking, not prototype assumptions. Both are built for the conditions where AI systems actually run: constrained hardware, unreliable networks, and operators who cannot watch every task in real time.
+The checkpoint-based fault model and operator dashboard are designed around constrained hardware, unreliable networks, and operators who need to understand task state without watching every run. Deployment status and production reliability metrics are not claimed in this case study.

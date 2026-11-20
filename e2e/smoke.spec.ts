@@ -114,7 +114,7 @@ test.describe('Production portfolio smoke tests', () => {
     const yapEngine = architectureIndex.getByRole('button', { name: /Yap Engine/i });
     await yapEngine.click();
     await expect(yapEngine).toHaveAttribute('aria-pressed', 'true');
-    await expect(announcement).toContainText('content-addressed stage inputs');
+    await expect(announcement).toContainText('content-addressed inputs');
   });
 
   test('representative routes have no serious or critical accessibility violations', async ({

@@ -112,7 +112,7 @@ export function HeroSection(): React.JSX.Element {
               </h1>
               <p className="max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">
                 Staff Backend and Platform Engineer focused on reliable backend services,
-                distributed systems, AI infrastructure, and resilient fintech products. I turn
+                distributed systems, AI infrastructure, and resilient fintech products. The work turns
                 operational constraints into systems with explicit failure boundaries, observable
                 behavior, and deliberate recovery paths.
               </p>

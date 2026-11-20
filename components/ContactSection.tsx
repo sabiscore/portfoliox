@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { CONTACT_EMAIL } from '@/lib/config';
 import {
   CONTACT_INQUIRY_TYPES,
   CONTACT_SCOPES,
@@ -50,7 +51,7 @@ export function ContactSection(): React.JSX.Element {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const directEmail = 'oscar@scardubu.dev';
+  const directEmail = CONTACT_EMAIL;
 
   useEffect(
     () => () => {

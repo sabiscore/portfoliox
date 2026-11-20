@@ -1,11 +1,11 @@
 packages: []
 
-# Explicitly approve only packages whose native build steps are required by
-# the production toolchain. All newly introduced dependency build scripts fail
-# installation until they are reviewed and added here.
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - unrs-resolver
+# pnpm 10.26+ allowBuilds replaces the older onlyBuiltDependencies list.
+# Approve only the reviewed packages required by the Next.js production toolchain.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
 
+# Fail installation when a new dependency introduces an unreviewed lifecycle script.
 strictDepBuilds: true

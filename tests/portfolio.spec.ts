@@ -117,6 +117,15 @@ test.describe('Current portfolio interactions', () => {
   }) => {
     await gotoHome(page);
     await page.route('**/api/contact', async (route) => {
+      const payload = route.request().postDataJSON() as Record<string, unknown>;
+      expect(payload).toMatchObject({
+        name: 'Ada Okafor',
+        email: 'ada@example.com',
+        scope: 'Backend & Platform Infrastructure',
+        inquiryType: 'consulting',
+        timeline: 'month',
+        stakes: 'Payment reconciliation blocks settlement close.',
+      });
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -127,6 +136,10 @@ test.describe('Current portfolio interactions', () => {
     const form = page.locator('#contact form');
     await form.locator('#contact-name').fill('Ada Okafor');
     await form.locator('#contact-email').fill('ada@example.com');
+    await form.locator('#contact-inquiry-type').selectOption('consulting');
+    await form.locator('#contact-timeline').selectOption('month');
+    await form.locator('#contact-scope').selectOption('Backend & Platform Infrastructure');
+    await form.locator('#contact-stakes').fill('Payment reconciliation blocks settlement close.');
     await form.locator('#contact-message').fill(
       'Please review our payment reconciliation architecture and recovery plan.'
     );

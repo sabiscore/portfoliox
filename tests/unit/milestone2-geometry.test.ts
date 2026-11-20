@@ -98,4 +98,23 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     expect(fixesCss).toContain('overflow-x: hidden;');
     expect(globalsCss).toContain('overflow-x: hidden;');
   });
+  it('keeps pnpm runtime and native build-script approvals explicit', () => {
+    const packageJson = JSON.parse(read('package.json')) as {
+      packageManager: string;
+      engines: { node: string };
+      pnpm?: unknown;
+    };
+    const workspace = read('pnpm-workspace.yaml');
+
+    expect(packageJson.packageManager).toBe('pnpm@10.24.0');
+    expect(packageJson.engines.node).toBe('22.x');
+    expect(packageJson.pnpm).toBeUndefined();
+    expect(workspace).toContain('strictDepBuilds: true');
+    expect(workspace).toContain('onlyBuiltDependencies:');
+    for (const dependency of ['esbuild', 'sharp', 'unrs-resolver']) {
+      expect(workspace).toContain(`  - ${dependency}`);
+    }
+    expect(workspace).not.toContain('dangerouslyAllowAllBuilds');
+  });
+
 });

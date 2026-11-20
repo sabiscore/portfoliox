@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* global console, process */
 // scripts/verify-contrast.mjs
 // Precise mathematical verification of OKLCH colors, sRGB relative luminance, and WCAG 2.1 contrast ratios
 

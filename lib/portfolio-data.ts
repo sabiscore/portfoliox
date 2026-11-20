@@ -25,7 +25,7 @@ export const HERO = {
   kicker: 'Staff Backend and Platform Engineer',
   h1: 'Systems you can trust at 2 AM.',
   subHeadline: 'Scalable backend, platform, and AI infrastructure.',
-  body: 'I build resilient architectures designed for high availability and easy maintenance. My work makes failure visible, recovery deliberate, and day-to-day operations simple to understand.',
+  body: 'Resilient architectures are designed for high availability and maintainability. Failure remains visible, recovery is deliberate, and day-to-day operations are easy to understand.',
   availability: 'OPEN TO STAFF BACKEND AND PLATFORM OPPORTUNITIES',
   availabilityLastUpdated: '2026-08-22',
   location: 'Lagos, Nigeria 🇳🇬',

@@ -1,270 +1,209 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import type { JSX } from 'react';
+import { useState } from 'react';
 
-export interface TelemetryNode {
-  id: 'sabiscore' | 'yapcommerce' | 'taxbridge';
-  service: string;
-  domain: string;
-  status: 'NOMINAL' | 'SYNCING' | 'FALLBACK_LOCKED';
-  latencyMs: number;
-  memoryEnvelope: string;
-  runtimeStack: string[];
-  lastAssertion: string;
-  metricLabel: string;
-  metricValue: string;
+export type ArchitectureNodeId = 'sabiscore' | 'yapcommerce' | 'taxbridge';
+
+export interface ArchitectureNode {
+  id: ArchitectureNodeId;
+  title: string;
+  discipline: string;
+  designConstraint: string;
+  architectureSummary: string;
+  evidenceBoundary: string;
+  runtimeStack: readonly string[];
 }
 
-const DETERMINISTIC_BASELINE_NODES: readonly TelemetryNode[] = [
+export type TelemetryNode = ArchitectureNode;
+
+const ARCHITECTURE_NODES: readonly ArchitectureNode[] = [
   {
     id: 'sabiscore',
-    service: 'SABISCORE_QUANT_ENGINE',
-    domain: 'sabiscore.app',
-    status: 'NOMINAL',
-    latencyMs: 38,
-    memoryEnvelope: '412MB / 512MB cgroup',
-    runtimeStack: ['Polars', 'DuckDB', 'FastAPI', 'Next.js 15'],
-    lastAssertion: 'SHIN_DEVIG_SIMPLEX_OK',
-    metricLabel: 'CLV_EDGE',
-    metricValue: '+4.82%',
+    title: 'SabiScore',
+    discipline: 'Quantitative forecasting · ML platform',
+    designConstraint:
+      'Analytical workloads must remain understandable when data volume, model quality, or upstream feeds change.',
+    architectureSummary:
+      'The project record describes out-of-core feature processing, ensemble model evaluation, market de-vigging, version-aware caching, and an explicit lower-confidence fallback path.',
+    evidenceBoundary:
+      'Public product demo. Private uptime and latency artifacts are not presented as public benchmarks.',
+    runtimeStack: ['Python', 'FastAPI', 'Polars', 'DuckDB', 'PostgreSQL', 'Redis', 'Next.js'],
   },
   {
     id: 'yapcommerce',
-    service: 'YAP_ENGINE_ORCHESTRATOR',
-    domain: 'edge.local.wsl2',
-    status: 'NOMINAL',
-    latencyMs: 14,
-    memoryEnvelope: '6.4GB / 8.0GB WSL2',
-    runtimeStack: ['GGUF Q4_K_M', 'Fastify', 'TypeScript', 'Zod'],
-    lastAssertion: 'ZERO_USD_CLOUD_LLM_VERIFIED',
-    metricLabel: 'CLOUD_BURN',
-    metricValue: '$0.00/mo',
+    title: 'Yap Engine',
+    discipline: 'AI workflows · Media orchestration',
+    designConstraint:
+      'Multi-stage generation can be interrupted by provider limits, worker restarts, and constrained CPU or memory.',
+    architectureSummary:
+      'The architecture uses stage-level checkpoints, content-addressed inputs, local model routing, bounded provider fallbacks, and deterministic media assembly.',
+    evidenceBoundary:
+      'Public architecture and source record. No throughput or production latency SLO is claimed here.',
+    runtimeStack: ['Python', 'TypeScript', 'Fastify', 'GGUF', 'Kokoro TTS', 'Redis'],
   },
   {
     id: 'taxbridge',
-    service: 'TAXBRIDGE_LEDGER_CORE',
-    domain: 'fintech.ng.edge',
-    status: 'NOMINAL',
-    latencyMs: 22,
-    memoryEnvelope: '188MB / 512MB Worker',
-    runtimeStack: ['Fastify', 'DuckDB', 'Zod', 'CRDT-Sync'],
-    lastAssertion: 'FAIL_CLOSED_AUDIT_HASH_OK',
-    metricLabel: 'SYNC_INTEGRITY',
-    metricValue: '100.0%',
+    title: 'TaxBridge',
+    discipline: 'Fintech · Fiscal compliance',
+    designConstraint:
+      'Tax workflows must preserve tenant context and retry safety across unreliable networks and external fiscalization dependencies.',
+    architectureSummary:
+      'The implementation direction combines PostgreSQL row-level security, idempotent background jobs, append-oriented audit records, and offline-first mobile synchronization.',
+    evidenceBoundary:
+      'Active build. NRS DigiTax integration and tenant-policy validation remain in progress.',
+    runtimeStack: ['Fastify', 'PostgreSQL', 'Redis', 'BullMQ', 'Expo', 'SQLite', 'TypeScript'],
   },
 ] as const;
 
-function validateTelemetryPayload(raw: unknown): TelemetryNode[] | null {
-  if (!Array.isArray(raw) || raw.length === 0) return null;
-  const validNodes: TelemetryNode[] = [];
-
-  for (const item of raw) {
-    if (
-      typeof item === 'object' &&
-      item !== null &&
-      'id' in item &&
-      'service' in item &&
-      'latencyMs' in item &&
-      typeof (item as Record<string, unknown>).service === 'string' &&
-      typeof (item as Record<string, unknown>).latencyMs === 'number'
-    ) {
-      validNodes.push(item as TelemetryNode);
-    } else {
-      return null; // Fail-closed on any malformed telemetry contract
-    }
-  }
-  return validNodes;
-}
-
 export interface LiveActivityBarProps {
   className?: string;
-  initialActiveId?: TelemetryNode['id'];
+  initialActiveId?: ArchitectureNodeId;
 }
 
-export function LiveActivityBar({
-  className = '',
-  initialActiveId = 'sabiscore',
-}: LiveActivityBarProps) {
-  const [nodes, setNodes] = useState<readonly TelemetryNode[]>(DETERMINISTIC_BASELINE_NODES);
-  const [activeId, setActiveId] = useState<TelemetryNode['id']>(initialActiveId);
-  const [telemetryMode, setTelemetryMode] = useState<'LIVE_EDGE' | 'DETERMINISTIC_CACHE'>('LIVE_EDGE');
-  const [tickCount, setTickCount] = useState<number>(0);
-
-  const probeEdgeHealth = useCallback(async () => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
-
-    try {
-      const response = await fetch('/api/activity/latest', {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-        signal: controller.signal,
-        cache: 'no-store',
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        setTelemetryMode('DETERMINISTIC_CACHE');
-        return;
-      }
-
-      const payload: unknown = await response.json();
-      const validated = validateTelemetryPayload(
-        typeof payload === 'object' && payload !== null && 'nodes' in payload
-          ? (payload as { nodes: unknown }).nodes
-          : payload
-      );
-
-      if (validated) {
-        setNodes(validated);
-        setTelemetryMode('LIVE_EDGE');
-      } else {
-        setTelemetryMode('DETERMINISTIC_CACHE');
-      }
-    } catch {
-      clearTimeout(timeoutId);
-      // Fail-closed: preserve deterministic baseline without throwing unhandled client exceptions
-      setTelemetryMode('DETERMINISTIC_CACHE');
-    }
-  }, []);
-
-  useEffect(() => {
-    void probeEdgeHealth();
-    const pollInterval = setInterval(() => {
-      setTickCount((prev) => prev + 1);
-    }, 6000);
-
-    return () => clearInterval(pollInterval);
-  }, [probeEdgeHealth]);
-
-  const activeNode = nodes.find((n) => n.id === activeId) ?? nodes[0];
-
+export function LiveActivityBarSkeleton(): JSX.Element {
   return (
     <section
-      aria-label="Live Deployment Telemetry"
-      className={`w-full rounded-none border border-white/10 bg-[#0E0E10]/90 backdrop-blur-xl transition-colors duration-200 hover:border-[#00D9FF]/40 ${className}`}
+      aria-label="Project architecture index loading"
+      aria-busy="true"
+      className="w-full border border-white/10 bg-[#0E0E10]/90 p-5"
     >
-      {/* Top Terminal Pulse Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#08090C]/80 px-4 py-2.5">
-        <div className="flex items-center gap-3">
-          <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00FF66] opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#00FF66]" />
-          </span>
-          <span className="font-mono text-xs font-semibold tracking-wider text-white uppercase">
-            TELEMETRY.PULSE // FAIL-CLOSED INVARIANT
-          </span>
-          <span className="hidden border border-[#00FF66]/30 bg-[#00FF66]/10 px-2 py-0.5 font-mono text-[11px] text-[#00FF66] sm:inline-block">
-            {telemetryMode}
-          </span>
+      <span className="sr-only">Loading project architecture index</span>
+      <div aria-hidden="true" className="animate-pulse space-y-4">
+        <div className="h-3 w-52 rounded bg-white/10" />
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="h-12 rounded border border-white/10 bg-white/[0.03]" />
+          <div className="h-12 rounded border border-white/10 bg-white/[0.03]" />
+          <div className="h-12 rounded border border-white/10 bg-white/[0.03]" />
         </div>
-
-        <div className="flex items-center gap-4 font-mono text-xs text-zinc-400">
-          <span>
-            HEARTBEAT_SEQ: <strong className="text-[#00D9FF]">0x{(1024 + tickCount).toString(16).toUpperCase()}</strong>
-          </span>
-          <button
-            type="button"
-            onClick={() => void probeEdgeHealth()}
-            aria-label="Re-verify edge telemetry"
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-white/10 bg-[#0E0E10] px-3 font-mono text-xs text-zinc-200 transition-colors hover:border-[#00D9FF]/40 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
-          >
-            SYNC_NODE
-          </button>
-        </div>
-      </div>
-
-      {/* Interactive Node Selector Tabs (Strict 44px Minimum Touch Geometry) */}
-      <div className="grid grid-cols-1 divide-y divide-white/10 border-b border-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        {nodes.map((node) => {
-          const isSelected = node.id === activeNode.id;
-          return (
-            <button
-              key={node.id}
-              type="button"
-              onClick={() => setActiveId(node.id)}
-              aria-pressed={isSelected}
-              className={`flex min-h-[48px] w-full items-center justify-between px-4 py-3 text-left transition-colors ${
-                isSelected
-                  ? 'bg-[#00D9FF]/[0.07] text-white'
-                  : 'bg-transparent text-zinc-400 hover:bg-white/[0.02] hover:text-zinc-200'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    isSelected ? 'bg-[#00D9FF]' : 'bg-[#00FF66]/70'
-                  }`}
-                />
-                <span className="font-mono text-xs font-medium tracking-tight">
-                  {node.service}
-                </span>
-              </div>
-              <span
-                className={`border px-2 py-0.5 font-mono text-[11px] ${
-                  isSelected
-                    ? 'border-[#00D9FF]/40 bg-[#00D9FF]/10 text-[#00D9FF]'
-                    : 'border-white/10 bg-[#08090C] text-zinc-400'
-                }`}
-              >
-                {node.latencyMs}ms
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Active Node Deep Architectural Context Readout */}
-      <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-12 lg:items-center">
-        <div className="space-y-1 lg:col-span-4">
-          <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-400">
-            <span>ENDPOINT:</span>
-            <span className="text-[#00D9FF]">{activeNode.domain}</span>
-          </div>
-          <p className="font-mono text-xs text-zinc-200">
-            ASSERTION:{' '}
-            <span className="border border-[#00FF66]/30 bg-[#00FF66]/10 px-1.5 py-0.5 text-[#00FF66]">
-              {activeNode.lastAssertion}
-            </span>
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 border-y border-white/10 py-3 sm:py-0 lg:col-span-4 lg:border-x lg:border-y-0 lg:px-4">
-          <div>
-            <span className="block font-mono text-[10px] tracking-wider text-zinc-400 uppercase">
-              MEMORY_ENVELOPE
-            </span>
-            <span className="font-mono text-xs font-semibold text-white">
-              {activeNode.memoryEnvelope}
-            </span>
-          </div>
-          <div>
-            <span className="block font-mono text-[10px] tracking-wider text-zinc-400 uppercase">
-              {activeNode.metricLabel}
-            </span>
-            <span className="font-mono text-xs font-semibold text-[#00FF66]">
-              {activeNode.metricValue}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 lg:col-span-4 lg:justify-end">
-          <span className="font-mono text-[10px] tracking-wider text-zinc-400 uppercase">
-            RUNTIME:
-          </span>
-          {activeNode.runtimeStack.map((tech) => (
-            <span
-              key={tech}
-              className="inline-flex min-h-[32px] items-center border border-white/10 bg-[#08090C] px-2.5 py-1 font-mono text-xs text-[#00D9FF]"
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
+        <div className="h-24 rounded border border-white/10 bg-white/[0.03]" />
       </div>
     </section>
   );
 }
 
+export function LiveActivityBar({
+  className = '',
+  initialActiveId = 'sabiscore',
+}: LiveActivityBarProps): JSX.Element {
+  const [activeId, setActiveId] = useState<ArchitectureNodeId>(initialActiveId);
+  const activeNode =
+    ARCHITECTURE_NODES.find((node) => node.id === activeId) ?? ARCHITECTURE_NODES[0];
+
+  return (
+    <section
+      aria-labelledby="architecture-index-heading"
+      className={`w-full border border-white/10 bg-[#0E0E10]/95 transition-colors duration-200 hover:border-[#00D9FF]/30 ${className}`}
+    >
+      <header className="flex flex-col gap-2 border-b border-white/10 bg-[#08090C]/80 px-4 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-5">
+        <div>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#00D9FF]">
+            Architecture index
+          </p>
+          <h2
+            id="architecture-index-heading"
+            className="mt-1 font-display text-lg font-semibold text-white sm:text-xl"
+          >
+            Systems, constraints, and implementation choices
+          </h2>
+        </div>
+        <p className="max-w-md text-xs leading-5 text-zinc-500">
+          Project snapshots from the written engineering record — not a live production monitor.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {ARCHITECTURE_NODES.map((node, index) => {
+          const selected = node.id === activeNode.id;
+          return (
+            <button
+              key={node.id}
+              type="button"
+              onClick={() => setActiveId(node.id)}
+              aria-pressed={selected}
+              className={`flex min-h-[52px] items-center justify-between gap-3 px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF] ${
+                selected
+                  ? 'bg-[#00D9FF]/[0.07] text-white'
+                  : 'bg-transparent text-zinc-400 hover:bg-white/[0.025] hover:text-zinc-200'
+              }`}
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="font-mono text-[10px] text-[#00D9FF]/70">
+                  0{index + 1}
+                </span>
+                <span className="truncate font-mono text-xs font-semibold uppercase tracking-wide">
+                  {node.title}
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? 'bg-[#00D9FF]' : 'bg-white/20'}`}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.7fr)]"
+      >
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00D9FF]">
+            {activeNode.discipline}
+          </p>
+          <h3 className="mt-2 font-display text-xl font-bold text-white">{activeNode.title}</h3>
+
+          <div className="mt-4 space-y-3">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                Engineering constraint
+              </p>
+              <p className="mt-1 max-w-[72ch] text-sm leading-6 text-zinc-300">
+                {activeNode.designConstraint}
+              </p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                Architectural approach
+              </p>
+              <p className="mt-1 max-w-[72ch] text-sm leading-6 text-zinc-300">
+                {activeNode.architectureSummary}
+              </p>
+            </div>
+            <p className="border-l-2 border-[#00D9FF]/50 pl-3 text-xs leading-5 text-zinc-400">
+              Evidence boundary: {activeNode.evidenceBoundary}
+            </p>
+          </div>
+        </div>
+
+        <aside className="border-t border-white/10 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            Runtime and data stack
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {activeNode.runtimeStack.map((technology) => (
+              <li
+                key={technology}
+                className="inline-flex min-h-[30px] items-center border border-white/10 bg-[#08090C] px-2.5 py-1 font-mono text-[11px] text-zinc-300"
+              >
+                {technology}
+              </li>
+            ))}
+          </ul>
+          <a
+            href={`/work/${activeNode.id === 'yapcommerce' ? 'swarmxq' : activeNode.id}`}
+            className="mt-5 inline-flex min-h-[44px] w-full items-center justify-between border border-[#00D9FF]/35 bg-[#00D9FF]/[0.06] px-3.5 py-2.5 font-mono text-[11px] font-semibold tracking-wider text-[#00D9FF] transition-colors hover:bg-[#00D9FF]/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+          >
+            <span>OPEN PROJECT RECORD</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+export const Liveactivitybar = LiveActivityBar;
 export default LiveActivityBar;

@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { JetBrains_Mono, Space_Grotesk } from 'next/font/google';
+import type { ReactNode } from 'react';
+
+import { Providers } from './providers';
+import { SITE_URL } from '@/lib/config';
 import './globals.css';
 
 const spaceGrotesk = Space_Grotesk({
@@ -23,23 +27,53 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Oscar Ndugbu (@Scardubu) — Principal Systems Architect & Quant Strategist',
+  metadataBase: new URL(SITE_URL),
+  title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
   description:
-    'Editorial anthology of fail-closed quantitative systems, memory-bounded Polars/DuckDB pipelines, and edge-native Nigerian fintech infrastructure.',
+    'Staff Backend and Platform Engineer in Lagos, Nigeria. Engineering reliable backend services, data-intensive platforms, AI infrastructure, and resilient fintech systems.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'Oscar Ndugbu — Staff Backend and Platform Engineer',
+    title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
+    description:
+      'Backend, platform, AI infrastructure, and production reliability engineering. Lagos, Nigeria · Remote.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Oscar Ndugbu — Staff Backend and Platform Engineer' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
+    description:
+      'Backend, platform, AI infrastructure, and production reliability engineering. Lagos, Nigeria · Remote.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html
       lang="en"
+      data-theme="dark"
       className={`dark ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <meta name="color-scheme" content="dark" />
+      </head>
       <body className="min-h-screen bg-[#08090C] font-sans text-white antialiased selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]">
-        {children}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:border focus:border-[#00D9FF] focus:bg-[#08090C] focus:px-4 focus:py-3 focus:font-mono focus:text-xs focus:text-white"
+        >
+          Skip to main content
+        </a>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

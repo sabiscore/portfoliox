@@ -15,7 +15,7 @@ export function GradientMeshMotion({
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#08090C] ${className}`}
+      className={`gradient-mesh-motion pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#08090C] ${className}`}
     >
       {/* Primary Coordinate Grid Layer */}
       <div className="absolute inset-0 bg-kinetic-grid bg-[size:36px_36px] opacity-60" />

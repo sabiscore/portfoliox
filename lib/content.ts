@@ -55,6 +55,10 @@ function calculateReadingTime(content: string) {
   return Math.max(1, Math.ceil(content.split(/\s+/).length / 220));
 }
 
+function isSafeContentSlug(slug: string): boolean {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+}
+
 export async function getWritingPosts(): Promise<WritingPost[]> {
   return getFiles(WRITING_DIR)
     .map((file) => {
@@ -76,6 +80,10 @@ export async function getWritingPosts(): Promise<WritingPost[]> {
 }
 
 export async function getWritingPost(slug: string) {
+  if (!isSafeContentSlug(slug)) {
+    return null;
+  }
+
   const filePath = path.join(WRITING_DIR, `${slug}.mdx`);
 
   if (!fs.existsSync(filePath)) {
@@ -121,6 +129,10 @@ export async function getWorkCases(): Promise<WorkCaseMeta[]> {
 }
 
 export async function getWorkCase(slug: string) {
+  if (!isSafeContentSlug(slug)) {
+    return null;
+  }
+
   const filePath = path.join(WORK_DIR, `${slug}.mdx`);
 
   if (!fs.existsSync(filePath)) {

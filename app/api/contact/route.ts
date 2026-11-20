@@ -98,8 +98,9 @@ export async function POST(request: Request) {
       text: `Name: ${data.name}
 Email: ${data.email}
 Company: ${data.company ?? '-'}
+Scope: ${data.scope ?? '-'}
 Type: ${data.inquiryType ?? '-'}
-Timeline: ${data.timeline ?? '-'}
+Timeline: ${data.timeline}
 Stakes: ${data.stakes ?? '-'}
 
 Message:

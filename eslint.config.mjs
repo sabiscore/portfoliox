@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import nextPlugin from '@next/eslint-plugin-next';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
@@ -43,16 +44,10 @@ export default [
       /**
        * DESIGN SYSTEM ENFORCEMENT
        *
-       * NOTE: Downgraded to 'warn'. The design system is built on CSS custom
-       * properties (var(--color-film-teal), var(--color-text-secondary), etc.)
-       * which have no equivalent Tailwind utility classes â€” they are design tokens,
-       * not arbitrary inline values. Blocking them as errors prevents the entire
-       * codebase from compiling. Arbitrary magic-number inline styles remain
-       * visually flagged by the warning, satisfying the intent of the rule.
+       * CSS custom-property tokens have no one-to-one Tailwind utility mapping.
+       * Keep arbitrary inline styles visible as warnings rather than blocking
+       * valid token-backed styling in the current design system.
        */
-
-      // âš ï¸ Warn on inline styles (CSS custom-property token refs are permitted by
-      //    design; arbitrary values should still be avoided and will surface as warnings)
       'no-restricted-syntax': [
         'warn',
         {
@@ -61,7 +56,7 @@ export default [
         },
       ],
 
-      // âŒ Prevent arbitrary relative imports and enforce path aliases.
+      // Prevent arbitrary relative imports and enforce path aliases.
       'no-restricted-imports': ['error', { patterns: ['../*', '../../*', '../../../*'] }],
 
       /**
@@ -75,6 +70,34 @@ export default [
        * CODE QUALITY
        */
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+  // These files execute in Node.js, not in the browser. Scope Node globals to
+  // tooling and configuration so process/console/module are not accidentally
+  // accepted in application components.
+  {
+    files: [
+      'scripts/**/*.{js,mjs,cjs}',
+      'eslint-rules/**/*.{js,mjs,cjs}',
+      'tailwind.config.js',
+      'postcss.config.mjs',
+      'playwright.config.ts',
+      'vitest.config.ts',
+    ],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      // Console output is the CLI interface for build, audit, and generator scripts.
+      'no-console': 'off',
+    },
+  },
+  // This one interactive authoring CLI intentionally remains CommonJS. Keep
+  // the exception local rather than disabling the rule for all Node scripts.
+  {
+    files: ['scripts/create-blog-post.js'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ];

@@ -44,7 +44,6 @@
 
   "include": [
     "next-env.d.ts",
-    "mdx.d.ts",
     "lib/global.d.ts",
     "app/**/*.ts",
     "app/**/*.tsx",

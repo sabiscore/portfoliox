@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-const GITHUB_REPOSITORY = 'Scardubu/oscar-portfolio-main';
+const GITHUB_REPOSITORY = 'sabiscore/portfoliox';
 const GITHUB_COMMITS_URL = `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits?per_page=1`;
 
 const NO_STORE_HEADERS = {
@@ -51,12 +51,13 @@ function formatAgo(createdAt: Date): string {
 function fallbackActivity(checkedAt: string, status = 200): NextResponse {
   return jsonResponse(
     {
-      ago: 'Recently',
+      ago: 'Unavailable',
       type: 'StatusEvent',
       repo: GITHUB_REPOSITORY,
       sha: 'unknown',
       message: 'Activity feed temporarily unavailable',
       checkedAt,
+      availability: 'unavailable',
     },
     status
   );
@@ -115,12 +116,13 @@ export async function GET(): Promise<NextResponse> {
 
     if (!commits.length) {
       return jsonResponse({
-        ago: 'Recently',
+        ago: 'Unavailable',
         type: 'StatusEvent',
         repo: GITHUB_REPOSITORY,
         sha: 'unknown',
-        message: 'No recent activity found',
+        message: 'No public commits were returned for this repository',
         checkedAt,
+        availability: 'empty',
       });
     }
 
@@ -147,6 +149,7 @@ export async function GET(): Promise<NextResponse> {
       sha: commit.sha.slice(0, 7),
       message: trimCommitMessage(commit.commit.message),
       checkedAt,
+      availability: 'available',
     });
   } catch {
     return fallbackActivity(checkedAt);

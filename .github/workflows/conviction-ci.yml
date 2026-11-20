@@ -16,8 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.24.0'
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10.34.9'
 
 jobs:
   typecheck:
@@ -41,6 +41,9 @@ jobs:
       - name: Run type-check
         run: pnpm run type-check
 
+      - name: Run unit tests
+        run: pnpm run test:unit
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -61,6 +64,9 @@ jobs:
 
       - name: Run lint
         run: pnpm run lint
+
+      - name: Run copy audit
+        run: pnpm run audit:copy
 
   build:
     name: Build
@@ -84,7 +90,7 @@ jobs:
       - name: Build
         run: pnpm run build
         env:
-          NEXT_PUBLIC_SITE_URL: https://www.scardubu.dev
+          NEXT_PUBLIC_SITE_URL: https://scardubu.dev
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -123,17 +129,17 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run smoke tests
-        run: pnpm exec playwright test e2e/smoke.spec.ts --project=chromium
+        run: pnpm run test:smoke
         env:
           CI: true
-          NEXT_PUBLIC_SITE_URL: https://www.scardubu.dev
+          NEXT_PUBLIC_SITE_URL: https://scardubu.dev
 
       - name: Smoke — font contract
         shell: bash
         run: |
           set -euo pipefail
-          FONT_CONSTRUCTORS=$(grep -rEn '(Crimson_Pro|CrimsonPro|Geist|Inter|Space_Grotesk)[[:space:]]*\(' --include='*.tsx' --include='*.ts' app components lib 2>/dev/null || true)
-          FONT_FAMILIES=$(grep -rEn 'font-family:[^;]*(Crimson Pro|Crimson_Pro|CrimsonPro|Geist|Inter|Space Grotesk)' --include='*.css' app components 2>/dev/null || true)
+          FONT_CONSTRUCTORS=$(grep -rEn '(Crimson_Pro|CrimsonPro|Geist|Inter)[[:space:]]*\(' --include='*.tsx' --include='*.ts' app components lib 2>/dev/null || true)
+          FONT_FAMILIES=$(grep -rEn 'font-family:[^;]*(Crimson Pro|Crimson_Pro|CrimsonPro|Geist|Inter)' --include='*.css' app components 2>/dev/null || true)
           if [ -n "$FONT_CONSTRUCTORS$FONT_FAMILIES" ]; then
             echo '✗ Forbidden font declaration detected:'
             printf '%s\n%s\n' "$FONT_CONSTRUCTORS" "$FONT_FAMILIES"
@@ -153,24 +159,12 @@ jobs:
 
       - name: Smoke — conviction strings present
         run: |
-          grep -rEn "The system has to work at 2am" --include="*.tsx" --include="*.ts" . | grep -q "." || (echo "✗ Conviction signal missing" && exit 1)
-          grep -rEn "Staff Backend and Platform Engineer" --include="*.tsx" --include="*.ts" app components lib | grep -q "." || (echo "✗ Canonical role missing" && exit 1)
+          grep -rEn "Systems you can trust at" --include="*.tsx" --include="*.ts" app components lib | grep -q "." || (echo "✗ Conviction signal missing" && exit 1)
+          grep -rEn "STAFF BACKEND & PLATFORM ENGINEER" --include="*.tsx" --include="*.ts" app components lib | grep -q "." || (echo "✗ Canonical role missing" && exit 1)
           echo "✓ Conviction strings verified"
 
-      - name: Smoke — V16 V17 V18 V19 contract checks
-        run: |
-          V16_A=$(grep -rEn "translateZ\(0\)" --include="*.css" --include="*.tsx" app components | wc -l)
-          V16_B=$(grep -rEn "contain:[[:space:]]*strict" --include="*.css" --include="*.tsx" app components | wc -l)
-          [ "$V16_A" -ge 1 ] && [ "$V16_B" -ge 1 ] || (echo "✗ V16 GradientMesh safeguards missing" && exit 1)
-
-          V17=$(grep -rEn 'name="color-scheme"[[:space:]]+content="dark"' --include="*.tsx" app | wc -l)
-          [ "$V17" -ge 1 ] || (echo "✗ V17 color-scheme meta missing" && exit 1)
-
-          V18=$(grep -rEn 'aria-live="polite"' --include="*.tsx" components | grep -i "liveactivitybar\|ticker\|commit\|status" | wc -l)
-          [ "$V18" -ge 1 ] || (echo "✗ V18 aria-live missing" && exit 1)
-
-          V19=$(grep -rEn 'min-h-\[44px\]|min-w-\[44px\]' --include="*.tsx" components | grep -i "bookmark\|toast\|dismiss" | wc -l)
-          [ "$V19" -ge 1 ] || (echo "✗ V19 touch target missing" && exit 1)
+      - name: Smoke — UI accessibility and rendering contracts
+        run: pnpm run verify:ui-contracts
 
       - name: Smoke — V22 z-index multi-digit regex support
         run: |

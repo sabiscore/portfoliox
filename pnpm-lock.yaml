@@ -128,6 +128,9 @@ importers:
       zod:
         specifier: ^3.24.1
         version: 3.25.76
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.11.3
@@ -219,6 +222,16 @@ importers:
       vitest:
         specifier: ^3.2.1
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.22.0)(yaml@2.8.3)
+
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      caniuse-lite:
+        specifier: ^1.0.30001700
+        version: 1.0.30001793
+      postcss:
+        specifier: ^8.5.2
+        version: 8.5.6
 
 packages:
 

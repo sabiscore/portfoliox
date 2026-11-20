@@ -10,7 +10,7 @@ export function Footer(): React.JSX.Element {
             SCARDUBU // OSCAR NDUGBU
           </div>
           <p className="font-mono text-xs text-white/50">
-            FAIL-CLOSED SYSTEMS · ZERO-USD EDGE AI · QUANTITATIVE INFRASTRUCTURE
+            BACKEND SYSTEMS · PLATFORM INFRASTRUCTURE · AI ENGINEERING
           </p>
         </div>
 

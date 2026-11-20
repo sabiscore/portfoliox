@@ -1,102 +1,72 @@
+import { SITE_URL } from '@/lib/config';
+
 export interface ProjectData {
   name: string;
   description: string;
   url: string;
   category: string;
-  metrics?: {
-    users?: number;
-    accuracy?: number;
-    uptime?: number;
-    latency?: number;
-  };
   techStack: string[];
   datePublished?: string;
   codeRepository?: string;
 }
 
+/**
+ * SoftwareApplication schema deliberately contains no fabricated offers,
+ * aggregate ratings, user counts, or operational metrics.
+ */
 export function generateProjectSchema(project: ProjectData) {
-  const schema: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
     name: project.name,
     description: project.description,
     url: project.url,
     applicationCategory: project.category,
-    operatingSystem: "Cross-platform",
+    operatingSystem: 'Cross-platform',
     author: {
-      "@type": "Person",
-      name: "Oscar Ndugbu",
-      url: "https://www.scardubu.dev",
-      jobTitle: "Staff Backend and Platform Engineer",
-      sameAs: [
-        "https://github.com/scardubu",
-        "https://linkedin.com/in/oscardubu",
-      ],
+      '@type': 'Person',
+      name: 'Oscar Ndugbu',
+      url: SITE_URL,
+      jobTitle: 'Staff Backend and Platform Engineer',
+      sameAs: ['https://github.com/scardubu', 'https://linkedin.com/in/oscardubu'],
     },
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
+    ...(project.codeRepository
+      ? {
+          codeRepository: project.codeRepository,
+          programmingLanguage: project.techStack,
+        }
+      : {}),
+    ...(project.datePublished ? { datePublished: project.datePublished } : {}),
   };
-
-  if (project.metrics?.accuracy) {
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: (project.metrics.accuracy / 100) * 5,
-      ratingCount: project.metrics.users || 100,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
-
-  if (project.codeRepository) {
-    schema.codeRepository = {
-      "@type": "SoftwareSourceCode",
-      codeRepository: project.codeRepository,
-      programmingLanguage: project.techStack,
-    };
-  }
-
-  if (project.datePublished) {
-    schema.datePublished = project.datePublished;
-  }
-
-  return schema;
 }
 
 export function generatePersonSchema() {
   return {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "@id": "https://www.scardubu.dev/#person",
-    name: "Oscar Ndugbu",
-    alternateName: "scardubu",
-    jobTitle: "Staff Backend and Platform Engineer",
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${SITE_URL}/#person`,
+    name: 'Oscar Ndugbu',
+    alternateName: 'Scardubu',
+    jobTitle: 'Staff Backend and Platform Engineer',
     description:
-      "Staff backend and platform engineer building fintech systems, backend infrastructure, AI pipelines, and reliability tooling. Based in Lagos, Nigeria.",
-    url: "https://www.scardubu.dev",
-    image: "https://www.scardubu.dev/headshot.webp",
-    sameAs: [
-      "https://github.com/scardubu",
-      "https://linkedin.com/in/oscardubu",
-    ],
+      'Staff backend and platform engineer building backend services, platform infrastructure, AI systems, and reliable fintech products. Based in Lagos, Nigeria.',
+    url: SITE_URL,
+    image: `${SITE_URL}/headshot.webp`,
+    sameAs: ['https://github.com/scardubu', 'https://linkedin.com/in/oscardubu'],
     address: {
-      "@type": "PostalAddress",
-      addressCountry: "NG",
-      // v14.1 FIX: "Abuja" → "Lagos" — location of record
-      addressRegion: "Lagos",
+      '@type': 'PostalAddress',
+      addressCountry: 'NG',
+      addressRegion: 'Lagos',
     },
     knowsAbout: [
-      "Machine Learning",
-      "MLOps",
-      "FastAPI",
-      "XGBoost",
-      "Production ML Systems",
-      "Platform Engineering",
-      "Next.js",
-      "TypeScript",
-      "Python",
+      'Backend engineering',
+      'Platform engineering',
+      'Distributed systems',
+      'Machine learning infrastructure',
+      'FastAPI',
+      'PostgreSQL',
+      'TypeScript',
+      'Python',
     ],
   };
 }
@@ -109,29 +79,31 @@ export function generateBlogPostSchema(post: {
   image?: string;
   readingTime?: number;
 }) {
+  const url = `${SITE_URL}/writing/${post.slug}`;
+
   return {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
     headline: post.title,
     description: post.description,
-    url: `https://www.scardubu.dev/blog/${post.slug}`,
+    url,
     datePublished: post.publishedAt,
     dateModified: post.publishedAt,
     author: {
-      "@type": "Person",
-      name: "Oscar Ndugbu",
-      url: "https://www.scardubu.dev",
+      '@type': 'Person',
+      name: 'Oscar Ndugbu',
+      url: SITE_URL,
     },
     publisher: {
-      "@type": "Person",
-      name: "Oscar Ndugbu",
-      url: "https://www.scardubu.dev",
+      '@type': 'Person',
+      name: 'Oscar Ndugbu',
+      url: SITE_URL,
     },
-    image: post.image || "https://www.scardubu.dev/og-image.png",
+    image: post.image || `${SITE_URL}/og-image.png`,
     mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://www.scardubu.dev/blog/${post.slug}`,
+      '@type': 'WebPage',
+      '@id': url,
     },
-    ...(post.readingTime && { timeRequired: `PT${post.readingTime}M` }),
+    ...(post.readingTime ? { timeRequired: `PT${post.readingTime}M` } : {}),
   };
 }

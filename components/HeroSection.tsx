@@ -1,90 +1,55 @@
-'use client';
-
-import React, { useState, useRef, useCallback } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { IdentityCard } from '@/components/IdentityCard';
+import { LiveActivityBar } from '@/components/Liveactivitybar';
 
-// Deterministic file-path matching to components/Liveactivitybar.tsx on Linux/Vercel
-const LiveActivityBar = dynamic(
-  () => import('@/components/Liveactivitybar').then((mod) => mod.LiveActivityBar),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        aria-hidden="true"
-        className="h-[148px] w-full animate-pulse border border-white/10 bg-[#0E0E10]/80 p-4 font-mono text-xs text-zinc-500"
-      >
-        INITIALIZING_TELEMETRY_BUS // VERIFYING_ZOD_CONTRACTS...
-      </div>
-    ),
-  }
-);
-
-interface ArchitecturalDeployment {
+interface FeaturedProject {
   slug: string;
   name: string;
   domainRole: string;
-  quantMetric: string;
+  evidenceNote: string;
   architectureSummary: string;
   embeddedStack: string[];
-  status: 'PROD_ACTIVE' | 'EDGE_VALIDATED';
+  evidenceStatus: 'PUBLIC DEMO' | 'PUBLIC SOURCE' | 'ACTIVE BUILD';
 }
 
-const ACTIVE_DEPLOYMENTS: readonly ArchitecturalDeployment[] = [
+const FEATURED_PROJECTS: readonly FeaturedProject[] = [
   {
     slug: 'sabiscore',
     name: 'SabiScore',
     domainRole: 'Quantitative Football Markets & Probabilistic Forecasting',
-    quantMetric: '200+ Settled Matches vs. Pinnacle Closing Line',
+    evidenceNote: 'Public product demo · private performance artifacts are not published here',
     architectureSummary:
-      'Out-of-core Polars & DuckDB feature engineering, Shin devigging, Dirichlet simplex calibration, and 0.25x fractional Kelly allocation inside a strict 512MB cgroup.',
+      'Out-of-core Polars and DuckDB feature processing, odds de-vigging, ensemble evaluation, and a version-aware fallback path.',
     embeddedStack: ['Polars', 'DuckDB', 'PyArrow', 'FastAPI', 'Next.js 15'],
-    status: 'PROD_ACTIVE',
+    evidenceStatus: 'PUBLIC DEMO',
   },
   {
     slug: 'yap-engine',
     name: 'YapCommerce // The Yap Engine',
     domainRole: 'Autonomous Multi-Agent Media & Social Commerce Pipeline',
-    quantMetric: '$0.00 Cloud LLM Spend // 8GB–16GB WSL2 Envelope',
+    evidenceNote: 'Public architecture record · no production throughput SLO is claimed',
     architectureSummary:
-      'Local quantized GGUF inference and deterministic multi-agent orchestration over Fastify, eliminating external API token burn while maintaining strict schema guarantees.',
+      'Local model routing and stage-oriented agent orchestration, with schema validation and content-addressed checkpoints for restartable media workflows.',
     embeddedStack: ['GGUF Local LLM', 'Fastify', 'TypeScript', 'Zod', 'PM2'],
-    status: 'PROD_ACTIVE',
+    evidenceStatus: 'PUBLIC SOURCE',
   },
   {
     slug: 'taxbridge',
     name: 'TaxBridge',
     domainRole: 'Offline-First Nigerian Fintech & Fiscal Compliance Ledger',
-    quantMetric: 'Zero-Data-Loss Edge Sync // Sub-25ms Validation',
+    evidenceNote: 'Active build · NRS DigiTax integration and policy validation remain in progress',
     architectureSummary:
-      'Resilient revenue collection and tax reconciliation engine engineered for intermittent connectivity across Southeast Nigeria with cryptographic audit trails.',
+      'Tax workflow architecture for intermittent connectivity, explicit organization context, background processing, and append-oriented audit records.',
     embeddedStack: ['Fastify', 'DuckDB', 'Zod', 'SQLite CRDT', 'Tailwind'],
-    status: 'EDGE_VALIDATED',
+    evidenceStatus: 'ACTIVE BUILD',
   },
 ] as const;
 
-export function HeroSection() {
-  const containerRef = useRef<HTMLElement | null>(null);
-  const [cursorCoords, setCursorCoords] = useState<{ x: number; y: number }>({ x: 480, y: 260 });
-  const [isPointerInside, setIsPointerInside] = useState<boolean>(false);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    setCursorCoords({
-      x: Math.round(e.clientX - rect.left),
-      y: Math.round(e.clientY - rect.top),
-    });
-  }, []);
-
+export function HeroSection(): React.JSX.Element {
   return (
     <section
-      ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerEnter={() => setIsPointerInside(true)}
-      onPointerLeave={() => setIsPointerInside(false)}
-      aria-label="Architectural Anthology & Principal Overview"
+      aria-labelledby="hero-heading"
       className="relative min-h-screen w-full overflow-hidden bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
     >
       {/* Kinetic 1px Coordinate Grid + Subtle Radial Cursor Illumination */}
@@ -94,12 +59,7 @@ export function HeroSection() {
       />
       <div
         aria-hidden="true"
-        style={{
-          background: isPointerInside
-            ? `radial-gradient(560px circle at ${cursorCoords.x}px ${cursorCoords.y}px, rgba(0, 217, 255, 0.08), rgba(0, 255, 102, 0.02) 45%, transparent 80%)`
-            : 'radial-gradient(640px circle at 20% 15%, rgba(0, 217, 255, 0.06), transparent 75%)',
-        }}
-        className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_circle_at_20%_15%,rgba(0,217,255,0.06),transparent_75%)]"
       />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-6 lg:px-8">
@@ -108,17 +68,17 @@ export function HeroSection() {
           <div className="flex items-center gap-3">
             <span className="inline-flex h-2 w-2 rounded-full bg-[#00FF66]" />
             <span className="font-mono text-xs font-semibold tracking-widest text-white uppercase">
-              SCARDUBU.DEV // ANTHOLOGY_V2.6
+              SCARDUBU.DEV // ENGINEERING PORTFOLIO
             </span>
             <span className="hidden border border-white/10 bg-[#08090C] px-2 py-0.5 font-mono text-[11px] text-zinc-400 md:inline-block">
-              LOC: AWKA / LAGOS, NG (WAT)
+              LAGOS, NIGERIA
             </span>
           </div>
 
           <nav aria-label="Primary Jump Links" className="flex flex-wrap items-center gap-2">
             {[
               { href: '#deployments', label: '01.DEPLOYMENTS' },
-              { href: '#telemetry', label: '02.TELEMETRY' },
+              { href: '#architecture-index', label: '02.ARCHITECTURE INDEX' },
               { href: '/writing', label: '03.EDITORIAL' },
               { href: '/cv/oscar-ndugbu-resume.pdf', label: '04.DOSSIER_PDF' },
             ].map((item) => (
@@ -139,22 +99,22 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2.5 border border-[#00D9FF]/40 bg-[#0E0E10]/90 px-3.5 py-1.5 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-[#00D9FF]" />
               <span className="font-mono text-xs font-medium tracking-wider text-[#00D9FF] uppercase">
-                PRINCIPAL SYSTEMS ARCHITECT &amp; QUANT STRATEGIST
+                STAFF BACKEND &amp; PLATFORM ENGINEER
               </span>
             </div>
 
             <div className="space-y-4">
-              <h1 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.06]">
-                Fail-Closed Quantitative Systems &amp;{' '}
-                <span className="text-[#00D9FF]">Edge-Native</span> Fintech Infrastructure.
+              <h1
+                id="hero-heading"
+                className="max-w-[15ch] font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.06]"
+              >
+                Systems you can trust at <span className="text-[#00D9FF]">2 AM.</span>
               </h1>
               <p className="max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">
-                Engineering high-throughput, memory-bounded analytical platforms and offline-resilient
-                financial infrastructure. Built with out-of-core{' '}
-                <span className="font-mono text-sm text-white">Polars/DuckDB</span> pipelines,
-                calibrated probabilistic models, and{' '}
-                <span className="font-mono text-sm text-[#00FF66]">$0.00 cloud-LLM</span> local GGUF
-                orchestration.
+                Staff Backend and Platform Engineer focused on reliable backend services,
+                distributed systems, AI infrastructure, and resilient fintech products. The work turns
+                operational constraints into systems with explicit failure boundaries, observable
+                behavior, and deliberate recovery paths.
               </p>
             </div>
 
@@ -166,7 +126,7 @@ export function HeroSection() {
               >
                 <span>INSPECT_SYSTEM_ARCHITECTURE</span>
                 <span aria-hidden="true" className="text-[#00D9FF]">
-                  →
+                  ↗
                 </span>
               </Link>
 
@@ -187,22 +147,18 @@ export function HeroSection() {
               </a>
             </div>
 
-            {/* Quantitative Invariants Bar */}
             <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-6 sm:grid-cols-4">
               {[
-                { label: 'RENDER_CGROUP_CEILING', value: '512 MB', accent: 'text-[#00D9FF]' },
-                { label: 'LOCAL_WSL2_ENVELOPE', value: '8–16 GB', accent: 'text-white' },
-                { label: 'CLOUD_LLM_API_BURN', value: '$0.00 / MO', accent: 'text-[#00FF66]' },
-                { label: 'RUNTIME_CONTRACT', value: 'FAIL-CLOSED', accent: 'text-[#00D9FF]' },
+                { label: 'BACKEND', value: 'Fastify · Python · TypeScript' },
+                { label: 'DATA', value: 'PostgreSQL · Redis · DuckDB' },
+                { label: 'AI SYSTEMS', value: 'Inference · Model pipelines' },
+                { label: 'ENGINEERING', value: 'Fail-closed · Observable · Recoverable' },
               ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="border border-white/10 bg-[#0E0E10]/80 p-3 backdrop-blur-md"
-                >
+                <div key={stat.label} className="border border-white/10 bg-[#0E0E10]/80 p-3">
                   <span className="block font-mono text-[10px] tracking-wider text-zinc-400 uppercase">
                     {stat.label}
                   </span>
-                  <span className={`mt-1 block font-mono text-sm font-bold ${stat.accent}`}>
+                  <span className="mt-1 block font-mono text-xs font-semibold leading-5 text-zinc-200">
                     {stat.value}
                   </span>
                 </div>
@@ -211,45 +167,43 @@ export function HeroSection() {
           </div>
 
           {/* Right Column: Editorial Identity Ledger */}
-          <div className="lg:col-span-5">
+          <div id="identity" className="scroll-mt-24 lg:col-span-5">
             <IdentityCard />
           </div>
         </div>
 
-        {/* Live Telemetry Bus */}
-        <div id="telemetry" className="mt-12">
+        <div id="architecture-index" className="mt-12 scroll-mt-24">
           <LiveActivityBar />
         </div>
 
-        {/* Contextual Skill Visualization Embedded in Active Production Deployments */}
-        <div id="deployments" className="mt-14 space-y-6">
+        <div id="deployments" className="mt-14 scroll-mt-24 space-y-6">
           <div className="flex flex-col justify-between gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-end">
             <div>
               <span className="font-mono text-xs tracking-widest text-[#00D9FF] uppercase">
-                CONTEXTUAL_SKILL_TOPOLOGY // ACTIVE_SYSTEMS
+                SELECTED ENGINEERING WORK
               </span>
               <h2 className="mt-1 font-display text-2xl font-bold text-white sm:text-3xl">
-                Production Architecture &amp; Embedded Runtime Stack
+                Architecture, constraints, and implementation
               </h2>
             </div>
             <span className="font-mono text-xs text-zinc-400">
-              ZERO_SYNTHETIC_BENCHMARKS // VERIFIED_DEPLOYMENTS
+              PUBLIC RECORDS · EVIDENCE BOUNDARIES STATED
             </span>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {ACTIVE_DEPLOYMENTS.map((deployment) => (
+            {FEATURED_PROJECTS.map((deployment) => (
               <article
                 key={deployment.slug}
                 className="flex flex-col justify-between border border-white/10 bg-[#0E0E10]/90 p-6 backdrop-blur-xl transition-colors duration-200 hover:border-[#00D9FF]/40"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-                    <span className="font-mono text-xs font-semibold text-[#00FF66]">
-                      ● {deployment.status}
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#00D9FF]">
+                      {deployment.evidenceStatus}
                     </span>
-                    <span className="border border-white/10 bg-[#08090C] px-2 py-0.5 font-mono text-[11px] text-zinc-300">
-                      {deployment.quantMetric}
+                    <span className="max-w-[22rem] text-right font-mono text-[10px] leading-4 text-zinc-500">
+                      {deployment.evidenceNote}
                     </span>
                   </div>
 
@@ -284,7 +238,7 @@ export function HeroSection() {
                     className="inline-flex min-h-[44px] w-full items-center justify-between border border-white/10 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-medium text-white transition-colors hover:border-[#00D9FF]/40 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
                   >
                     <span>OPEN_CASE_DOSSIER</span>
-                    <span aria-hidden="true">→</span>
+                    <span aria-hidden="true">↗</span>
                   </Link>
                 </div>
               </article>

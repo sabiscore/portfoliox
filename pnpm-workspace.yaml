@@ -1,0 +1,11 @@
+packages: []
+
+# Explicitly approve only packages whose native build steps are required by
+# the production toolchain. All newly introduced dependency build scripts fail
+# installation until they are reviewed and added here.
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver
+
+strictDepBuilds: true

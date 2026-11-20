@@ -6,6 +6,13 @@
   "engines": {
     "node": "22.x"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  },
   "scripts": {
     "prebuild": "node scripts/verify-app-router.mjs && node scripts/verify-ui-contracts.mjs && pnpm run lint && pnpm run type-check && pnpm run test:unit && pnpm run audit:copy",
     "build": "BROWSERSLIST_IGNORE_OLD_DATA=1 next build",

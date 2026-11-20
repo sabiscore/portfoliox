@@ -1,17 +1,40 @@
-// Zod validation schemas (Phase 5)
-// The honeypot accepts a bounded value so the API can silently acknowledge
-// automated submissions without exposing the detection rule.
+// Shared client/server contract for the professional inquiry endpoint.
 import { z } from 'zod';
 
+export const CONTACT_SCOPES = [
+  'Backend & Platform Infrastructure',
+  'Fintech & Compliance Systems',
+  'Data & Quantitative Systems',
+  'AI & Intelligent Workflows',
+  'Architecture Advisory',
+] as const;
+
+export const CONTACT_INQUIRY_TYPES = [
+  'job',
+  'consulting',
+  'collaboration',
+  'advisory',
+] as const;
+
+export const CONTACT_TIMELINES = [
+  'immediate',
+  'month',
+  'quarter',
+  'exploring',
+] as const;
+
 export const contactSchema = z.object({
-  name: z.string().min(2).max(50),
-  email: z.string().email(),
-  company: z.string().optional(),
-  inquiryType: z.enum(['job', 'consulting', 'collaboration', 'advisory']).optional(),
-  timeline: z.enum(['immediate', 'month', 'quarter', 'exploring']),
-  stakes: z.string().min(5).max(240),
-  message: z.string().min(10).max(500),
-  // Honeypot: bots fill it, humans leave it empty. The route discards any
-  // non-empty value after parsing; the bound prevents oversized payloads.
+  name: z.string().trim().min(2, 'Enter at least two characters.').max(50),
+  email: z.string().trim().email('Enter a valid email address.').max(254),
+  company: z.string().trim().max(120).optional(),
+  scope: z.enum(CONTACT_SCOPES).optional(),
+  inquiryType: z.enum(CONTACT_INQUIRY_TYPES).optional(),
+  timeline: z.enum(CONTACT_TIMELINES),
+  stakes: z.string().trim().min(5, 'Describe the operational or business impact.').max(240),
+  message: z.string().trim().min(10, 'Add at least ten characters to the brief.').max(500),
+  // Honeypot: bots fill it, humans leave it empty. The route silently
+  // acknowledges a non-empty value after validation.
   honeypot: z.string().max(200).default(''),
 });
+
+export type ContactInput = z.infer<typeof contactSchema>;

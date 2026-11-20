@@ -98,6 +98,7 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     expect(fixesCss).toContain('overflow-x: hidden;');
     expect(globalsCss).toContain('overflow-x: hidden;');
   });
+
   it('keeps pnpm runtime and native build-script approvals explicit', () => {
     const packageJson = JSON.parse(read('package.json')) as {
       packageManager: string;

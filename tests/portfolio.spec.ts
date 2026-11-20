@@ -107,7 +107,7 @@ test.describe('Current portfolio interactions', () => {
     await form.locator('#contact-name').fill('A');
     await form.locator('#contact-email').fill('not-an-email');
     await form.locator('#contact-message').fill('short');
-    await form.getByRole('button', { name: /DISPATCH ARCHITECTURAL BRIEF/i }).click();
+    await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
 
     await expect(form.getByRole('alert')).toContainText('SCHEMA_VALIDATION_ERROR');
   });
@@ -143,7 +143,7 @@ test.describe('Current portfolio interactions', () => {
     await form.locator('#contact-message').fill(
       'Please review our payment reconciliation architecture and recovery plan.'
     );
-    await form.getByRole('button', { name: /DISPATCH ARCHITECTURAL BRIEF/i }).click();
+    await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
 
     await expect(form.getByRole('status')).toContainText('ACK_RECEIVED');
   });
@@ -163,10 +163,14 @@ test.describe('Current portfolio interactions', () => {
     const form = page.locator('#contact form');
     await form.locator('#contact-name').fill('Ada Okafor');
     await form.locator('#contact-email').fill('ada@example.com');
+    await form.locator('#contact-inquiry-type').selectOption('consulting');
+    await form.locator('#contact-timeline').selectOption('month');
+    await form.locator('#contact-scope').selectOption('Backend & Platform Infrastructure');
+    await form.locator('#contact-stakes').fill('Payment reconciliation blocks settlement close.');
     await form.locator('#contact-message').fill(
       'Please review our payment reconciliation architecture and recovery plan.'
     );
-    await form.getByRole('button', { name: /DISPATCH ARCHITECTURAL BRIEF/i }).click();
+    await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
 
     await expect(form.getByRole('alert')).toContainText('TRANSMISSION_FALLBACK');
     await expect(page.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();

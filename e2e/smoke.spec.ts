@@ -238,7 +238,7 @@ test.describe('Production portfolio smoke tests', () => {
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
     await expect(footer).toContainText(
-      'FAIL-CLOSED SYSTEMS · ZERO-USD EDGE AI · QUANTITATIVE INFRASTRUCTURE'
+      'BACKEND SYSTEMS · PLATFORM INFRASTRUCTURE · AI ENGINEERING'
     );
     await expect(footer.getByRole('link', { name: /GITHUB/i })).toHaveAttribute(
       'href',

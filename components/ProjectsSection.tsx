@@ -1,6 +1,6 @@
-import type { JSX } from 'react';
 'use client';
 
+import type { JSX } from 'react';
 import { useCallback, useState } from 'react';
 import Link from 'next/link';
 
@@ -112,7 +112,6 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
       { primitive: 'Redis', role: 'Queue state' },
     ],
     caseStudyHref: '/work/swarmxq',
-    sourceHref: 'https://github.com/scardubu',
   },
   {
     slug: 'ubec',

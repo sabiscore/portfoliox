@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
+import { CONTACT_EMAIL } from '@/lib/config';
+
 export interface ArchitecturalPillar {
   code: string;
   title: string;
@@ -54,7 +56,7 @@ export function IdentityCard({ className = '' }: IdentityCardProps): React.JSX.E
 
   const handleCopyContact = async () => {
     try {
-      await navigator.clipboard.writeText('oscar@scardubu.dev');
+      await navigator.clipboard.writeText(CONTACT_EMAIL);
       setCopiedEmail(true);
       if (resetTimer.current) clearTimeout(resetTimer.current);
       resetTimer.current = setTimeout(() => setCopiedEmail(false), 2500);

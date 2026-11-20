@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 'use client';
 
 import { useState } from 'react';
@@ -60,7 +61,7 @@ export interface LiveActivityBarProps {
   initialActiveId?: ArchitectureNodeId;
 }
 
-export function LiveActivityBarSkeleton(): React.JSX.Element {
+export function LiveActivityBarSkeleton(): JSX.Element {
   return (
     <section
       aria-label="Project architecture index loading"
@@ -84,7 +85,7 @@ export function LiveActivityBarSkeleton(): React.JSX.Element {
 export function LiveActivityBar({
   className = '',
   initialActiveId = 'sabiscore',
-}: LiveActivityBarProps): React.JSX.Element {
+}: LiveActivityBarProps): JSX.Element {
   const [activeId, setActiveId] = useState<ArchitectureNodeId>(initialActiveId);
   const activeNode =
     ARCHITECTURE_NODES.find((node) => node.id === activeId) ?? ARCHITECTURE_NODES[0];

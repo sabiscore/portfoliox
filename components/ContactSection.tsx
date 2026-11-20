@@ -69,7 +69,7 @@ export function ContactSection(): React.JSX.Element {
     } catch {
       setCopiedEmail(false);
     }
-  }, []);
+  }, [directEmail]);
 
   const updateField = <K extends keyof InquiryPayload>(field: K, value: InquiryPayload[K]) => {
     setFormState((current) => ({ ...current, [field]: value }));

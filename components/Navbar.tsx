@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -11,14 +11,15 @@ interface NavRoute {
 }
 
 const NAV_ROUTES: ReadonlyArray<NavRoute> = [
-  { code: '01', label: 'PROJECTS', href: '/#projects' },
-  { code: '02', label: 'FAILURE MODES', href: '/#failure-modes' },
-  { code: '03', label: 'ARCHITECTURE LEDGER', href: '/#identity' },
+  { code: '01', label: 'WORK', href: '/#projects' },
+  { code: '02', label: 'ENGINEERING', href: '/#failure-modes' },
+  { code: '03', label: 'PROFILE', href: '/#identity' },
   { code: '04', label: 'WRITING', href: '/writing' },
 ];
 
 export function Navbar(): React.JSX.Element {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
 
   const toggleMobileMenu = useCallback(() => {
@@ -32,6 +33,19 @@ export function Navbar(): React.JSX.Element {
   useEffect(() => {
     closeMobileMenu();
   }, [pathname, closeMobileMenu]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleEscape = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape') return;
+      closeMobileMenu();
+      menuButtonRef.current?.focus();
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMobileMenuOpen, closeMobileMenu]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#08090C]/90 backdrop-blur-xl">
@@ -71,7 +85,7 @@ export function Navbar(): React.JSX.Element {
         <div className="flex items-center gap-2">
           <Link
             href="/#contact"
-            aria-label="Direct architectural inquiry"
+            aria-label="Go to the contact section"
             className="min-h-[44px] min-w-[44px] px-3.5 inline-flex items-center justify-center gap-2 border border-white/15 hover:border-[#00D9FF] bg-[#0E0E10] font-mono text-xs font-semibold uppercase tracking-wider text-white hover:text-[#00D9FF] transition-colors"
           >
             <span className="text-[#00D9FF]" aria-hidden="true">
@@ -81,6 +95,7 @@ export function Navbar(): React.JSX.Element {
           </Link>
 
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={toggleMobileMenu}
             aria-expanded={isMobileMenuOpen}
@@ -101,7 +116,7 @@ export function Navbar(): React.JSX.Element {
         >
           <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-2">
             <span className="font-mono text-[11px] uppercase tracking-widest text-white/50">
-              NAVIGATION MATRIX
+              SITE NAVIGATION
             </span>
             <span className="font-mono text-[11px] text-[#00FF66]">
               ● LAGOS · UTC+1

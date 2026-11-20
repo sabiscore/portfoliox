@@ -156,7 +156,7 @@ export function ProjectsSection(): JSX.Element {
     <section
       id="projects"
       aria-labelledby="projects-section-heading"
-      className="w-full border-b border-white/10 bg-[#08090C] px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
+      className="w-full scroll-mt-24 border-b border-white/10 bg-[#08090C] px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
     >
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="max-w-3xl space-y-3">

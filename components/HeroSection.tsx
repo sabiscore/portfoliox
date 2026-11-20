@@ -77,15 +77,15 @@ export function HeroSection(): React.JSX.Element {
 
           <nav aria-label="Primary Jump Links" className="flex flex-wrap items-center gap-2">
             {[
-              { href: '#deployments', label: '01.DEPLOYMENTS' },
-              { href: '#architecture-index', label: '02.ARCHITECTURE INDEX' },
-              { href: '/writing', label: '03.EDITORIAL' },
-              { href: '/cv/oscar-ndugbu-resume.pdf', label: '04.DOSSIER_PDF' },
+              { href: '#deployments', label: 'Selected work' },
+              { href: '#architecture-index', label: 'Live activity' },
+              { href: '/writing', label: 'Engineering notes' },
+              { href: '/cv/oscar-ndugbu-resume.pdf', label: 'Download résumé' },
             ].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-transparent px-3 font-mono text-xs text-zinc-300 transition-colors hover:border-[#00D9FF]/40 hover:bg-[#08090C] hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-transparent px-3 font-mono text-xs text-zinc-300 transition-colors hover:border-[#00D9FF]/40 hover:bg-[#08090C] hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
               >
                 {item.label}
               </Link>
@@ -122,9 +122,9 @@ export function HeroSection(): React.JSX.Element {
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
                 href="#deployments"
-                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center gap-3 border border-[#00D9FF] bg-[#00D9FF]/15 px-6 py-3 font-mono text-xs font-semibold tracking-wider text-white uppercase backdrop-blur-md transition-colors hover:bg-[#00D9FF]/25 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center gap-3 border border-[#00D9FF] bg-[#00D9FF]/15 px-6 py-3 font-sans text-sm font-semibold tracking-normal text-white backdrop-blur-md transition-colors hover:bg-[#00D9FF]/25 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
               >
-                <span>INSPECT_SYSTEM_ARCHITECTURE</span>
+                <span>Explore selected work</span>
                 <span aria-hidden="true" className="text-[#00D9FF]">
                   ↗
                 </span>
@@ -132,9 +132,9 @@ export function HeroSection(): React.JSX.Element {
 
               <Link
                 href="/writing"
-                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center border border-white/15 bg-[#0E0E10]/90 px-6 py-3 font-mono text-xs font-medium tracking-wider text-zinc-200 uppercase backdrop-blur-md transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center border border-white/15 bg-[#0E0E10]/90 px-6 py-3 font-sans text-sm font-medium tracking-normal text-zinc-200 backdrop-blur-md transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
               >
-                READ_ENGINEERING_MONOGRAPHS
+                Read engineering notes
               </Link>
 
               <a
@@ -143,7 +143,7 @@ export function HeroSection(): React.JSX.Element {
                 rel="noopener noreferrer"
                 className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center border border-white/10 bg-[#08090C] px-4 py-3 font-mono text-xs text-zinc-300 transition-colors hover:border-[#00FF66]/40 hover:text-[#00FF66] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FF66]"
               >
-                GITHUB // SABISCORE ↗
+                SabiScore on GitHub ↗
               </a>
             </div>
 

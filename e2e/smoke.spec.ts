@@ -223,7 +223,7 @@ test.describe('Production portfolio smoke tests', () => {
     }
   });
 
-  test('activity API returns uncached JSON with a relative-time field', async ({ page }) => {
+  test('activity API returns the canonical repository and explicit availability', async ({ page }) => {
     await goto(page);
 
     const response = await page.request.get('/api/activity');
@@ -232,7 +232,13 @@ test.describe('Production portfolio smoke tests', () => {
     expect(response.headers()['cache-control']).toContain('no-store');
 
     const body: unknown = await response.json();
-    expect(body).toEqual(expect.objectContaining({ ago: expect.any(String) }));
+    expect(body).toEqual(
+      expect.objectContaining({
+        repo: 'sabiscore/portfoliox',
+        ago: expect.any(String),
+        availability: expect.stringMatching(/^(available|empty|unavailable)$/),
+      })
+    );
   });
 
   test('footer renders its current operating statement and external destinations', async ({ page }) => {

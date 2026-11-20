@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 'use client';
 
 import { useCallback, useState } from 'react';
@@ -142,7 +143,7 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
   },
 ];
 
-export function ProjectsSection(): React.JSX.Element {
+export function ProjectsSection(): JSX.Element {
   const [expandedSlugs, setExpandedSlugs] = useState<Record<string, boolean>>({});
 
   const toggleHowItWorks = useCallback((slug: string) => {

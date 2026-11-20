@@ -50,15 +50,24 @@ describe('Current portfolio geometry and accessibility contracts', () => {
   it('keeps both hero calls to action at a 48px minimum height', () => {
     const hero = read('components/HeroSection.tsx');
 
-    const inspectIndex = hero.indexOf('INSPECT_SYSTEM_ARCHITECTURE');
+    // Locate the real CTA elements by their public destinations. This keeps
+    // the geometry contract coupled to the rendered links rather than
+    // historical implementation-marker names.
+    const inspectIndex = hero.indexOf('href="#deployments"');
     const inspectStart = hero.lastIndexOf('<Link', inspectIndex);
     const inspectEnd = hero.indexOf('</Link>', inspectIndex);
-    const inspectCta = hero.slice(inspectStart, inspectEnd);
+    const inspectCta =
+      inspectIndex >= 0 && inspectStart >= 0 && inspectEnd > inspectStart
+        ? hero.slice(inspectStart, inspectEnd)
+        : '';
 
-    const writingIndex = hero.indexOf('READ_ENGINEERING_MONOGRAPHS');
+    const writingIndex = hero.indexOf('href="/writing"');
     const writingStart = hero.lastIndexOf('<Link', writingIndex);
     const writingEnd = hero.indexOf('</Link>', writingIndex);
-    const writingCta = hero.slice(writingStart, writingEnd);
+    const writingCta =
+      writingIndex >= 0 && writingStart >= 0 && writingEnd > writingStart
+        ? hero.slice(writingStart, writingEnd)
+        : '';
 
     expect(inspectCta).toContain('href="#deployments"');
     expect(inspectCta).toContain('min-h-[48px]');

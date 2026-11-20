@@ -36,3 +36,10 @@ body {
   contain: strict;
   transform: translateZ(0);
 }
+
+/* Keep anchor navigation comfortable without forcing motion on sensitive users. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

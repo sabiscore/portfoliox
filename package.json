@@ -23,13 +23,6 @@
     "prepare": "node -e \"if (process.env.CI || process.env.VERCEL) process.exit(0); require('child_process').execSync('pnpm exec husky', { stdio: 'inherit' })\"",
     "verify:ui-contracts": "node scripts/verify-ui-contracts.mjs"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "unrs-resolver"
-    ]
-  },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@mdx-js/loader": "^3.1.1",

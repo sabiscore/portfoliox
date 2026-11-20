@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 import Link from 'next/link';
 
 interface FailureBoundaryPattern {
@@ -50,7 +51,7 @@ const FAILURE_BOUNDARY_PATTERNS: readonly FailureBoundaryPattern[] = [
   },
 ];
 
-export function ProductionPatterns(): React.JSX.Element {
+export function ProductionPatterns(): JSX.Element {
   return (
     <section
       id="failure-modes"

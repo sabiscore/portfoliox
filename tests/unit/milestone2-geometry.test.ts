@@ -106,13 +106,13 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     };
     const workspace = read('pnpm-workspace.yaml');
 
-    expect(packageJson.packageManager).toBe('pnpm@10.24.0');
+    expect(packageJson.packageManager).toBe('pnpm@10.34.9');
     expect(packageJson.engines.node).toBe('22.x');
     expect(packageJson.pnpm).toBeUndefined();
     expect(workspace).toContain('strictDepBuilds: true');
-    expect(workspace).toContain('onlyBuiltDependencies:');
+    expect(workspace).toContain('allowBuilds:');
     for (const dependency of ['esbuild', 'sharp', 'unrs-resolver']) {
-      expect(workspace).toContain(`  - ${dependency}`);
+      expect(workspace).toContain(`  ${dependency}: true`);
     }
     expect(workspace).not.toContain('dangerouslyAllowAllBuilds');
   });

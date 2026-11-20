@@ -155,8 +155,11 @@ test.describe('Production portfolio smoke tests', () => {
     await expect(section.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
     await expect(section.locator('#contact-name')).toHaveAccessibleName(/NAME \/\/ IDENTIFIER/i);
     await expect(section.locator('#contact-email')).toHaveAccessibleName(/RETURN ENDPOINT/i);
+    await expect(section.locator('#contact-inquiry-type')).toHaveAccessibleName(/ENGAGEMENT TYPE/i);
+    await expect(section.locator('#contact-timeline')).toHaveAccessibleName(/TIMELINE/i);
     await expect(section.locator('#contact-scope')).toHaveAccessibleName(/SYSTEM DOMAIN/i);
-    await expect(section.locator('#contact-message')).toHaveAccessibleName(/CONSTRAINTS & OBJECTIVES/i);
+    await expect(section.locator('#contact-stakes')).toHaveAccessibleName(/OPERATIONAL OR BUSINESS IMPACT/i);
+    await expect(section.locator('#contact-message')).toHaveAccessibleName(/CONSTRAINTS AND OBJECTIVES/i);
   });
 
   test('resume link points to the canonical PDF asset', async ({ page }) => {

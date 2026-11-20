@@ -76,8 +76,8 @@ test.describe('Current portfolio interactions', () => {
     const yapNode = index.getByRole('button', { name: /Yap Engine/i });
     await yapNode.click();
     await expect(yapNode).toHaveAttribute('aria-pressed', 'true');
-    await expect(index).toContainText('content-addressed stage inputs');
-    await expect(index).toContainText('No production latency SLO is claimed here.');
+    await expect(index).toContainText('content-addressed inputs');
+    await expect(index).toContainText('No throughput or production latency SLO is claimed here.');
   });
 
   test('project cards link to their case-study routes', async ({ page }) => {

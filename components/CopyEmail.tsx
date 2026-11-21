@@ -1,51 +1,109 @@
 'use client';
-// CONVICTION ENGINE V1.0 — Oscar Ndugbu Design System
-// Major Reset • Lagos → Global • Production Conviction Architecture
-// FIXED (v21.1): Missing <a opening tag — broken JSX causing build failure.
-// Renders as <a href="mailto:..."> — opens mail client on touch devices.
-// On desktop with clipboard API: intercepts click and copies address.
-// Icon always visible (not hover-only) for touch accessibility.
-// Min touch target: 44×44px guaranteed.
 
-import { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-interface CopyEmailProps {
-  email: string;
-  className?: string;
+export type CopyStatus = 'idle' | 'copied' | 'failed';
+
+export function useCopyEmail(email: string, resetMs = 2500) {
+  const [status, setStatus] = useState<CopyStatus>('idle');
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current) {
+        clearTimeout(resetTimer.current);
+      }
+    },
+    []
+  );
+
+  const copy = useCallback(async (): Promise<boolean> => {
+    if (typeof navigator === 'undefined' || typeof navigator.clipboard?.writeText !== 'function') {
+      setStatus('failed');
+      return false;
+    }
+
+    try {
+      await navigator.clipboard.writeText(email);
+      setStatus('copied');
+      if (resetTimer.current) clearTimeout(resetTimer.current);
+      resetTimer.current = setTimeout(() => setStatus('idle'), resetMs);
+      return true;
+    } catch {
+      setStatus('failed');
+      return false;
+    }
+  }, [email, resetMs]);
+
+  return { status, copy };
 }
 
-export function CopyEmail({ email, className = '' }: Readonly<CopyEmailProps>) {
-  const [copied, setCopied] = useState(false);
+export interface CopyEmailProps {
+  email: string;
+  className?: string;
+  variant?: 'inline' | 'primary';
+  label?: string;
+  copiedLabel?: string;
+  onStatusChange?: (status: CopyStatus) => void;
+}
 
-  const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (typeof navigator.clipboard?.writeText === 'function') {
-      try {
-        e.preventDefault();
-        await navigator.clipboard.writeText(email);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1400);
-      } catch {
-        // Clipboard denied — fall through to mailto:
-      }
+export function CopyEmail({
+  email,
+  className = '',
+  variant = 'inline',
+  label,
+  copiedLabel = 'COPIED TO CLIPBOARD',
+  onStatusChange,
+}: Readonly<CopyEmailProps>): React.JSX.Element {
+  const { status, copy } = useCopyEmail(email, variant === 'primary' ? 2500 : 1600);
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [onStatusChange, status]);
+
+  if (variant === 'primary') {
+    const isCopied = status === 'copied';
+    const buttonClasses = isCopied
+      ? 'border-accent-emerald/55 bg-accent-emerald/10 text-accent-emerald'
+      : 'border-accent-cyan/50 bg-accent-cyan/10 text-accent-cyan hover:border-accent-cyan hover:bg-accent-cyan hover:text-obsidian-base';
+
+    return (
+      <button
+        type="button"
+        onClick={() => void copy()}
+        aria-label={isCopied ? 'Email address copied to clipboard' : `Copy email address ${email}`}
+        className={`inline-flex min-h-touch min-w-touch flex-1 items-center justify-center gap-2 border px-4 py-2.5 font-mono text-xs font-semibold tracking-wider transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-surface motion-safe:active:translate-y-px ${buttonClasses} ${className}`}
+      >
+        {isCopied ? <CheckIcon /> : <CopyIcon />}
+        <span>{isCopied ? copiedLabel : (label ?? 'COPY EMAIL ADDRESS')}</span>
+      </button>
+    );
+  }
+
+  const handleLinkClick = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (typeof navigator !== 'undefined' && typeof navigator.clipboard?.writeText === 'function') {
+      event.preventDefault();
+      await copy();
     }
   };
 
   return (
-    // FIX v21.1: restored missing <a opening tag
     <a
       href={`mailto:${email}`}
-      onClick={handleClick}
-      aria-label={copied ? 'Email address copied to clipboard' : `Send email to ${email}`}
-      className={`copy-email inline-flex min-h-[44px] items-center gap-1.5 font-mono text-xs tracking-wider transition-colors ${copied ? 'text-color-film-teal' : 'text-color-text-muted'} ${className}`}
+      onClick={(event) => void handleLinkClick(event)}
+      aria-label={status === 'copied' ? 'Email address copied to clipboard' : `Send email to ${email}`}
+      className={`copy-email inline-flex min-h-touch items-center gap-1.5 font-mono text-xs tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan ${
+        status === 'copied' ? 'text-accent-emerald' : 'text-zinc-300 hover:text-accent-cyan'
+      } ${className}`}
     >
-      {copied ? (
+      {status === 'copied' ? (
         <>
           <CheckIcon />
-          <span>Copied!</span>
+          <span>Copied</span>
         </>
       ) : (
         <>
-          <span>{email}</span>
+          <span>{label ?? email}</span>
           <CopyIcon />
         </>
       )}
@@ -53,11 +111,11 @@ export function CopyEmail({ email, className = '' }: Readonly<CopyEmailProps>) {
   );
 }
 
-function CopyIcon() {
+function CopyIcon(): React.JSX.Element {
   return (
     <svg
-      width="12"
-      height="12"
+      width="13"
+      height="13"
       viewBox="0 0 12 12"
       fill="none"
       aria-hidden="true"
@@ -74,11 +132,11 @@ function CopyIcon() {
   );
 }
 
-function CheckIcon() {
+function CheckIcon(): React.JSX.Element {
   return (
     <svg
-      width="12"
-      height="12"
+      width="13"
+      height="13"
       viewBox="0 0 12 12"
       fill="none"
       aria-hidden="true"

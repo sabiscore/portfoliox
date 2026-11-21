@@ -47,12 +47,13 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     expect(writingPage).toContain('headingId="writing-list-heading"');
   });
 
-  it('keeps both hero calls to action at a 48px minimum height', () => {
+  it('keeps both hero calls to action at a 48px minimum height via design tokens', () => {
     const hero = read('components/HeroSection.tsx');
+    const tailwindConfig = read('tailwind.config.js');
 
-    // Locate the real CTA elements by their public destinations. This keeps
-    // the geometry contract coupled to the rendered links rather than
-    // historical implementation-marker names.
+    expect(tailwindConfig).toContain("cta: '48px'");
+    expect(tailwindConfig).toContain("touch: '44px'");
+
     const inspectIndex = hero.indexOf('href="#projects"');
     const inspectStart = hero.lastIndexOf('<Link', inspectIndex);
     const inspectEnd = hero.indexOf('</Link>', inspectIndex);
@@ -70,22 +71,30 @@ describe('Current portfolio geometry and accessibility contracts', () => {
         : '';
 
     expect(inspectCta).toContain('href="#projects"');
-    expect(inspectCta).toContain('min-h-[48px]');
-    expect(inspectCta).toContain('min-w-[44px]');
+    expect(inspectCta).toContain('min-h-cta');
+    expect(inspectCta).toContain('min-w-touch');
     expect(writingCta).toContain('href="/writing"');
-    expect(writingCta).toContain('min-h-[48px]');
-    expect(writingCta).toContain('min-w-[44px]');
+    expect(writingCta).toContain('min-h-cta');
+    expect(writingCta).toContain('min-w-touch');
   });
 
-  it('keeps the identity ledger portrait and profile grid within their mobile geometry', () => {
+  it('keeps the identity ledger portrait, editorial frame, and 2x2 capability symmetry compliant', () => {
     const identity = read('components/IdentityCard.tsx');
+    const identityStyles = read('components/identityCardStyles.ts');
+    const hero = read('components/HeroSection.tsx');
+
     expect(identity).toContain('aria-label="Staff Backend and Platform Engineer profile"');
-    // The current identity ledger deliberately uses a compact 64px square
-    // portrait beside a shrink-safe text column instead of the retired card grid.
-    expect(identity).toContain('className="mt-5 flex items-center gap-4"');
-    expect(identity).toContain('className="relative h-16 w-16 shrink-0');
-    expect(identity).toContain('className="min-w-0 flex-1"');
-    expect(identity).toContain('sizes="64px"');
+    expect(identity).toContain("const PORTRAIT_ASSET_PATH = '/images/oscar-headshot.jpg';");
+    expect(identity).toContain('const PORTRAIT_WIDTH = 240;');
+    expect(identity).toContain('const PORTRAIT_HEIGHT = 300;');
+    expect(identity).toContain('priority');
+    expect(identity).toContain('IDENTITY_CARD_PROFILE_GRID_CLASSNAME');
+    expect(identity).toContain('IDENTITY_CARD_PORTRAIT_CLASSNAME');
+    expect(identityStyles).toContain('grid-cols-profile-mobile');
+    expect(identityStyles).toContain('aspect-portrait');
+
+    // Enforce balanced 3-term capability rows across all 4 quadrants
+    expect(hero).toContain("{ label: 'AI systems', terms: ['Local GGUF', 'Inference', 'Model pipelines'] }");
   });
 
   it('keeps the app-level theme tokens and dark color-scheme contract', () => {
@@ -126,5 +135,4 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     }
     expect(workspace).not.toContain('dangerouslyAllowAllBuilds');
   });
-
 });

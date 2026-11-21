@@ -30,17 +30,21 @@ module.exports = {
         micro: ['0.6875rem', { lineHeight: '1.125rem' }],
       },
       letterSpacing: {
+        domain: '0.16em',
         kicker: '0.18em',
         section: '0.2em',
+        brand: '0.26em',
       },
       maxWidth: {
         hero: '72rem',
         heading: '15ch',
-        prose: '60ch',
+        prose: '62ch',
       },
       minHeight: {
+        chip: '30px',
         touch: '44px',
         cta: '48px',
+        tab: '52px',
       },
       minWidth: {
         touch: '44px',

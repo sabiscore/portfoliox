@@ -1,13 +1,8 @@
-import type { JSX } from 'react';
 import Link from 'next/link';
+import type { JSX } from 'react';
 
 import { getWorkCases } from '@/lib/content';
-import {
-  STATUS_TONE,
-  WORK_CASE_META,
-  WORK_CASE_ORDER,
-  type EvidenceStatus,
-} from '@/lib/work-meta';
+import { STATUS_TONE, WORK_CASE_META, WORK_CASE_ORDER, type EvidenceStatus } from '@/lib/work-meta';
 
 interface ProjectLedgerEntry {
   slug: string;
@@ -152,10 +147,10 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
 const projectCode = (index: number): string => `P/${String(index + 1).padStart(2, '0')}`;
 
 const primaryLinkClass =
-  'group inline-flex min-h-11 w-full items-center justify-center gap-2 bg-[#00D9FF] px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[#08090C] transition-colors hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E10] motion-safe:active:translate-y-px sm:w-auto';
+  'group inline-flex min-h-11 w-full items-center justify-center gap-2 bg-accent-cyan px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-obsidian-base transition-colors hover:bg-accent-cyanHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-surface motion-safe:active:translate-y-px sm:w-auto';
 
 const secondaryLinkClass =
-  'group inline-flex min-h-11 w-full items-center justify-center gap-2 border border-white/20 bg-[#08090C] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] motion-safe:active:translate-y-px sm:w-auto';
+  'group inline-flex min-h-11 w-full items-center justify-center gap-2 border border-white/20 bg-obsidian-base px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-accent-cyan/50 hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan motion-safe:active:translate-y-px sm:w-auto';
 
 const arrowOutClass =
   'motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5';
@@ -164,7 +159,7 @@ function StatusChip({ status }: { status: EvidenceStatus }): JSX.Element {
   const tone = STATUS_TONE[status];
   return (
     <span
-      className={`inline-flex min-h-6 items-center gap-1.5 border px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider ${tone.chip}`}
+      className={`text-2xs inline-flex min-h-6 items-center gap-1.5 border px-2 py-1 font-mono font-semibold tracking-wider uppercase ${tone.chip}`}
     >
       <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} />
       {status}
@@ -190,7 +185,7 @@ async function MoreCaseStudies(): Promise<JSX.Element | null> {
     <div className="border-t border-white/10 pt-8">
       <h3
         id="more-case-studies-heading"
-        className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300"
+        className="tracking-section font-mono text-xs font-semibold text-zinc-300 uppercase"
       >
         More case studies
       </h3>
@@ -201,21 +196,21 @@ async function MoreCaseStudies(): Promise<JSX.Element | null> {
         {moreCases.map((entry) => {
           const meta = WORK_CASE_META[entry.slug];
           return (
-            <li key={entry.slug} data-project-id={entry.slug} className="bg-[#0E0E10]">
+            <li key={entry.slug} data-project-id={entry.slug} className="bg-obsidian-surface">
               <Link
                 href={`/work/${entry.slug}`}
-                className="group flex h-full flex-col p-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF]"
+                className="group focus-visible:ring-accent-cyan flex h-full flex-col p-5 transition-colors hover:bg-white/5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
               >
                 {meta ? (
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+                  <span className="text-2xs tracking-domain font-mono text-zinc-400 uppercase">
                     {meta.domain}
                   </span>
                 ) : null}
                 <span className="mt-2 flex items-start justify-between gap-3">
-                  <span className="font-display text-lg font-semibold leading-snug text-white group-hover:text-[#00D9FF]">
+                  <span className="font-display group-hover:text-accent-cyan text-lg leading-snug font-semibold text-white">
                     {entry.title}
                   </span>
-                  <span aria-hidden="true" className={`mt-1 text-[#00D9FF] ${arrowOutClass}`}>
+                  <span aria-hidden="true" className={`text-accent-cyan mt-1 ${arrowOutClass}`}>
                     ↗
                   </span>
                 </span>
@@ -223,7 +218,7 @@ async function MoreCaseStudies(): Promise<JSX.Element | null> {
                   {entry.summary}
                 </span>
                 {meta ? (
-                  <span className="mt-4 inline-flex items-center gap-1.5 border-t border-white/10 pt-3 font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+                  <span className="text-2xs mt-4 inline-flex items-center gap-1.5 border-t border-white/10 pt-3 font-mono tracking-wider text-zinc-400 uppercase">
                     <span
                       aria-hidden="true"
                       className={`h-1.5 w-1.5 rounded-full ${STATUS_TONE[meta.status].dot}`}
@@ -245,13 +240,13 @@ export function ProjectsSection(): JSX.Element {
     <section
       id="projects"
       aria-labelledby="projects-section-heading"
-      className="w-full border-b border-white/10 bg-[#08090C] px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
+      className="bg-obsidian-base w-full border-b border-white/10 px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
     >
-      <div className="mx-auto max-w-6xl space-y-10">
-        <header className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-end lg:gap-12">
-          <div className="max-w-3xl space-y-3">
-            <p className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
-              <span className="font-bold text-[#00D9FF]">01</span>
+      <div className="max-w-hero mx-auto space-y-10">
+        <header className="projects-header-grid grid grid-cols-1 gap-8 lg:items-end lg:gap-12">
+          <div className="max-w-prose space-y-3">
+            <p className="tracking-section flex items-center gap-2.5 font-mono text-xs uppercase">
+              <span className="text-accent-cyan font-bold">01</span>
               <span className="text-zinc-400">PROJECTS // SELECTED WORK</span>
             </p>
             <h2
@@ -266,23 +261,26 @@ export function ProjectsSection(): JSX.Element {
             </p>
           </div>
 
-          <nav aria-label="Project index" className="min-w-0 border border-white/10 bg-[#0E0E10]">
+          <nav
+            aria-label="Project index"
+            className="bg-obsidian-surface min-w-0 border border-white/10"
+          >
             <ol className="divide-y divide-white/10">
               {SELECTED_PROJECTS.map((project, index) => (
                 <li key={project.slug}>
                   <a
                     href={`#project-${project.slug}`}
-                    className="group flex min-h-11 items-center justify-between gap-3 px-4 py-2.5 font-mono text-xs transition-colors hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF]"
+                    className="group focus-visible:ring-accent-cyan flex min-h-11 items-center justify-between gap-3 px-4 py-2.5 font-mono text-xs transition-colors hover:bg-white/5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                   >
                     <span className="flex min-w-0 items-center gap-3">
-                      <span aria-hidden="true" className="shrink-0 text-[#00D9FF]/80">
+                      <span aria-hidden="true" className="text-accent-cyan/80 shrink-0">
                         {projectCode(index)}
                       </span>
-                      <span className="truncate text-zinc-100 group-hover:text-[#00D9FF]">
+                      <span className="group-hover:text-accent-cyan truncate text-zinc-100">
                         {project.title}
                       </span>
                     </span>
-                    <span className="flex shrink-0 items-center gap-1.5 text-[10px] uppercase tracking-wider text-zinc-400">
+                    <span className="text-2xs flex shrink-0 items-center gap-1.5 tracking-wider text-zinc-400 uppercase">
                       <span
                         aria-hidden="true"
                         className={`h-1.5 w-1.5 rounded-full ${STATUS_TONE[project.status].dot}`}
@@ -305,19 +303,19 @@ export function ProjectsSection(): JSX.Element {
                 key={project.slug}
                 id={`project-${project.slug}`}
                 data-project-id={project.slug}
-                className={`flex min-w-0 scroll-mt-24 flex-col border border-white/10 bg-[#0E0E10] transition-colors hover:border-[#00D9FF]/35 ${
+                className={`bg-obsidian-surface hover:border-accent-cyan/40 flex min-w-0 scroll-mt-24 flex-col border border-white/10 transition-colors ${
                   wide ? 'lg:col-span-2' : ''
                 }`}
               >
                 <div
                   className={`flex-1 p-5 sm:p-6 ${
-                    wide ? 'lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-8 lg:p-7' : ''
+                    wide ? 'projects-wide-grid lg:grid lg:gap-8 lg:p-7' : ''
                   }`}
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
-                        <span aria-hidden="true" className="text-[#00D9FF]/80">
+                      <p className="text-2xs tracking-domain flex items-center gap-3 font-mono text-zinc-400 uppercase">
+                        <span aria-hidden="true" className="text-accent-cyan/80">
                           {projectCode(index)}
                         </span>
                         <span>{project.domain}</span>
@@ -326,25 +324,27 @@ export function ProjectsSection(): JSX.Element {
                     </div>
 
                     <h3
-                      className={`mt-3 font-display font-bold tracking-tight text-white ${
+                      className={`font-display mt-3 font-bold tracking-tight text-white ${
                         wide ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-2xl sm:text-3xl'
                       }`}
                     >
                       {project.title}
                     </h3>
-                    <p className="mt-2.5 max-w-[62ch] text-sm leading-6 text-zinc-300 sm:text-base sm:leading-7">
+                    <p className="mt-2.5 max-w-prose text-sm leading-6 text-zinc-300 sm:text-base sm:leading-7">
                       {project.summary}
                     </p>
 
                     <dl className="mt-5 space-y-3.5 border-t border-white/10 pt-4">
                       <div>
-                        <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#00D9FF]">
+                        <dt className="text-2xs tracking-domain text-accent-cyan font-mono font-bold uppercase">
                           Constraint
                         </dt>
-                        <dd className="mt-1 text-sm leading-6 text-zinc-300">{project.constraint}</dd>
+                        <dd className="mt-1 text-sm leading-6 text-zinc-300">
+                          {project.constraint}
+                        </dd>
                       </div>
                       <div>
-                        <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#00D9FF]">
+                        <dt className="text-2xs tracking-domain text-accent-cyan font-mono font-bold uppercase">
                           Architecture decision
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-zinc-300">{project.decision}</dd>
@@ -358,7 +358,7 @@ export function ProjectsSection(): JSX.Element {
                         wide ? 'lg:border-t-0 lg:pt-0' : ''
                       }`}
                     >
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <p className="text-2xs tracking-domain font-mono font-semibold text-zinc-400 uppercase">
                         Evidence boundary
                       </p>
                       <p className="mt-1 border-l-2 border-white/15 pl-3 text-xs leading-5 text-zinc-300">
@@ -367,19 +367,19 @@ export function ProjectsSection(): JSX.Element {
                     </div>
 
                     <div className="mt-4">
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <p className="text-2xs tracking-domain font-mono font-semibold text-zinc-400 uppercase">
                         Runtime and data stack
                       </p>
                       <ul className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                         {project.contextualStack.map((item) => (
                           <li
                             key={item.primitive}
-                            className="flex min-w-0 flex-col gap-1 border border-white/10 bg-[#08090C] px-3 py-2"
+                            className="bg-obsidian-base flex min-w-0 flex-col gap-1 border border-white/10 px-3 py-2"
                           >
-                            <span className="break-words font-mono text-xs font-semibold text-white">
+                            <span className="font-mono text-xs font-semibold break-words text-white">
                               {item.primitive}
                             </span>
-                            <span className="font-mono text-[10px] leading-4 text-[#00D9FF]">
+                            <span className="text-2xs text-accent-cyan font-mono leading-4">
                               {item.role}
                             </span>
                           </li>
@@ -388,24 +388,27 @@ export function ProjectsSection(): JSX.Element {
                     </div>
 
                     <details className="group mt-4">
-                      <summary className="inline-flex min-h-11 w-full cursor-pointer list-none items-center justify-between border border-white/15 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-200 transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] sm:w-auto sm:justify-center sm:gap-3 [&::-webkit-details-marker]:hidden">
+                      <summary className="details-summary-clean bg-obsidian-base hover:border-accent-cyan/50 hover:text-accent-cyan focus-visible:ring-accent-cyan inline-flex min-h-11 w-full cursor-pointer list-none items-center justify-between border border-white/15 px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-zinc-200 uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none sm:w-auto sm:justify-center sm:gap-3">
                         <span>How it works</span>
-                        <span aria-hidden="true" className="text-[#00D9FF] group-open:hidden">
+                        <span aria-hidden="true" className="text-accent-cyan group-open:hidden">
                           +
                         </span>
-                        <span aria-hidden="true" className="hidden text-[#00D9FF] group-open:inline">
+                        <span
+                          aria-hidden="true"
+                          className="text-accent-cyan hidden group-open:inline"
+                        >
                           −
                         </span>
                       </summary>
 
-                      <div className="mt-3 border border-[#00D9FF]/25 bg-[#08090C] p-4">
-                        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                      <div className="border-accent-cyan/25 bg-obsidian-base mt-3 border p-4">
+                        <p className="text-2xs tracking-domain font-mono font-semibold text-zinc-400 uppercase">
                           Implementation note
                         </p>
                         <p className="mt-1 text-sm leading-6 text-zinc-300">
                           {project.implementationNote}
                         </p>
-                        <p className="mt-4 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#00D9FF]">
+                        <p className="text-2xs tracking-domain text-accent-cyan mt-4 font-mono font-semibold uppercase">
                           Implementation details
                         </p>
                         <ul className="mt-3 space-y-2">
@@ -414,7 +417,7 @@ export function ProjectsSection(): JSX.Element {
                               key={note}
                               className="flex items-start gap-2 text-sm leading-6 text-zinc-300"
                             >
-                              <span aria-hidden="true" className="mt-0.5 text-[#00D9FF]">
+                              <span aria-hidden="true" className="text-accent-cyan mt-0.5">
                                 —
                               </span>
                               <span>{note}</span>

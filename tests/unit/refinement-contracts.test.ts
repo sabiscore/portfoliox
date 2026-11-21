@@ -12,8 +12,7 @@ import { CV_ASSET_PATH } from '@/lib/config';
 import { formatDate } from '@/lib/utils';
 
 const rootDir = resolve(__dirname, '../..');
-const read = (relativePath: string) =>
-  readFileSync(resolve(rootDir, relativePath), 'utf8');
+const read = (relativePath: string) => readFileSync(resolve(rootDir, relativePath), 'utf8');
 
 describe('Production refinement P0/P1 contracts', () => {
   it('filters low-signal maintenance commits and accepts qualifying engineering commits', () => {
@@ -57,10 +56,7 @@ describe('Production refinement P0/P1 contracts', () => {
     ];
 
     for (const message of qualifyingMessages) {
-      expect(
-        isQualifyingCommitMessage(message),
-        `Expected acceptance for "${message}"`
-      ).toBe(true);
+      expect(isQualifyingCommitMessage(message), `Expected acceptance for "${message}"`).toBe(true);
     }
   });
 
@@ -158,21 +154,34 @@ describe('Production refinement P0/P1 contracts', () => {
     );
   });
 
-  it('enforces token-only Tailwind styling and primary/secondary CTA hierarchy on Hero and IdentityCard', () => {
+  it('enforces token-only Tailwind styling and removes dead legacy tokens across Phase 1 and Phase 2 surfaces', () => {
     const upgradedFiles = [
+      'components/Navbar.tsx',
       'components/HeroSection.tsx',
       'components/IdentityCard.tsx',
       'components/IdentityCardMotion.tsx',
       'components/identityCardStyles.ts',
       'components/CopyEmail.tsx',
       'components/cinematic/HeroPortraitShader.tsx',
+      'components/ProjectsSection.tsx',
+      'components/SkillsSection.tsx',
+      'components/Liveactivitybar.tsx',
+      'components/ContactSection.tsx',
+      'components/Footer.tsx',
+      'components/CommandPalette.tsx',
     ];
-    const arbitraryUtilityPattern = /\b(?:bg|text|border|min-h|min-w|max-w|grid-cols|aspect|tracking|z)-\[[^\]]+\]/;
+    const arbitraryUtilityPattern =
+      /\b(?:bg|text|border|min-h|min-w|max-w|grid-cols|aspect|tracking|shadow|transition|z)-\[[^\]]+\]/;
+    const deadLegacyTokenPattern =
+      /\b(?:obsidian-border|obsidian-text|obsidian-muted|obsidian-dim|obsidian-elevated|bg-illuminate-cyan|text-caption|tracking-telemetry)\b/;
 
     for (const file of upgradedFiles) {
       const source = read(file);
       expect(source, `${file} must not use arbitrary Tailwind bracket tokens`).not.toMatch(
         arbitraryUtilityPattern
+      );
+      expect(source, `${file} must not reference undefined legacy design tokens`).not.toMatch(
+        deadLegacyTokenPattern
       );
     }
 

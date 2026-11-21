@@ -13,7 +13,9 @@ test.describe('P0/P1 production refinement behavioral & geometry checks', () => 
 
     await page.goto('/work/ubec');
     expect(await page.title()).toBe('UBEC Data Pipeline · Oscar Ndugbu');
-    await expect(page.locator('body')).not.toContainText('Case study. Case study and architecture review.');
+    await expect(page.locator('body')).not.toContainText(
+      'Case study. Case study and architecture review.'
+    );
   });
 
   test('navbar brand link exposes a single accessible label without ScardubuSCARDUBU duplication', async ({
@@ -27,20 +29,60 @@ test.describe('P0/P1 production refinement behavioral & geometry checks', () => 
     expect(rawText).not.toMatch(/ScardubuSCARDUBU/i);
   });
 
-  test('identity card portrait renders headshot.webp with explicit dimensions and zero CLS risk', async ({
+  test('identity card portrait renders oscar-headshot.jpg in a commanding 4:5 editorial frame with balanced quadrants and 44px CTAs', async ({
     page,
+    isMobile,
   }) => {
-    await page.goto('/');
-    const portrait = page
-      .locator('#identity img[alt*="Oscar Ndugbu"]')
-      .first();
-    await expect(portrait).toBeVisible();
-    await expect(portrait).toHaveAttribute('width', '64');
-    await expect(portrait).toHaveAttribute('height', '64');
-    const src = (await portrait.getAttribute('src')) ?? '';
-    expect(src).toContain('headshot.webp');
-    const naturalWidth = await portrait.evaluate((img: HTMLImageElement) => img.naturalWidth);
-    expect(naturalWidth).toBeGreaterThan(0);
+    test.skip(isMobile, 'Desktop project exercises the full 375/430/768/1440 responsive matrix.');
+
+    for (const width of [375, 430, 768, 1440] as const) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+
+      const portrait = page.locator('#identity img[alt*="Oscar Ndugbu"]').first();
+      await expect(portrait).toBeVisible();
+      await expect(portrait).toHaveAttribute('width', '240');
+      await expect(portrait).toHaveAttribute('height', '300');
+
+      const src = (await portrait.getAttribute('src')) ?? '';
+      expect(src).toContain('oscar-headshot.jpg');
+
+      await expect
+        .poll(() => portrait.evaluate((img: HTMLImageElement) => img.naturalWidth))
+        .toBeGreaterThan(0);
+
+      const portraitBox = await portrait.boundingBox();
+      expect(portraitBox, `Portrait bounding box missing at ${width}px`).not.toBeNull();
+      const expectedMinWidth = width >= 1024 ? 136 : width >= 640 ? 128 : 104;
+      expect(portraitBox!.width, `Portrait too small at ${width}px`).toBeGreaterThanOrEqual(
+        expectedMinWidth
+      );
+      const ratio = portraitBox!.width / portraitBox!.height;
+      expect(ratio, `Portrait aspect ratio drifted from 4:5 at ${width}px`).toBeGreaterThan(0.75);
+      expect(ratio, `Portrait aspect ratio drifted from 4:5 at ${width}px`).toBeLessThan(0.85);
+
+      // Verify 2x2 capability matrix symmetry: 4 quadrants with 3 items each
+      const quadrants = page.locator('#identity dl > div');
+      await expect(quadrants).toHaveCount(4);
+      for (let i = 0; i < 4; i += 1) {
+        await expect(quadrants.nth(i).locator('dd')).toHaveCount(3);
+      }
+
+      // Verify footer CTAs maintain >= 44px touch targets
+      const copyBtn = page.locator('#identity button').first();
+      const cvLink = page.locator('#identity a[aria-label*="résumé PDF"]').first();
+      const copyBox = await copyBtn.boundingBox();
+      const cvBox = await cvLink.boundingBox();
+      expect(copyBox!.height, `Copy CTA height < 44px at ${width}px`).toBeGreaterThanOrEqual(44);
+      expect(cvBox!.height, `CV CTA height < 44px at ${width}px`).toBeGreaterThanOrEqual(44);
+      expect(cvBox!.width, `CV CTA width < 44px at ${width}px`).toBeGreaterThanOrEqual(44);
+
+      // Zero horizontal document overflow
+      const hasOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth
+      );
+      expect(hasOverflow, `Horizontal overflow detected at ${width}px`).toBe(false);
+    }
   });
 
   test('writing index renders one semantic <time> per article and related SwarmXQ date is 08 Dec 2025', async ({
@@ -135,7 +177,9 @@ test.describe('P0/P1 production refinement behavioral & geometry checks', () => 
       const xs: number[] = [];
       for (let i = 0; i < footerLinkCount; i += 1) {
         const box = await footerLinks.nth(i).boundingBox();
-        expect(box!.height, `Footer link ${i} height < 44px at ${width}px`).toBeGreaterThanOrEqual(44);
+        expect(box!.height, `Footer link ${i} height < 44px at ${width}px`).toBeGreaterThanOrEqual(
+          44
+        );
         xs.push(Math.round(box!.x));
       }
       const distinctFooterCols = new Set(xs).size;
@@ -143,7 +187,9 @@ test.describe('P0/P1 production refinement behavioral & geometry checks', () => 
     }
   });
 
-  test('legacy resume PDF URL redirects permanently to the canonical CV asset', async ({ request }) => {
+  test('legacy resume PDF URL redirects permanently to the canonical CV asset', async ({
+    request,
+  }) => {
     const response = await request.get('/oscar-scardubu-resume.pdf', { maxRedirects: 0 });
     expect([301, 308]).toContain(response.status());
     expect(response.headers()['location']).toBe('/cv/oscar-ndugbu-resume.pdf');

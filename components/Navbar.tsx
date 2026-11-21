@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { CV_ASSET_PATH } from '@/lib/config';
@@ -33,8 +33,7 @@ const isRouteActive = (route: NavRoute, pathname: string | null): boolean => {
 
 // Homepage sections tracked for the in-view indicator, in document order.
 const TRACKED_SECTIONS = ['projects', 'failure-modes', 'contact'] as const;
-const sectionIdOf = (href: string): string | null =>
-  href.startsWith('/#') ? href.slice(2) : null;
+const sectionIdOf = (href: string): string | null => (href.startsWith('/#') ? href.slice(2) : null);
 
 /**
  * Highlights the homepage section crossing the upper-middle viewport band,
@@ -131,22 +130,22 @@ export function Navbar(): React.JSX.Element {
   }, [isMobileMenuOpen, closeMobileMenu]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#08090C]/92 backdrop-blur-xl">
+    <header className="bg-obsidian-base/95 sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-xl">
       <nav
         aria-label="Primary system navigation"
-        className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8"
+        className="max-w-hero mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8"
       >
         {/* Brand Wordmark */}
         <div className="flex items-center gap-4">
           <Link
             href="/"
             aria-label="Oscar Ndugbu — Home"
-            className="inline-flex min-h-[44px] items-center gap-3 font-display text-base font-bold tracking-[0.28em] text-white transition-colors hover:text-[#00D9FF] sm:text-lg"
+            className="min-h-touch font-display tracking-brand hover:text-accent-cyan inline-flex items-center gap-3 text-base font-bold text-white transition-colors sm:text-lg"
           >
             <span aria-hidden="true">SCARDUBU</span>
           </Link>
 
-          <span className="hidden items-center border border-white/10 bg-[#0E0E10] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-300 xl:inline-flex">
+          <span className="bg-obsidian-surface text-2xs hidden items-center border border-white/10 px-2.5 py-1 font-mono font-semibold tracking-widest text-zinc-300 uppercase xl:inline-flex">
             STAFF BACKEND &amp; PLATFORM
           </span>
         </div>
@@ -157,19 +156,17 @@ export function Navbar(): React.JSX.Element {
             const active = isRouteActive(route, pathname);
             const inView = sectionIdOf(route.href) === sectionInView && sectionInView !== null;
             const isCurrent = active || inView;
-            const className = `group inline-flex min-h-[44px] items-center gap-1.5 px-3.5 font-mono text-xs uppercase tracking-wider transition-[color,background-color,box-shadow] duration-200 hover:bg-white/[0.03] hover:text-[#00D9FF] ${
-              isCurrent
-                ? 'bg-white/[0.02] text-[#00D9FF] shadow-[inset_0_-2px_0_#00D9FF]'
-                : 'text-zinc-200'
+            const className = `group inline-flex min-h-touch items-center gap-1.5 px-3.5 font-mono text-xs uppercase tracking-wider transition-colors duration-200 hover:bg-white/5 hover:text-accent-cyan ${
+              isCurrent ? 'nav-link-active bg-white/5 text-accent-cyan' : 'text-zinc-200'
             }`;
             const content = (
               <>
-                {route.code ? <span className="text-[#00D9FF]/80">{route.code}</span> : null}
+                {route.code ? <span className="text-accent-cyan/80">{route.code}</span> : null}
                 <span>{route.label}</span>
                 {route.asset ? (
                   <span
                     aria-hidden="true"
-                    className="text-[#00D9FF]/80 motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+                    className="text-accent-cyan/80 motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5"
                   >
                     ↗
                   </span>
@@ -210,13 +207,13 @@ export function Navbar(): React.JSX.Element {
             onClick={(event) => handleSamePageAnchorClick(event, '/#contact')}
             aria-label="Go to the contact section"
             aria-current={sectionInView === 'contact' ? 'true' : undefined}
-            className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 border px-3.5 font-mono text-xs font-semibold uppercase tracking-wider transition-colors hover:border-[#00D9FF] hover:text-[#00D9FF] motion-safe:active:translate-y-px ${
+            className={`min-h-touch min-w-touch hover:border-accent-cyan hover:text-accent-cyan inline-flex items-center justify-center gap-2 border px-3.5 font-mono text-xs font-semibold tracking-wider uppercase transition-colors motion-safe:active:translate-y-px ${
               sectionInView === 'contact'
-                ? 'border-[#00D9FF] bg-[#00D9FF]/10 text-[#00D9FF]'
-                : 'border-white/20 bg-[#0E0E10] text-white'
+                ? 'border-accent-cyan bg-accent-cyan/10 text-accent-cyan'
+                : 'bg-obsidian-surface border-white/20 text-white'
             }`}
           >
-            <span className="text-[#00D9FF]" aria-hidden="true">
+            <span className="text-accent-cyan" aria-hidden="true">
               ✉
             </span>
             <span>CONTACT</span>
@@ -229,7 +226,7 @@ export function Navbar(): React.JSX.Element {
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-navigation-drawer"
             aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-white/20 bg-[#0E0E10] font-mono text-sm text-white transition-colors hover:border-[#00D9FF] hover:text-[#00D9FF] lg:hidden"
+            className="min-h-touch min-w-touch bg-obsidian-surface hover:border-accent-cyan hover:text-accent-cyan inline-flex items-center justify-center border border-white/20 font-mono text-sm text-white transition-colors lg:hidden"
           >
             {isMobileMenuOpen ? '✕' : '☰'}
           </button>
@@ -246,15 +243,13 @@ export function Navbar(): React.JSX.Element {
           />
           <div
             id="mobile-navigation-drawer"
-            className="relative z-50 space-y-2 border-t border-white/10 bg-[#0E0E10]/98 px-4 pt-3 pb-5 shadow-2xl backdrop-blur-xl lg:hidden"
+            className="bg-obsidian-surface/95 relative z-50 space-y-2 border-t border-white/10 px-4 pt-3 pb-5 shadow-2xl backdrop-blur-xl lg:hidden"
           >
             <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-2.5">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-zinc-300">
+              <span className="text-micro font-mono tracking-widest text-zinc-300 uppercase">
                 SITE NAVIGATION
               </span>
-              <span className="font-mono text-[11px] text-[#00FF66]">
-                ● LAGOS · UTC+1
-              </span>
+              <span className="text-micro text-accent-emerald font-mono">● LAGOS · UTC+1</span>
             </div>
 
             <div className="grid grid-cols-1 gap-1.5">
@@ -262,12 +257,14 @@ export function Navbar(): React.JSX.Element {
                 const active = isRouteActive(route, pathname);
                 const inView = sectionIdOf(route.href) === sectionInView && sectionInView !== null;
                 const isCurrent = active || inView;
-                const className = `flex min-h-[48px] items-center justify-between border bg-[#08090C] px-4 font-mono text-xs font-semibold uppercase tracking-wider transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] ${
-                  isCurrent ? 'border-[#00D9FF]/50 text-[#00D9FF]' : 'border-white/10 text-white'
+                const className = `flex min-h-cta items-center justify-between border bg-obsidian-base px-4 font-mono text-xs font-semibold uppercase tracking-wider transition-colors hover:border-accent-cyan/50 hover:text-accent-cyan ${
+                  isCurrent
+                    ? 'border-accent-cyan/50 text-accent-cyan'
+                    : 'border-white/10 text-white'
                 }`;
                 const label = (
                   <span className="flex items-center gap-2.5">
-                    {route.code ? <span className="text-[#00D9FF]">{route.code}</span> : null}
+                    {route.code ? <span className="text-accent-cyan">{route.code}</span> : null}
                     <span>{route.asset ? `${route.label} (PDF)` : route.label}</span>
                   </span>
                 );
@@ -281,7 +278,7 @@ export function Navbar(): React.JSX.Element {
                     className={className}
                   >
                     {label}
-                    <span aria-hidden="true" className="text-[#00D9FF]">
+                    <span aria-hidden="true" className="text-accent-cyan">
                       ↗
                     </span>
                   </a>
@@ -296,8 +293,8 @@ export function Navbar(): React.JSX.Element {
                     className={className}
                   >
                     {label}
-                    <span aria-hidden="true" className="text-[#00D9FF]">
-                      →
+                    <span aria-hidden="true" className="text-accent-cyan">
+                      ›
                     </span>
                   </Link>
                 );

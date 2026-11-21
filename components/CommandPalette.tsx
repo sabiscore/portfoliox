@@ -1,200 +1,234 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Terminal,
-  Search,
-  ArrowUpRight,
-  X,
-  FileText,
-  Layers,
-  Code2,
-} from "lucide-react";
+import { ArrowUpRight, Code2, FileText, Layers, Search, Terminal, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { CV_ASSET_PATH } from "@/lib/config";
+import { STATIC_PALETTE_ITEMS, type PaletteItem } from '@/constants/palette';
+import { CV_ASSET_PATH } from '@/lib/config';
 
 interface CommandOption {
   id: string;
   label: string;
-  category: string;
+  subtitle?: string;
+  category: 'NAVIGATION' | 'EVIDENCE' | 'ARTIFACT';
   href: string;
+  keywords: string[];
   external?: boolean;
 }
 
-const COMMAND_OPTIONS: CommandOption[] = [
+const SECTION_COMMANDS: readonly CommandOption[] = [
   {
-    id: "nav-operating-model",
-    label: "00 // Operating Model & Profile",
-    category: "NAVIGATION",
-    href: "#operating-model",
+    id: 'nav-projects',
+    label: '01 // Selected Work & Case Studies',
+    subtitle: 'TaxBridge, SabiScore, Yap Engine & UBEC Data Pipeline',
+    category: 'NAVIGATION',
+    href: '/#projects',
+    keywords: ['projects', 'work', 'case studies', 'flagship'],
   },
   {
-    id: "nav-projects",
-    label: "01 // Production Case Studies",
-    category: "NAVIGATION",
-    href: "#projects",
+    id: 'nav-failure-modes',
+    label: '02 // Failure Modes & Recovery Design',
+    subtitle: 'Fail-closed boundaries, observability, and replay semantics',
+    category: 'NAVIGATION',
+    href: '/#failure-modes',
+    keywords: ['engineering', 'failure', 'patterns', 'reliability'],
   },
   {
-    id: "nav-patterns",
-    label: "02 // Fail-Closed Production Patterns",
-    category: "NAVIGATION",
-    href: "#patterns",
+    id: 'nav-contact',
+    label: '03 // Discuss a System',
+    subtitle: 'Direct email, engagement scope, and inquiry form',
+    category: 'NAVIGATION',
+    href: '/#contact',
+    keywords: ['contact', 'hire', 'email', 'consulting', 'advisory'],
   },
-  {
-    id: "nav-writing",
-    label: "03 // Technical Engineering Guides",
-    category: "NAVIGATION",
-    href: "#writing",
-  },
-  {
-    id: "nav-contact",
-    label: "04 // Discuss a System",
-    category: "NAVIGATION",
-    href: "#contact",
-  },
-  {
-    id: "work-taxbridge",
-    label: "Case Study: TaxBridge Compliance Platform",
-    category: "EVIDENCE",
-    href: "/work/taxbridge",
-  },
-  {
-    id: "work-sabiscore",
-    label: "Case Study: SabiScore Real-Time ML Engine",
-    category: "EVIDENCE",
-    href: "/work/sabiscore",
-  },
-  {
-    id: "work-swarmxq",
-    label: "Case Study: SwarmXQ & The Yap Engine",
-    category: "EVIDENCE",
-    href: "/work/swarmxq",
-  },
-  {
-    id: "asset-resume",
-    label: "Download Resume (oscar-ndugbu-resume.pdf)",
-    category: "ARTIFACT",
-    href: CV_ASSET_PATH,
-    external: true,
-  },
+];
+
+function mapPaletteItem(item: PaletteItem): CommandOption {
+  const isResume = item.href === CV_ASSET_PATH || item.category === 'system';
+  return {
+    id: item.id,
+    label: item.title,
+    subtitle: item.subtitle,
+    category: isResume ? 'ARTIFACT' : item.category === 'project' ? 'EVIDENCE' : 'NAVIGATION',
+    href: item.href,
+    keywords: item.keywords,
+    external: isResume,
+  };
+}
+
+const COMMAND_OPTIONS: readonly CommandOption[] = [
+  ...SECTION_COMMANDS,
+  ...STATIC_PALETTE_ITEMS.map(mapPaletteItem),
 ];
 
 export const CommandPalette: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
+  const filtered = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    if (!term) return COMMAND_OPTIONS;
+    return COMMAND_OPTIONS.filter(
+      (item) =>
+        item.label.toLowerCase().includes(term) ||
+        (item.subtitle?.toLowerCase().includes(term) ?? false) ||
+        item.category.toLowerCase().includes(term) ||
+        item.keywords.some((keyword) => keyword.toLowerCase().includes(term))
+    );
+  }, [query]);
+
+  const closePalette = useCallback(() => {
+    setOpen(false);
+    setQuery('');
+    setActiveIndex(0);
+  }, []);
+
+  const handleSelect = useCallback(
+    (item: CommandOption) => {
+      closePalette();
+      if (item.external) {
+        window.open(item.href, '_blank', 'noopener,noreferrer');
+      } else {
+        router.push(item.href);
+      }
+    },
+    [closePalette, router]
+  );
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
+    setActiveIndex(0);
+  }, [query]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
         setOpen((prev) => !prev);
-      } else if (e.key === "Escape") {
-        setOpen(false);
+        return;
+      }
+
+      if (!open) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closePalette();
+      } else if (event.key === 'ArrowDown' && filtered.length > 0) {
+        event.preventDefault();
+        setActiveIndex((prev) => (prev + 1) % filtered.length);
+      } else if (event.key === 'ArrowUp' && filtered.length > 0) {
+        event.preventDefault();
+        setActiveIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+      } else if (event.key === 'Enter' && filtered[activeIndex]) {
+        event.preventDefault();
+        handleSelect(filtered[activeIndex]);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeIndex, closePalette, filtered, handleSelect, open]);
 
   if (!open) return null;
-
-  const filtered = COMMAND_OPTIONS.filter(
-    (item) =>
-      item.label.toLowerCase().includes(query.toLowerCase()) ||
-      item.category.toLowerCase().includes(query.toLowerCase()),
-  );
-
-  const handleSelect = (item: CommandOption) => {
-    setOpen(false);
-    setQuery("");
-    if (item.external) {
-      window.open(item.href, "_blank", "noopener,noreferrer");
-    } else if (item.href.startsWith("#")) {
-      window.location.hash = item.href;
-    } else {
-      router.push(item.href);
-    }
-  };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="System Command Palette"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-obsidian-base/85 px-4 pt-20 backdrop-blur-sm"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) closePalette();
+      }}
+      className="bg-obsidian-base/85 fixed inset-0 z-50 flex items-start justify-center px-4 pt-20 backdrop-blur-sm"
     >
-      <div className="relative w-full max-w-xl overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface">
-        <div
-          className="absolute inset-x-0 top-0 h-px bg-illuminate-cyan"
-          aria-hidden="true"
-        />
-
+      <div className="command-palette-panel bg-obsidian-surface relative overflow-hidden border border-white/15">
         {/* Search Input Bar */}
-        <div className="flex items-center border-b border-obsidian-border px-4 py-3">
-          <Search className="mr-3 h-4 w-4 text-accent-cyan" />
+        <div className="flex items-center border-b border-white/10 px-4 py-2.5">
+          <Search aria-hidden="true" className="text-accent-cyan mr-3 h-4 w-4 shrink-0" />
           <input
             type="text"
             autoFocus
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
+            aria-label="Filter sections, case studies, or artifacts"
             placeholder="Filter sections, case studies, or artifacts..."
-            className="flex-1 bg-transparent font-mono text-caption text-obsidian-text placeholder:text-obsidian-dim focus:outline-none"
+            className="min-h-touch flex-1 bg-transparent font-mono text-xs text-white placeholder:text-zinc-400 focus:outline-none"
           />
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={closePalette}
             aria-label="Close command palette"
-            className="inline-flex h-8 w-8 items-center justify-center rounded border border-obsidian-border bg-obsidian-elevated text-obsidian-muted hover:border-accent-cyan hover:text-accent-cyan"
+            className="min-h-touch min-w-touch bg-obsidian-base hover:border-accent-cyan hover:text-accent-cyan focus-visible:ring-accent-cyan inline-flex items-center justify-center border border-white/15 text-zinc-300 transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
-            <X className="h-3.5 w-3.5" />
+            <X aria-hidden="true" className="h-4 w-4" />
           </button>
         </div>
 
         {/* Results List */}
-        <ul className="max-h-80 overflow-y-auto divide-y divide-obsidian-border p-2">
+        <ul className="max-h-80 divide-y divide-white/10 overflow-y-auto p-2">
           {filtered.length === 0 ? (
-            <li className="py-6 text-center font-mono text-caption text-obsidian-dim">
+            <li className="py-6 text-center font-mono text-xs text-zinc-400">
               No matching routes or specifications found.
             </li>
           ) : (
-            filtered.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => handleSelect(item)}
-                  className="flex min-h-touch w-full items-center justify-between rounded-lg px-3 py-2 text-left font-mono text-caption text-obsidian-text transition-colors hover:bg-obsidian-elevated hover:text-accent-cyan"
-                >
-                  <span className="flex items-center gap-2.5 truncate">
-                    {item.category === "ARTIFACT" ? (
-                      <FileText className="h-3.5 w-3.5 shrink-0 text-accent-emerald" />
-                    ) : item.category === "EVIDENCE" ? (
-                      <Layers className="h-3.5 w-3.5 shrink-0 text-accent-cyan" />
-                    ) : (
-                      <Code2 className="h-3.5 w-3.5 shrink-0 text-obsidian-muted" />
-                    )}
-                    <span className="truncate">{item.label}</span>
-                  </span>
+            filtered.map((item, index) => {
+              const isActive = index === activeIndex;
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => handleSelect(item)}
+                    className={`min-h-touch focus-visible:ring-accent-cyan flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left font-mono text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset ${
+                      isActive
+                        ? 'bg-accent-cyan/10 text-accent-cyan'
+                        : 'hover:text-accent-cyan text-zinc-100 hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      {item.category === 'ARTIFACT' ? (
+                        <FileText
+                          aria-hidden="true"
+                          className="text-accent-emerald h-3.5 w-3.5 shrink-0"
+                        />
+                      ) : item.category === 'EVIDENCE' ? (
+                        <Layers
+                          aria-hidden="true"
+                          className="text-accent-cyan h-3.5 w-3.5 shrink-0"
+                        />
+                      ) : (
+                        <Code2 aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                      )}
+                      <span className="min-w-0">
+                        <span className="block truncate font-semibold">{item.label}</span>
+                        {item.subtitle ? (
+                          <span className="text-micro block truncate font-sans text-zinc-400">
+                            {item.subtitle}
+                          </span>
+                        ) : null}
+                      </span>
+                    </span>
 
-                  <span className="ml-2 flex shrink-0 items-center gap-1 text-micro text-obsidian-dim">
-                    <span>{item.category}</span>
-                    <ArrowUpRight className="h-3 w-3" />
-                  </span>
-                </button>
-              </li>
-            ))
+                    <span className="text-2xs ml-2 flex shrink-0 items-center gap-1 tracking-wider text-zinc-400 uppercase">
+                      <span>{item.category}</span>
+                      <ArrowUpRight aria-hidden="true" className="text-accent-cyan h-3 w-3" />
+                    </span>
+                  </button>
+                </li>
+              );
+            })
           )}
         </ul>
 
         {/* Footer Telemetry Bar */}
-        <div className="flex items-center justify-between border-t border-obsidian-border bg-obsidian-base px-4 py-2 font-mono text-micro text-obsidian-dim">
+        <div className="bg-obsidian-base text-2xs flex items-center justify-between border-t border-white/10 px-4 py-2 font-mono tracking-wider text-zinc-400">
           <span className="inline-flex items-center gap-1.5">
-            <Terminal className="h-3 w-3 text-accent-emerald" />
+            <Terminal aria-hidden="true" className="text-accent-emerald h-3 w-3" />
             <span>OBSIDIAN NOCTURNE V2 // ROUTER</span>
           </span>
-          <span>ESC TO CLOSE</span>
+          <span>↑↓ NAVIGATE · ↵ OPEN · ESC CLOSE</span>
         </div>
       </div>
     </div>

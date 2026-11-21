@@ -3,24 +3,23 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const rootDir = resolve(__dirname, '../..');
-const read = (relativePath: string) =>
-  readFileSync(resolve(rootDir, relativePath), 'utf8');
+const read = (relativePath: string) => readFileSync(resolve(rootDir, relativePath), 'utf8');
 
 describe('Current portfolio geometry and accessibility contracts', () => {
-  it('keeps the mobile navigation control keyboard-accessible and touch-sized', () => {
+  it('keeps the mobile navigation control keyboard-accessible and touch-sized via design tokens', () => {
     const navbar = read('components/Navbar.tsx');
+    const tailwindConfig = read('tailwind.config.js');
     const buttonStart = navbar.indexOf('<button');
     const buttonEnd = navbar.indexOf('</button>', buttonStart);
     const mobileMenuButton =
-      buttonStart >= 0 && buttonEnd > buttonStart
-        ? navbar.slice(buttonStart, buttonEnd)
-        : '';
+      buttonStart >= 0 && buttonEnd > buttonStart ? navbar.slice(buttonStart, buttonEnd) : '';
 
+    expect(tailwindConfig).toContain("touch: '44px'");
     expect(mobileMenuButton).toContain('onClick={toggleMobileMenu}');
     expect(mobileMenuButton).toContain('aria-expanded={isMobileMenuOpen}');
     expect(mobileMenuButton).toContain('aria-controls="mobile-navigation-drawer"');
-    expect(mobileMenuButton).toContain('min-h-[44px]');
-    expect(mobileMenuButton).toContain('min-w-[44px]');
+    expect(mobileMenuButton).toContain('min-h-touch');
+    expect(mobileMenuButton).toContain('min-w-touch');
     expect(navbar).toContain(
       "aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}"
     );
@@ -94,7 +93,9 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     expect(identityStyles).toContain('aspect-portrait');
 
     // Enforce balanced 3-term capability rows across all 4 quadrants
-    expect(hero).toContain("{ label: 'AI systems', terms: ['Local GGUF', 'Inference', 'Model pipelines'] }");
+    expect(hero).toContain(
+      "{ label: 'AI systems', terms: ['Local GGUF', 'Inference', 'Model pipelines'] }"
+    );
   });
 
   it('keeps the app-level theme tokens and dark color-scheme contract', () => {

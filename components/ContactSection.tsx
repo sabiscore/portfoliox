@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
-import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 import {
   CONTACT_INQUIRY_TYPES,
   CONTACT_SCOPES,
   CONTACT_TIMELINES,
   contactSchema,
 } from '@/app/lib/validations';
+import { useCopyEmail } from '@/components/CopyEmail';
+import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 
 interface InquiryPayload {
   name: string;
@@ -74,29 +75,8 @@ export function ContactSection(): React.JSX.Element {
   const [status, setStatus] = useState<'IDLE' | 'SUBMITTING' | 'SENT' | 'ERROR'>('IDLE');
   const [errorMessage, setErrorMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof InquiryPayload, string>>>({});
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const directEmail = CONTACT_EMAIL;
-
-  useEffect(
-    () => () => {
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-    },
-    []
-  );
-
-  const handleCopyEmail = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(directEmail);
-      setCopyState('copied');
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-      resetTimer.current = setTimeout(() => setCopyState('idle'), 2500);
-    } catch {
-      // Clipboard access is blocked in some embedded browsers; the address stays visible above.
-      setCopyState('failed');
-    }
-  }, [directEmail]);
+  const { status: copyState, copy: handleCopyEmail } = useCopyEmail(directEmail);
 
   const updateField = <K extends keyof InquiryPayload>(field: K, value: InquiryPayload[K]) => {
     setFormState((current) => ({ ...current, [field]: value }));
@@ -135,9 +115,7 @@ export function ContactSection(): React.JSX.Element {
       const fieldKey = firstIssue?.path[0] as keyof InquiryPayload | undefined;
       setStatus('ERROR');
       setFieldErrors(nextErrors);
-      setErrorMessage(
-        `Check the form: ${firstIssue?.message ?? 'Complete all required fields.'}`
-      );
+      setErrorMessage(`Check the form: ${firstIssue?.message ?? 'Complete all required fields.'}`);
       if (fieldKey && FIELD_IDS[fieldKey]) {
         document.getElementById(FIELD_IDS[fieldKey])?.focus();
       }
@@ -169,21 +147,21 @@ export function ContactSection(): React.JSX.Element {
   };
 
   const getFieldClass = (field: keyof InquiryPayload): string =>
-    `min-h-11 w-full border ${
+    `min-h-touch w-full border ${
       fieldErrors[field] ? 'border-red-400/70' : 'border-white/15'
-    } bg-[#08090C] px-3.5 py-2.5 font-mono text-sm text-white transition-colors focus:border-[#00D9FF] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]`;
+    } bg-obsidian-base px-3.5 py-2.5 font-mono text-sm text-white transition-colors focus:border-accent-cyan focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan`;
 
   return (
     <section
       id="contact"
       aria-labelledby="contact-section-heading"
-      className="w-full border-b border-white/10 bg-[#08090C] px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
+      className="bg-obsidian-base w-full border-b border-white/10 px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8"
     >
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start lg:gap-10">
+      <div className="max-w-hero mx-auto grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start lg:gap-10">
         <div className="space-y-6 lg:col-span-5">
           <header className="space-y-3">
-            <p className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
-              <span className="font-bold text-[#00D9FF]">03</span>
+            <p className="tracking-section flex items-center gap-2.5 font-mono text-xs uppercase">
+              <span className="text-accent-cyan font-bold">03</span>
               <span className="text-zinc-400">CONTACT // START A CONVERSATION</span>
             </p>
             <h2
@@ -199,18 +177,16 @@ export function ContactSection(): React.JSX.Element {
           </header>
 
           {/* Direct one-click email copy bar above the form on mobile */}
-          <div className="space-y-4 border border-white/10 bg-[#0E0E10] p-5">
+          <div className="identity-card-shell bg-obsidian-surface space-y-4 border border-white/15 p-5">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
-              <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+              <span className="font-mono text-xs tracking-wider text-zinc-400 uppercase">
                 DIRECT CONTACT
               </span>
-              <span className="font-mono text-[11px] text-zinc-400">LAGOS · UTC+1</span>
+              <span className="text-micro font-mono text-zinc-300">LAGOS · UTC+1</span>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">
-                Email
-              </p>
-              <p className="mt-1 break-all font-mono text-sm font-semibold text-white sm:text-base">
+              <p className="text-2xs font-mono tracking-wider text-zinc-400 uppercase">Email</p>
+              <p className="mt-1 font-mono text-sm font-semibold break-all text-white sm:text-base">
                 {directEmail}
               </p>
             </div>
@@ -218,13 +194,17 @@ export function ContactSection(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => void handleCopyEmail()}
-                className="inline-flex min-h-11 flex-1 items-center justify-center border border-white/20 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                className={`min-h-touch focus-visible:ring-accent-cyan inline-flex flex-1 items-center justify-center border px-4 py-2.5 font-mono text-xs font-semibold tracking-wider uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+                  copyState === 'copied'
+                    ? 'border-accent-emerald/55 bg-accent-emerald/10 text-accent-emerald'
+                    : 'border-accent-cyan/50 bg-accent-cyan/10 text-accent-cyan hover:border-accent-cyan hover:bg-accent-cyan hover:text-obsidian-base'
+                }`}
               >
                 {copyState === 'copied' ? 'COPIED TO CLIPBOARD ✓' : 'COPY ADDRESS'}
               </button>
               <a
                 href={`mailto:${directEmail}`}
-                className="inline-flex min-h-11 items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-[#00D9FF] transition-colors hover:bg-[#00D9FF]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                className="min-h-touch bg-obsidian-base hover:border-accent-cyan/50 focus-visible:ring-accent-cyan inline-flex items-center justify-center border border-white/20 px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-zinc-200 uppercase transition-colors hover:text-white focus-visible:ring-2 focus-visible:outline-none"
               >
                 EMAIL DIRECTLY ↗
               </a>
@@ -233,7 +213,13 @@ export function ContactSection(): React.JSX.Element {
               role="status"
               aria-live="polite"
               aria-atomic="true"
-              className={copyState === 'idle' ? 'sr-only' : 'text-xs text-zinc-400'}
+              className={
+                copyState === 'idle'
+                  ? 'sr-only'
+                  : copyState === 'copied'
+                    ? 'text-micro text-accent-emerald font-mono'
+                    : 'text-micro font-mono text-zinc-300'
+              }
             >
               {copyState === 'copied'
                 ? 'Email address copied.'
@@ -243,8 +229,8 @@ export function ContactSection(): React.JSX.Element {
             </p>
           </div>
 
-          <div className="space-y-4 border border-white/10 bg-[#0E0E10] p-5">
-            <p className="border-b border-white/10 pb-3 font-mono text-xs uppercase tracking-wider text-zinc-400">
+          <div className="bg-obsidian-surface space-y-4 border border-white/10 p-5">
+            <p className="border-b border-white/10 pb-3 font-mono text-xs tracking-wider text-zinc-400 uppercase">
               ENGAGEMENT SCOPE
             </p>
             <ul className="space-y-3.5">
@@ -260,7 +246,7 @@ export function ContactSection(): React.JSX.Element {
                 href={CV_ASSET_PATH}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-1.5 border border-white/15 bg-[#08090C] px-3.5 py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-200 transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                className="min-h-touch bg-obsidian-base text-micro hover:border-accent-cyan/50 hover:text-accent-cyan focus-visible:ring-accent-cyan inline-flex items-center gap-1.5 border border-white/15 px-3.5 py-2 font-mono tracking-wider text-zinc-200 uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span>Résumé (PDF)</span>
                 <span aria-hidden="true">↗</span>
@@ -269,7 +255,7 @@ export function ContactSection(): React.JSX.Element {
                 href="https://github.com/Scardubu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-1.5 border border-white/15 bg-[#08090C] px-3.5 py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-200 transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                className="min-h-touch bg-obsidian-base text-micro hover:border-accent-cyan/50 hover:text-accent-cyan focus-visible:ring-accent-cyan inline-flex items-center gap-1.5 border border-white/15 px-3.5 py-2 font-mono tracking-wider text-zinc-200 uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span>GitHub</span>
                 <span aria-hidden="true">↗</span>
@@ -278,7 +264,7 @@ export function ContactSection(): React.JSX.Element {
                 href="https://linkedin.com/in/oscardubu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-1.5 border border-white/15 bg-[#08090C] px-3.5 py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-200 transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                className="min-h-touch bg-obsidian-base text-micro hover:border-accent-cyan/50 hover:text-accent-cyan focus-visible:ring-accent-cyan inline-flex items-center gap-1.5 border border-white/15 px-3.5 py-2 font-mono tracking-wider text-zinc-200 uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span>LinkedIn</span>
                 <span aria-hidden="true">↗</span>
@@ -287,13 +273,13 @@ export function ContactSection(): React.JSX.Element {
           </div>
         </div>
 
-        <div className="min-w-0 border border-white/10 bg-[#0E0E10] p-5 sm:p-8 lg:col-span-7">
+        <div className="bg-obsidian-surface min-w-0 border border-white/10 p-5 sm:p-8 lg:col-span-7">
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label
                   htmlFor="contact-name"
-                  className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
                   Name *
                 </label>
@@ -320,7 +306,7 @@ export function ContactSection(): React.JSX.Element {
               <div className="space-y-2">
                 <label
                   htmlFor="contact-email"
-                  className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
                   Email *
                 </label>
@@ -350,7 +336,7 @@ export function ContactSection(): React.JSX.Element {
               <div className="space-y-2">
                 <label
                   htmlFor="contact-inquiry-type"
-                  className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
                   Engagement type *
                 </label>
@@ -364,7 +350,7 @@ export function ContactSection(): React.JSX.Element {
                   className={getFieldClass('inquiryType')}
                 >
                   {CONTACT_INQUIRY_TYPES.map((type) => (
-                    <option key={type} value={type} className="bg-[#08090C] text-white">
+                    <option key={type} value={type} className="bg-obsidian-base text-white">
                       {INQUIRY_TYPE_LABELS[type]}
                     </option>
                   ))}
@@ -373,7 +359,7 @@ export function ContactSection(): React.JSX.Element {
               <div className="space-y-2">
                 <label
                   htmlFor="contact-timeline"
-                  className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
                   Timeline *
                 </label>
@@ -387,7 +373,7 @@ export function ContactSection(): React.JSX.Element {
                   className={getFieldClass('timeline')}
                 >
                   {CONTACT_TIMELINES.map((timeline) => (
-                    <option key={timeline} value={timeline} className="bg-[#08090C] text-white">
+                    <option key={timeline} value={timeline} className="bg-obsidian-base text-white">
                       {TIMELINE_LABELS[timeline]}
                     </option>
                   ))}
@@ -398,7 +384,7 @@ export function ContactSection(): React.JSX.Element {
             <div className="space-y-2">
               <label
                 htmlFor="contact-scope"
-                className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
               >
                 System domain *
               </label>
@@ -412,7 +398,7 @@ export function ContactSection(): React.JSX.Element {
                 className={getFieldClass('scope')}
               >
                 {CONTACT_SCOPES.map((scope) => (
-                  <option key={scope} value={scope} className="bg-[#08090C] text-white">
+                  <option key={scope} value={scope} className="bg-obsidian-base text-white">
                     {scope}
                   </option>
                 ))}
@@ -423,11 +409,11 @@ export function ContactSection(): React.JSX.Element {
               <div className="flex items-baseline justify-between gap-3">
                 <label
                   htmlFor="contact-stakes"
-                  className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
                   Operational or business impact *
                 </label>
-                <span className="font-mono text-[10px] text-zinc-400">
+                <span className="text-2xs font-mono text-zinc-400">
                   {formState.stakes.length}/240
                 </span>
               </div>
@@ -462,11 +448,11 @@ export function ContactSection(): React.JSX.Element {
               <div className="flex items-baseline justify-between gap-3">
                 <label
                   htmlFor="contact-message"
-                  className="block font-mono text-xs uppercase tracking-wider text-zinc-300"
+                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
                   Constraints and objectives *
                 </label>
-                <span className="font-mono text-[10px] text-zinc-400">
+                <span className="text-2xs font-mono text-zinc-400">
                   {formState.message.length}/500
                 </span>
               </div>
@@ -503,7 +489,7 @@ export function ContactSection(): React.JSX.Element {
             {status === 'SENT' ? (
               <div
                 role="status"
-                className="border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-3 font-mono text-xs leading-5 text-[#00D9FF]"
+                className="border-accent-cyan/40 bg-accent-cyan/10 text-accent-cyan border px-4 py-3 font-mono text-xs leading-5"
               >
                 Message sent. The inquiry was accepted by the contact service.
               </div>
@@ -512,7 +498,7 @@ export function ContactSection(): React.JSX.Element {
             <button
               type="submit"
               disabled={status === 'SUBMITTING'}
-              className="inline-flex min-h-11 w-full items-center justify-center border border-[#00D9FF] bg-[#00D9FF] px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[#08090C] transition-colors hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E10] disabled:cursor-wait disabled:opacity-60 sm:text-sm"
+              className="min-h-cta border-accent-cyan bg-accent-cyan text-obsidian-base hover:border-accent-cyanHover hover:bg-accent-cyanHover focus-visible:ring-accent-cyan focus-visible:ring-offset-obsidian-surface inline-flex w-full items-center justify-center border px-6 py-3 font-mono text-xs font-bold tracking-wider uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-wait disabled:opacity-60 sm:text-sm"
             >
               {status === 'SUBMITTING' ? 'SENDING INQUIRY…' : 'SEND INQUIRY ↗'}
             </button>

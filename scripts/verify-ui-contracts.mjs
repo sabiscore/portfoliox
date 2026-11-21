@@ -16,12 +16,18 @@ const gradient = read('components/GradientMeshMotion.tsx');
 const globalStyles = read('app/globals.css');
 const telemetry = read('components/Liveactivitybar.tsx');
 const blogWidget = read('components/BlogProgressWidget.tsx');
+const navbar = read('components/Navbar.tsx');
 const hero = read('components/HeroSection.tsx');
 const identityCard = read('components/IdentityCard.tsx');
 const identityMotion = read('components/IdentityCardMotion.tsx');
 const identityStyles = read('components/identityCardStyles.ts');
 const copyEmail = read('components/CopyEmail.tsx');
 const portraitShader = read('components/cinematic/HeroPortraitShader.tsx');
+const projects = read('components/ProjectsSection.tsx');
+const skills = read('components/SkillsSection.tsx');
+const contact = read('components/ContactSection.tsx');
+const footer = read('components/Footer.tsx');
+const commandPalette = read('components/CommandPalette.tsx');
 
 // V16 — GPU compositing and strict containment must be attached to the
 // full-viewport decorative layer, not merely mentioned in documentation.
@@ -89,7 +95,9 @@ const ledgerBlock = ledgerMatch ? ledgerMatch[0] : '';
 const quadrantTermArrays = [...ledgerBlock.matchAll(/terms:\s*\[([^\]]+)\]/g)];
 const allQuadrantsHaveThreeTerms =
   quadrantTermArrays.length === 4 &&
-  quadrantTermArrays.every((match) => match[1].split(',').filter((t) => t.trim().length > 0).length === 3);
+  quadrantTermArrays.every(
+    (match) => match[1].split(',').filter((t) => t.trim().length > 0).length === 3
+  );
 
 requireContract(
   allQuadrantsHaveThreeTerms && ledgerBlock.includes("'Local GGUF'"),
@@ -109,17 +117,25 @@ requireContract(
   'V22: IdentityCard footer must pair primary CopyEmail and canonical CV_ASSET_PATH controls with >= 44px touch targets and polite status feedback.'
 );
 
-// V23 — Upgraded Hero and Identity surface files must not introduce arbitrary
+// V23 — Upgraded Phase 1 + Phase 2 surface files must not introduce arbitrary
 // Tailwind bracket syntax (enforced alongside ESLint AST rules).
 const tokenScopedFiles = [
+  ['components/Navbar.tsx', navbar],
   ['components/HeroSection.tsx', hero],
   ['components/IdentityCard.tsx', identityCard],
   ['components/IdentityCardMotion.tsx', identityMotion],
   ['components/identityCardStyles.ts', identityStyles],
   ['components/CopyEmail.tsx', copyEmail],
   ['components/cinematic/HeroPortraitShader.tsx', portraitShader],
+  ['components/ProjectsSection.tsx', projects],
+  ['components/SkillsSection.tsx', skills],
+  ['components/Liveactivitybar.tsx', telemetry],
+  ['components/ContactSection.tsx', contact],
+  ['components/Footer.tsx', footer],
+  ['components/CommandPalette.tsx', commandPalette],
 ];
-const arbitraryClassRegex = /\b(?:bg|text|border|min-h|min-w|max-w|grid-cols|aspect|tracking|z|p|px|py|m|mt|mb|gap|rounded|w|h)-\[[^\]]+\]/;
+const arbitraryClassRegex =
+  /\b(?:bg|text|border|min-h|min-w|max-w|grid-cols|aspect|tracking|shadow|transition|z|p|px|py|m|mt|mb|gap|rounded|w|h)-\[[^\]]+\]/;
 
 for (const [filePath, source] of tokenScopedFiles) {
   requireContract(
@@ -138,6 +154,20 @@ requireContract(
   'V24: HeroPortraitShader must remain client-only (ssr: false) and gated for desktop fine-pointer and reduced-motion users.'
 );
 
+// V25 — Phase 2 cohesion surfaces must not reference dead legacy tokens or
+// low-contrast zinc-500 text, and CommandPalette must stay synced with STATIC_PALETTE_ITEMS.
+const deadLegacyTokenRegex =
+  /\b(?:obsidian-border|obsidian-text|obsidian-muted|obsidian-dim|obsidian-elevated|bg-illuminate-cyan|text-caption|tracking-telemetry)\b/;
+
+requireContract(
+  !deadLegacyTokenRegex.test(skills) &&
+    !deadLegacyTokenRegex.test(commandPalette) &&
+    !telemetry.includes('text-zinc-500') &&
+    commandPalette.includes('STATIC_PALETTE_ITEMS') &&
+    commandPalette.includes('min-h-touch min-w-touch'),
+  'V25: SkillsSection, Liveactivitybar, and CommandPalette must use live Obsidian Nocturne v2 tokens, WCAG AA+ contrast, and >= 44px touch targets.'
+);
+
 if (failures.length > 0) {
   console.error('\n━━━ UI CONTRACT VERIFICATION FAILED ━━━');
   for (const failure of failures) console.error(` ✕ ${failure}`);
@@ -145,4 +175,6 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(' ✓ [verify-ui-contracts] V16–V24 rendering, geometry, token, and accessibility contracts verified.');
+console.log(
+  ' ✓ [verify-ui-contracts] V16–V25 rendering, geometry, token, and accessibility contracts verified.'
+);

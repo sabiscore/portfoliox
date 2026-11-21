@@ -4,9 +4,9 @@ import type { JSX } from 'react';
 import { useState } from 'react';
 
 export {
+  isQualifyingCommitMessage,
   LOW_SIGNAL_COMMIT_PATTERN,
   LOW_SIGNAL_COMMIT_PATTERNS,
-  isQualifyingCommitMessage,
   sanitizeCommitTitle,
 } from '@/lib/activity-filter';
 
@@ -73,17 +73,17 @@ export function LiveActivityBarSkeleton(): JSX.Element {
     <section
       aria-label="Project architecture index loading"
       aria-busy="true"
-      className="w-full border border-white/10 bg-[#0E0E10]/90 p-5"
+      className="bg-obsidian-surface/90 w-full border border-white/10 p-5"
     >
       <span className="sr-only">Loading project architecture index</span>
       <div aria-hidden="true" className="animate-pulse space-y-4">
-        <div className="h-3 w-52 rounded bg-white/10" />
+        <div className="h-3 w-52 bg-white/10" />
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="h-12 rounded border border-white/10 bg-white/[0.03]" />
-          <div className="h-12 rounded border border-white/10 bg-white/[0.03]" />
-          <div className="h-12 rounded border border-white/10 bg-white/[0.03]" />
+          <div className="h-12 border border-white/10 bg-white/5" />
+          <div className="h-12 border border-white/10 bg-white/5" />
+          <div className="h-12 border border-white/10 bg-white/5" />
         </div>
-        <div className="h-24 rounded border border-white/10 bg-white/[0.03]" />
+        <div className="h-24 border border-white/10 bg-white/5" />
       </div>
     </section>
   );
@@ -100,21 +100,21 @@ export function LiveActivityBar({
   return (
     <section
       aria-labelledby="architecture-index-heading"
-      className={`w-full border border-white/10 bg-[#0E0E10]/95 transition-colors duration-200 hover:border-[#00D9FF]/30 ${className}`}
+      className={`bg-obsidian-surface/95 hover:border-accent-cyan/40 w-full border border-white/10 transition-colors duration-200 ${className}`}
     >
-      <header className="flex flex-col gap-2 border-b border-white/10 bg-[#08090C]/80 px-4 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-5">
+      <header className="bg-obsidian-base/80 flex flex-col gap-2 border-b border-white/10 px-4 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-5">
         <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#00D9FF]">
+          <p className="text-2xs tracking-section text-accent-cyan font-mono font-semibold uppercase">
             Architecture index
           </p>
           <h2
             id="architecture-index-heading"
-            className="mt-1 font-display text-lg font-semibold text-white sm:text-xl"
+            className="font-display mt-1 text-lg font-semibold text-white sm:text-xl"
           >
             Systems, constraints, and implementation choices
           </h2>
         </div>
-        <p className="max-w-md text-xs leading-5 text-zinc-500">
+        <p className="max-w-prose text-xs leading-5 text-zinc-400">
           Project snapshots from the written engineering record — not a live production monitor.
         </p>
       </header>
@@ -128,23 +128,21 @@ export function LiveActivityBar({
               type="button"
               onClick={() => setActiveId(node.id)}
               aria-pressed={selected}
-              className={`flex min-h-[52px] items-center justify-between gap-3 px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF] ${
+              className={`min-h-tab focus-visible:ring-accent-cyan flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset ${
                 selected
-                  ? 'bg-[#00D9FF]/[0.07] text-white'
-                  : 'bg-transparent text-zinc-400 hover:bg-white/[0.025] hover:text-zinc-200'
+                  ? 'bg-accent-cyan/10 text-white'
+                  : 'bg-transparent text-zinc-400 hover:bg-white/5 hover:text-zinc-200'
               }`}
             >
               <span className="flex min-w-0 items-center gap-3">
-                <span className="font-mono text-[10px] text-[#00D9FF]/70">
-                  0{index + 1}
-                </span>
-                <span className="truncate font-mono text-xs font-semibold uppercase tracking-wide">
+                <span className="text-2xs text-accent-cyan/80 font-mono">0{index + 1}</span>
+                <span className="truncate font-mono text-xs font-semibold tracking-wide uppercase">
                   {node.title}
                 </span>
               </span>
               <span
                 aria-hidden="true"
-                className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? 'bg-[#00D9FF]' : 'bg-white/20'}`}
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? 'bg-accent-cyan' : 'bg-white/20'}`}
               />
             </button>
           );
@@ -154,46 +152,46 @@ export function LiveActivityBar({
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.7fr)]"
+        className="activity-detail-grid grid gap-5 p-4 sm:p-5"
       >
         <div className="min-w-0">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00D9FF]">
+          <p className="text-2xs tracking-kicker text-accent-cyan font-mono font-semibold uppercase">
             {activeNode.discipline}
           </p>
-          <h3 className="mt-2 font-display text-xl font-bold text-white">{activeNode.title}</h3>
+          <h3 className="font-display mt-2 text-xl font-bold text-white">{activeNode.title}</h3>
 
           <div className="mt-4 space-y-3">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              <p className="text-2xs font-mono tracking-wider text-zinc-400 uppercase">
                 Engineering constraint
               </p>
-              <p className="mt-1 max-w-[72ch] text-sm leading-6 text-zinc-300">
+              <p className="mt-1 max-w-prose text-sm leading-6 text-zinc-300">
                 {activeNode.designConstraint}
               </p>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              <p className="text-2xs font-mono tracking-wider text-zinc-400 uppercase">
                 Architectural approach
               </p>
-              <p className="mt-1 max-w-[72ch] text-sm leading-6 text-zinc-300">
+              <p className="mt-1 max-w-prose text-sm leading-6 text-zinc-300">
                 {activeNode.architectureSummary}
               </p>
             </div>
-            <p className="border-l-2 border-[#00D9FF]/50 pl-3 text-xs leading-5 text-zinc-400">
+            <p className="border-accent-cyan/50 border-l-2 pl-3 text-xs leading-5 text-zinc-400">
               Evidence boundary: {activeNode.evidenceBoundary}
             </p>
           </div>
         </div>
 
-        <aside className="border-t border-white/10 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+        <aside className="border-t border-white/10 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-5">
+          <p className="text-2xs tracking-kicker font-mono font-semibold text-zinc-400 uppercase">
             Runtime and data stack
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {activeNode.runtimeStack.map((technology) => (
               <li
                 key={technology}
-                className="inline-flex min-h-[30px] items-center border border-white/10 bg-[#08090C] px-2.5 py-1 font-mono text-[11px] text-zinc-300"
+                className="min-h-chip bg-obsidian-base text-micro inline-flex items-center border border-white/10 px-2.5 py-1 font-mono text-zinc-300"
               >
                 {technology}
               </li>
@@ -201,7 +199,7 @@ export function LiveActivityBar({
           </ul>
           <a
             href={`/work/${activeNode.id === 'yapcommerce' ? 'yap-engine' : activeNode.id}`}
-            className="mt-5 inline-flex min-h-[44px] w-full items-center justify-between border border-[#00D9FF]/35 bg-[#00D9FF]/[0.06] px-3.5 py-2.5 font-mono text-[11px] font-semibold tracking-wider text-[#00D9FF] transition-colors hover:bg-[#00D9FF]/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+            className="min-h-touch border-accent-cyan/40 bg-accent-cyan/10 text-micro text-accent-cyan hover:border-accent-cyan hover:bg-accent-cyan hover:text-obsidian-base focus-visible:ring-accent-cyan mt-5 inline-flex w-full items-center justify-between border px-3.5 py-2.5 font-mono font-semibold tracking-wider transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <span>OPEN PROJECT RECORD</span>
             <span aria-hidden="true">↗</span>

@@ -20,10 +20,12 @@ const RULES = [
   ...(STRICT_NRS ? [{ pattern: /\bFIRS\b/g, message: 'FIRS reference found — use NRS' }] : []),
 ];
 
-// Evidence contract: these phrases either lack a public measurement artifact or
-// overstate what the linked source can prove. They must not re-enter rendered
-// copy, feeds, or machine-readable metadata through future refactors.
+// Evidence contract (synced with docs/claim-ledger.md): these phrases either
+// lack a public measurement artifact or overstate what the linked source can
+// prove. They must not re-enter rendered copy, feeds, or machine-readable
+// metadata through future refactors.
 const CLAIM_RULES = [
+  { pattern: /4 hours\s*(?:→|to|-)\s*15 minutes/gi, message: 'Unlinked accountant timing benchmark found' },
   { pattern: /99\.9(?:4)?%/gi, message: 'Unlinked uptime claim found' },
   { pattern: /45%\s+MTTD/gi, message: 'Unlinked MTTD claim found' },
   { pattern: /\bsub[- ]?150ms\b/gi, message: 'Unlinked latency claim found' },
@@ -32,6 +34,9 @@ const CLAIM_RULES = [
   { pattern: /40 million(?: Nigerian)? (?:students|children)/gi, message: 'Unsupported population claim found' },
   { pattern: /15\+\s+merged contributions/gi, message: 'Unlinked contribution-count claim found' },
   { pattern: /\bNDPC\s+(?:compliance|compliant)\b/gi, message: 'Unsupported compliance claim found' },
+  { pattern: /\bindependently verifiable\b/gi, message: 'Overbroad third-party verification claim found' },
+  { pattern: /\bthree live platforms\b/gi, message: 'Unqualified blanket deployment-status claim found' },
+  { pattern: /\bUpdated June 2026\b/gi, message: 'Stale hard-coded recency stamp found' },
   { pattern: /(?:respond|responds|response)[^\n]{0,24}within 24 hours/gi, message: 'Unsustainable response-time promise found' },
   { pattern: /350\+\s+international users/gi, message: 'Unsupported user-count claim found' },
   { pattern: /\$3k\+?\s+MRR/gi, message: 'Unsupported revenue claim found' },

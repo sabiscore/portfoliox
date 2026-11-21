@@ -25,7 +25,7 @@ const FAILURE_BOUNDARY_PATTERNS: readonly FailureBoundaryPattern[] = [
       'TaxBridge combines PostgreSQL row-level security, transaction-scoped organization context, and idempotent background jobs. Database policy configuration and NRS integration remain active validation work.',
     evidenceBoundary:
       'Active build. NRS DigiTax integration and tenant-policy validation remain in progress.',
-    evidenceRecord: 'TaxBridge engineering case study',
+    evidenceRecord: 'TaxBridge case study',
     href: '/work/taxbridge',
   },
   {
@@ -37,7 +37,7 @@ const FAILURE_BOUNDARY_PATTERNS: readonly FailureBoundaryPattern[] = [
       'SabiScore uses Polars and DuckDB for analytical feature processing, model-aware cache versioning, and a lower-confidence fallback path when preferred dependencies are unavailable.',
     evidenceBoundary:
       'Public product demo. Operational uptime, memory, latency, and calibration reports are not published as public benchmarks.',
-    evidenceRecord: 'SabiScore architecture and evaluation notes',
+    evidenceRecord: 'SabiScore case study',
     href: '/work/sabiscore',
   },
   {
@@ -49,8 +49,8 @@ const FAILURE_BOUNDARY_PATTERNS: readonly FailureBoundaryPattern[] = [
       'The Yap Engine record describes content-addressed stage inputs, intermediate artifact persistence, local model routing, and deterministic media assembly to avoid replaying completed stages.',
     evidenceBoundary:
       'Public source and architecture record. No production throughput or availability SLO is asserted here.',
-    evidenceRecord: 'SwarmXQ and Yap Engine case study',
-    href: '/work/swarmxq',
+    evidenceRecord: 'Yap Engine case study',
+    href: '/work/yap-engine',
   },
 ];
 
@@ -116,8 +116,9 @@ export function ProductionPatterns(): JSX.Element {
     >
       <div className="mx-auto max-w-6xl space-y-10">
         <header className="max-w-3xl space-y-3">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#00D9FF]">
-            02 // ENGINEERING DECISIONS
+          <p className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em]">
+            <span className="font-bold text-[#00D9FF]">02</span>
+            <span className="text-zinc-400">ENGINEERING // DECISIONS</span>
           </p>
           <h2
             id="failure-modes-heading"

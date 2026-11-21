@@ -31,8 +31,12 @@ export const metadata: Metadata = {
   title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
   description:
     'Staff Backend and Platform Engineer in Lagos, Nigeria. Engineering reliable backend services, data-intensive platforms, AI infrastructure, and resilient fintech systems.',
+  manifest: '/manifest.json',
   alternates: {
     canonical: '/',
+    types: {
+      'application/rss+xml': '/rss.xml',
+    },
   },
   openGraph: {
     type: 'website',
@@ -41,14 +45,21 @@ export const metadata: Metadata = {
     title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
     description:
       'Backend, platform, AI infrastructure, and production reliability engineering. Lagos, Nigeria · Remote.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Oscar Ndugbu — Staff Backend and Platform Engineer' }],
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Oscar Ndugbu — Staff Backend and Platform Engineer',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
     description:
       'Backend, platform, AI infrastructure, and production reliability engineering. Lagos, Nigeria · Remote.',
-    images: ['/og-image.png'],
+    images: ['/twitter-image'],
   },
 };
 

@@ -18,7 +18,7 @@ export function GradientMeshMotion({
       className={`gradient-mesh-motion pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#08090C] ${className}`}
     >
       {/* Primary Coordinate Grid Layer */}
-      <div className="absolute inset-0 bg-kinetic-grid bg-[size:36px_36px] opacity-60" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px] opacity-60" />
 
       {/* Top Cyan Telemetry Horizon */}
       <div

@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
   }
 
   return {
-    title: post.frontmatter.title,
+    title: `${post.frontmatter.title} · Oscar Ndugbu`,
     description: post.frontmatter.summary,
     alternates: { canonical: `${SITE_URL}/writing/${slug}` },
     openGraph: {
@@ -86,22 +86,50 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
       description: post.frontmatter.summary,
       url: `${SITE_URL}/writing/${slug}`,
       type: 'article',
+      publishedTime: post.frontmatter.date,
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: `${post.frontmatter.title} · Oscar Ndugbu`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${post.frontmatter.title} · Oscar Ndugbu`,
+      description: post.frontmatter.summary,
+      images: ['/twitter-image'],
     },
   };
 }
 
 function articleJsonLd(title: string, summary: string, date: string, slug: string) {
+  const url = `${SITE_URL}/writing/${slug}`;
   return {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: title,
     description: summary,
     datePublished: date,
-    url: `${SITE_URL}/writing/${slug}`,
+    dateModified: date,
+    url,
+    image: `${SITE_URL}/opengraph-image`,
     author: {
       '@type': 'Person',
-      name: 'Oscar Ndugbu (Scardubu)',
+      name: 'Oscar Ndugbu',
+      alternateName: 'Scardubu',
       url: SITE_URL,
+    },
+    publisher: {
+      '@type': 'Person',
+      name: 'Oscar Ndugbu',
+      url: SITE_URL,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
     },
   };
 }
@@ -120,7 +148,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
   const articleMeta: Array<{ label: string; value: string }> = [
     { label: 'Published', value: formatDate(post.frontmatter.date) },
     { label: 'Reading time', value: `${post.readingTime} min read` },
-    { label: 'Surface', value: 'Technical Monograph' },
+    { label: 'Author', value: 'Oscar Ndugbu' },
   ];
 
   return (
@@ -143,7 +171,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                     post.frontmatter.date,
                     slug
                   )
-                ),
+                ).replace(/</g, '\\u003c'),
               }}
             />
 
@@ -156,7 +184,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
               <span>BACK TO WRITING</span>
             </Link>
 
-            <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
+            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start lg:gap-12">
               <div className="min-w-0">
                 <header className="mb-10 max-w-[65ch] border-b border-white/10 pb-8">
                   <StaticSectionIntro
@@ -180,7 +208,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                   </div>
                 </header>
 
-                <article className="prose prose-invert max-w-[72ch] pb-16 prose-headings:font-display prose-headings:tracking-tight prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-3 prose-h2:text-white prose-h3:text-[#00D9FF] prose-p:leading-8 prose-p:text-zinc-300 prose-li:text-zinc-300 prose-strong:text-white prose-a:text-[#00D9FF] prose-a:underline-offset-4 hover:prose-a:text-white prose-code:before:content-none prose-code:after:content-none">
+                <article className="min-w-0 max-w-[72ch] pb-16">
                   {post.content}
                 </article>
 
@@ -238,7 +266,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
               </div>
 
               {/* Right Telemetry & Metadata Sidebar */}
-              <aside className="space-y-4 xl:sticky xl:top-24">
+              <aside className="space-y-4 lg:sticky lg:top-24">
                 <div className="border border-white/10 bg-[#0E0E10]/90 p-5 backdrop-blur-xl">
                   <span className="font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase">
                     AT A GLANCE
@@ -274,8 +302,15 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                 ) : null}
 
                 <Link
-                  href="/writing"
+                  href="/#contact"
                   className="inline-flex min-h-[44px] w-full items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase transition-colors hover:bg-[#00D9FF]/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                >
+                  DISCUSS A SYSTEM
+                </Link>
+
+                <Link
+                  href="/writing"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center border border-white/15 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-zinc-200 uppercase transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
                 >
                   ALL WRITING
                 </Link>

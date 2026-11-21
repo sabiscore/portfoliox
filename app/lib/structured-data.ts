@@ -99,7 +99,7 @@ export function generateBlogPostSchema(post: {
       name: 'Oscar Ndugbu',
       url: SITE_URL,
     },
-    image: post.image || `${SITE_URL}/og-image.png`,
+    image: post.image || `${SITE_URL}/opengraph-image`,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': url,

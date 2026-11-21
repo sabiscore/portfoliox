@@ -384,13 +384,14 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
         let lenisTickerFn: ((time: number) => void) | null = null;
 
         try {
-          const sectionOffset = getSectionOffset();
           lenis = new LenisConstructor({
             lerp: 0.1,
             smoothWheel: true,
             syncTouch: false,
             wheelMultiplier: 1,
-            anchors: { offset: -sectionOffset },
+            // Same-page hash navigation is coordinated via scrollToSection so
+            // Lenis never races Next.js <Link> scrollIntoView() calls.
+            anchors: false,
             stopInertiaOnNavigate: true,
             prevent: (node: HTMLElement) => {
               if (node.hasAttribute('data-lenis-prevent')) return true;

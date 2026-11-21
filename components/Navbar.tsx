@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { useScrollCinema } from '@/components/cinematic/ScrollCinemaProvider';
 import { CV_ASSET_PATH } from '@/lib/config';
 
 interface NavRoute {
@@ -24,8 +25,11 @@ const NAV_ROUTES: ReadonlyArray<NavRoute> = [
   { label: 'RÉSUMÉ', href: CV_ASSET_PATH, asset: true },
 ];
 
-const isRouteActive = (route: NavRoute, pathname: string | null): boolean =>
-  !route.asset && !route.href.includes('#') && Boolean(pathname?.startsWith(route.href));
+const isRouteActive = (route: NavRoute, pathname: string | null): boolean => {
+  if (route.asset || !pathname) return false;
+  if (route.href === '/#projects') return pathname.startsWith('/work');
+  return !route.href.includes('#') && pathname.startsWith(route.href);
+};
 
 // Homepage sections tracked for the in-view indicator, in document order.
 const TRACKED_SECTIONS = ['projects', 'failure-modes', 'contact'] as const;
@@ -66,6 +70,7 @@ export function Navbar(): React.JSX.Element {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const { scrollToSection } = useScrollCinema();
   const sectionInView = useSectionInView(pathname === '/');
 
   const toggleMobileMenu = useCallback(() => {
@@ -75,6 +80,21 @@ export function Navbar(): React.JSX.Element {
   const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
   }, []);
+
+  const handleSamePageAnchorClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>, href: string, closeDrawer = false) => {
+      if (closeDrawer) closeMobileMenu();
+      const targetId = sectionIdOf(href);
+      if (pathname !== '/' || !targetId) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      window.history.pushState(null, '', `/#${targetId}`);
+      scrollToSection(targetId);
+    },
+    [closeMobileMenu, pathname, scrollToSection]
+  );
 
   useEffect(() => {
     closeMobileMenu();
@@ -151,7 +171,8 @@ export function Navbar(): React.JSX.Element {
               <Link
                 key={route.href}
                 href={route.href}
-                aria-current={active ? 'page' : inView ? 'true' : undefined}
+                onClick={(event) => handleSamePageAnchorClick(event, route.href)}
+                aria-current={active && !route.href.includes('#') ? 'page' : active || inView ? 'true' : undefined}
                 className={className}
               >
                 {content}
@@ -164,6 +185,7 @@ export function Navbar(): React.JSX.Element {
         <div className="flex items-center gap-2">
           <Link
             href="/#contact"
+            onClick={(event) => handleSamePageAnchorClick(event, '/#contact')}
             aria-label="Go to the contact section"
             aria-current={sectionInView === 'contact' ? 'true' : undefined}
             className={`min-h-[44px] min-w-[44px] px-3.5 inline-flex items-center justify-center gap-2 border hover:border-[#00D9FF] motion-safe:active:translate-y-px ${
@@ -208,8 +230,10 @@ export function Navbar(): React.JSX.Element {
           <div className="grid grid-cols-1 gap-1.5">
             {NAV_ROUTES.map((route) => {
               const active = isRouteActive(route, pathname);
+              const inView = sectionIdOf(route.href) === sectionInView && sectionInView !== null;
+              const isCurrent = active || inView;
               const className = `min-h-[48px] px-4 flex items-center justify-between border bg-[#08090C] font-mono text-xs font-semibold uppercase tracking-wider hover:border-[#00D9FF]/50 hover:text-[#00D9FF] transition-colors ${
-                active ? 'border-[#00D9FF]/50 text-[#00D9FF]' : 'border-white/10 text-white'
+                isCurrent ? 'border-[#00D9FF]/50 text-[#00D9FF]' : 'border-white/10 text-white'
               }`;
               const label = (
                 <span className="flex items-center gap-2.5">
@@ -235,8 +259,8 @@ export function Navbar(): React.JSX.Element {
                 <Link
                   key={route.href}
                   href={route.href}
-                  onClick={closeMobileMenu}
-                  aria-current={active ? 'page' : undefined}
+                  onClick={(event) => handleSamePageAnchorClick(event, route.href, true)}
+                  aria-current={active && !route.href.includes('#') ? 'page' : isCurrent ? 'true' : undefined}
                   className={className}
                 >
                   {label}

@@ -39,25 +39,25 @@ export function IdentityCard({ className = '', children }: IdentityCardProps): R
       aria-label="Staff Backend and Platform Engineer profile"
       className={`border border-white/10 bg-[#0E0E10]/95 p-5 backdrop-blur-xl transition-colors duration-200 hover:border-[#00D9FF]/40 sm:p-6 ${className}`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-        <div>
+      <div className="space-y-1.5 border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between gap-2">
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00D9FF]">
             ENGINEERING PROFILE
           </p>
-          <p className="mt-1 font-mono text-xs text-zinc-400">
-            BACKEND · PLATFORM · AI SYSTEMS
-          </p>
+          <span className="shrink-0 border border-white/10 bg-[#08090C] px-2 py-1 font-mono text-[10px] text-zinc-400">
+            LAGOS, NG
+          </span>
         </div>
-        <span className="border border-white/10 bg-[#08090C] px-2 py-1 font-mono text-[10px] text-zinc-400">
-          LAGOS, NG
-        </span>
+        <p className="font-mono text-xs text-zinc-400">
+          BACKEND · PLATFORM · AI SYSTEMS
+        </p>
       </div>
 
       <div className="mt-5 flex items-center gap-4">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden border border-[#00D9FF]/40 bg-[#08090C]">
           <Image
             src="/headshot.webp"
-            alt="Oscar Ndugbu"
+            alt="Oscar Ndugbu, Staff Backend and Platform Engineer"
             fill
             sizes="64px"
             priority
@@ -80,7 +80,7 @@ export function IdentityCard({ className = '', children }: IdentityCardProps): R
 
       {children ? <div className="mt-6 border-t border-white/10 pt-5">{children}</div> : null}
 
-      <div className="mt-6 space-y-3 border-t border-white/10 pt-4">
+      <div className="mt-6 border-t border-white/10 pt-4">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -93,12 +93,18 @@ export function IdentityCard({ className = '', children }: IdentityCardProps): R
             href={CV_ASSET_PATH}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Open résumé PDF in a new tab"
             className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-white/15 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-semibold text-zinc-200 transition-colors hover:border-[#00D9FF]/40 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
           >
             CV.PDF
           </a>
         </div>
-        <p role="status" aria-live="polite" aria-atomic="true" className="min-h-4 text-xs text-zinc-400">
+        <p
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className={copyState === 'idle' ? 'sr-only' : 'mt-2.5 text-xs text-zinc-400'}
+        >
           {copyState === 'copied'
             ? 'Email address copied.'
             : copyState === 'failed'

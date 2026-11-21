@@ -6,8 +6,8 @@ interface OGImageProps {
 
 export function OGImage({
   title = 'SCARDUBU',
-  subtitle = 'Staff Backend and Platform Engineer · AI infrastructure at scale',
-  caption = 'Reliability-first systems, explicit tradeoffs, and platform execution from interface to infrastructure.',
+  subtitle = 'Staff Backend and Platform Engineer · AI & Fintech Systems',
+  caption = 'Systems built with explicit failure boundaries, observable behavior, and deliberate recovery paths.',
 }: Readonly<OGImageProps>) {
   return (
     <div
@@ -15,35 +15,31 @@ export function OGImage({
         height: '100%',
         width: '100%',
         display: 'flex',
-        background: '#0a0a0f',
-        color: '#f8fafc',
+        background: '#08090C',
+        color: '#ffffff',
         position: 'relative',
         overflow: 'hidden',
-        fontFamily: 'Arial, sans-serif',
+        fontFamily: 'system-ui, sans-serif',
       }}
     >
       <div
         style={{
           position: 'absolute',
-          inset: 0,
-          background:
-            'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '64px 64px',
-          opacity: 0.14,
-          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.1))',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: '#00D9FF',
         }}
       />
       <div
         style={{
           position: 'absolute',
-          right: 80,
-          top: 90,
-          width: 360,
-          height: 360,
-          borderRadius: '999px',
+          inset: 0,
           background:
-            'radial-gradient(circle, rgba(0,212,255,0.28), rgba(0,212,255,0.02) 68%, transparent 75%)',
-          filter: 'blur(28px)',
+            'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          opacity: 0.45,
         }}
       />
       <div
@@ -52,74 +48,83 @@ export function OGImage({
           flexDirection: 'column',
           justifyContent: 'space-between',
           width: '100%',
-          padding: '72px',
+          padding: '68px 72px',
+          position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div
-            style={{
-              display: 'flex',
-              padding: '10px 18px',
-              borderRadius: 999,
-              border: '1px solid rgba(255,255,255,0.14)',
-              background: 'rgba(255,255,255,0.06)',
-              fontSize: 22,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color: 'rgba(226,232,240,0.82)',
-            }}
-          >
-            Lagos NG · Remote-First
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              fontSize: 22,
-              color: 'rgba(226,232,240,0.78)',
+              padding: '8px 16px',
+              border: '1px solid rgba(0,217,255,0.45)',
+              background: '#0E0E10',
+              fontSize: 16,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: '#00D9FF',
+              fontWeight: 700,
             }}
           >
             <span
               style={{
-                width: 12,
-                height: 12,
+                width: 8,
+                height: 8,
                 borderRadius: 999,
-                background: '#00d4ff',
-                boxShadow: '0 0 24px rgba(0,212,255,0.7)',
+                background: '#00D9FF',
               }}
             />
-            Active build surface
+            OSCAR NDUGBU · LAGOS, NG · REMOTE
+          </div>
+          <div
+            style={{
+              fontSize: 16,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: '#a1a1aa',
+            }}
+          >
+            WWW.SCARDUBU.DEV
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '76%' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ fontSize: 76, fontWeight: 700, letterSpacing: '0.24em' }}>{title}</div>
-            <div style={{ fontSize: 34, color: '#67e8f9' }}>{subtitle}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: '88%' }}>
+          <div style={{ fontSize: 74, fontWeight: 800, letterSpacing: '0.2em', lineHeight: 1 }}>
+            {title}
           </div>
-          <div style={{ fontSize: 28, lineHeight: 1.4, color: 'rgba(226,232,240,0.88)' }}>
-            {caption}
-          </div>
+          <div style={{ fontSize: 32, color: '#00D9FF', fontWeight: 600 }}>{subtitle}</div>
+          <div style={{ fontSize: 25, lineHeight: 1.45, color: '#d4d4d8' }}>{caption}</div>
         </div>
 
-        <div style={{ display: 'flex', gap: 18 }}>
-          {['Work that shipped', 'Failure modes designed', 'Projects owned'].map((item) => (
-            <div
-              key={item}
-              style={{
-                display: 'flex',
-                padding: '14px 18px',
-                borderRadius: 999,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.05)',
-                color: 'rgba(248,250,252,0.82)',
-                fontSize: 22,
-              }}
-            >
-              {item}
-            </div>
-          ))}
+        <div
+          style={{
+            display: 'flex',
+            gap: 16,
+            borderTop: '1px solid rgba(255,255,255,0.12)',
+            paddingTop: 24,
+          }}
+        >
+          {['Backend & Platform', 'Quantitative ML', 'AI Infrastructure', 'Fintech Recovery'].map(
+            (item) => (
+              <div
+                key={item}
+                style={{
+                  display: 'flex',
+                  padding: '10px 16px',
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  background: '#0E0E10',
+                  color: '#e4e4e7',
+                  fontSize: 16,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {item}
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>

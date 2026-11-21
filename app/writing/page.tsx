@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { StaticSectionIntro } from '@/components/shared/StaticSectionIntro';
+import { SITE_URL } from '@/lib/config';
 import { getWritingPosts } from '@/lib/content';
 import { formatDate } from '@/lib/utils';
 
@@ -17,12 +18,28 @@ export const metadata: Metadata = {
   title: 'Writing · Oscar Ndugbu',
   description:
     'Practical writing on architecture decisions, ML trade-offs, and the engineering choices that hold up in production — by Oscar Ndugbu.',
-  alternates: { canonical: 'https://www.scardubu.dev/writing' },
+  alternates: { canonical: `${SITE_URL}/writing` },
   openGraph: {
     title: 'Writing · Oscar Ndugbu',
-    description: 'Architecture decisions, ML trade-offs, and practical lessons from production engineering.',
-    url: 'https://www.scardubu.dev/writing',
+    description:
+      'Architecture decisions, ML trade-offs, and practical lessons from production engineering.',
+    url: `${SITE_URL}/writing`,
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Writing · Oscar Ndugbu — Staff Backend and Platform Engineer',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Writing · Oscar Ndugbu',
+    description:
+      'Architecture decisions, ML trade-offs, and practical lessons from production engineering.',
+    images: ['/twitter-image'],
   },
 };
 
@@ -53,9 +70,18 @@ export default async function WritingPage() {
             descriptionClassName="type-lede mt-4 max-w-[56ch] text-zinc-300"
           />
 
-          <p className="shrink-0 font-mono text-xs uppercase tracking-widest text-zinc-400">
-            {posts.length} articles
-          </p>
+          <div className="flex shrink-0 items-center gap-4">
+            <p className="font-mono text-xs uppercase tracking-widest text-zinc-400">
+              {posts.length} articles
+            </p>
+            <a
+              href="/rss.xml"
+              className="inline-flex min-h-[44px] items-center gap-1.5 border border-white/15 bg-[#0E0E10] px-3.5 py-2 font-mono text-[11px] uppercase tracking-wider text-zinc-300 transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+            >
+              <span>RSS</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </header>
 
         {/* ── Featured post ────────────────────────────────────────────── */}

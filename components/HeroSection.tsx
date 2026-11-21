@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { IdentityCard } from '@/components/IdentityCard';
 import { CV_ASSET_PATH } from '@/lib/config';
 
-// Canonical public profile (verified 2026-11-20). The `sabiscore` account hosts
-// this portfolio's repository, not the SabiScore product source.
+// Canonical public profiles (verified against structured data and repository records).
+// The `sabiscore` account hosts this portfolio's repository, not the SabiScore product source.
 const GITHUB_PROFILE_URL = 'https://github.com/Scardubu';
+const LINKEDIN_PROFILE_URL = 'https://linkedin.com/in/oscardubu';
 
 interface CapabilityRow {
   label: string;
@@ -160,6 +161,17 @@ export function HeroSection(): React.JSX.Element {
                   className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
                 >
                   <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">GitHub @Scardubu</span>
+                  <span aria-hidden="true" className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5">↗</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={LINKEDIN_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                >
+                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">LinkedIn</span>
                   <span aria-hidden="true" className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5">↗</span>
                 </a>
               </li>

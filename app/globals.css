@@ -17,6 +17,16 @@ html {
   scroll-padding-top: 5rem;
 }
 
+/* Prevent CSS smooth-scrolling from fighting Lenis RAF interpolation when active. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
 body {
   background-color: #08090c;
   color: #ffffff;

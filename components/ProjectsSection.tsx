@@ -2,8 +2,12 @@ import type { JSX } from 'react';
 import Link from 'next/link';
 
 import { getWorkCases } from '@/lib/content';
-
-type EvidenceStatus = 'ACTIVE BUILD' | 'PUBLIC DEMO' | 'PUBLIC SOURCE' | 'PRIVATE CASE STUDY';
+import {
+  STATUS_TONE,
+  WORK_CASE_META,
+  WORK_CASE_ORDER,
+  type EvidenceStatus,
+} from '@/lib/work-meta';
 
 interface ProjectLedgerEntry {
   slug: string;
@@ -145,14 +149,6 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
   },
 ];
 
-// Evidence status is carried by text and a dot; colour only reinforces it (WCAG 1.4.1).
-const STATUS_TONE: Record<EvidenceStatus, { chip: string; dot: string }> = {
-  'ACTIVE BUILD': { chip: 'border-amber-300/40 bg-amber-300/10 text-amber-200', dot: 'bg-amber-300' },
-  'PUBLIC DEMO': { chip: 'border-[#00D9FF]/40 bg-[#00D9FF]/10 text-[#00D9FF]', dot: 'bg-[#00D9FF]' },
-  'PUBLIC SOURCE': { chip: 'border-[#00FF66]/35 bg-[#00FF66]/10 text-[#00FF66]', dot: 'bg-[#00FF66]' },
-  'PRIVATE CASE STUDY': { chip: 'border-white/15 bg-white/[0.03] text-zinc-300', dot: 'bg-zinc-400' },
-};
-
 const projectCode = (index: number): string => `P/${String(index + 1).padStart(2, '0')}`;
 
 const secondaryLinkClass =
@@ -178,7 +174,13 @@ async function MoreCaseStudies(): Promise<JSX.Element | null> {
   const featuredSlugs = new Set(
     SELECTED_PROJECTS.map((project) => project.caseStudyHref.replace('/work/', ''))
   );
-  const moreCases = (await getWorkCases()).filter((entry) => !featuredSlugs.has(entry.slug));
+  const moreCases = (await getWorkCases())
+    .filter((entry) => !featuredSlugs.has(entry.slug))
+    .sort((left, right) => {
+      const leftRank = WORK_CASE_ORDER.indexOf(left.slug);
+      const rightRank = WORK_CASE_ORDER.indexOf(right.slug);
+      return (leftRank === -1 ? 99 : leftRank) - (rightRank === -1 ? 99 : rightRank);
+    });
   if (moreCases.length === 0) return null;
 
   return (
@@ -193,24 +195,41 @@ async function MoreCaseStudies(): Promise<JSX.Element | null> {
           aria-labelledby="more-case-studies-heading"
           className="mt-5 grid grid-cols-1 gap-px border border-white/10 bg-white/10 md:grid-cols-3"
         >
-          {moreCases.map((entry) => (
-            <li key={entry.slug} data-project-id={entry.slug} className="bg-[#0E0E10]">
-              <Link
-                href={`/work/${entry.slug}`}
-                className="group flex h-full flex-col p-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF]"
-              >
-                <span className="flex items-start justify-between gap-3">
-                  <span className="font-display text-lg font-semibold leading-snug text-white group-hover:text-[#00D9FF]">
-                    {entry.title}
+          {moreCases.map((entry) => {
+            const meta = WORK_CASE_META[entry.slug];
+            return (
+              <li key={entry.slug} data-project-id={entry.slug} className="bg-[#0E0E10]">
+                <Link
+                  href={`/work/${entry.slug}`}
+                  className="group flex h-full flex-col p-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF]"
+                >
+                  {meta ? (
+                    <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+                      {meta.domain}
+                    </span>
+                  ) : null}
+                  <span className="mt-2 flex items-start justify-between gap-3">
+                    <span className="font-display text-lg font-semibold leading-snug text-white group-hover:text-[#00D9FF]">
+                      {entry.title}
+                    </span>
+                    <span aria-hidden="true" className={`mt-1 text-[#00D9FF] ${arrowOutClass}`}>↗</span>
                   </span>
-                  <span aria-hidden="true" className={`mt-1 text-[#00D9FF] ${arrowOutClass}`}>↗</span>
-                </span>
-                <span className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">
-                  {entry.summary}
-                </span>
-              </Link>
-            </li>
-          ))}
+                  <span className="mt-2 line-clamp-3 flex-1 text-sm leading-6 text-zinc-400">
+                    {entry.summary}
+                  </span>
+                  {meta ? (
+                    <span className="mt-4 inline-flex items-center gap-1.5 border-t border-white/10 pt-3 font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+                      <span
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${STATUS_TONE[meta.status].dot}`}
+                      />
+                      <span>{meta.status}</span>
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
   );
@@ -331,7 +350,11 @@ export function ProjectsSection(): JSX.Element {
                   </div>
 
                   <div className={`min-w-0 ${wide ? 'mt-6 lg:mt-0' : 'mt-6'}`}>
-                    <div className="border-t border-white/10 pt-5 lg:border-t-0 lg:pt-0">
+                    <div
+                      className={`border-t border-white/10 pt-5 ${
+                        wide ? 'lg:border-t-0 lg:pt-0' : ''
+                      }`}
+                    >
                       <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
                         Evidence boundary
                       </p>

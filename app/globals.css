@@ -6,6 +6,10 @@
   --bg-oled-elevated: #0e0e10;
   --accent-cyan: #00d9ff;
   --accent-emerald: #00ff66;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-emphasis: rgba(0, 217, 255, 0.4);
+  /* Syncs ScrollCinemaProvider section offsets with the 64px (h-16) sticky navbar. */
+  --nav-height: 64px;
   color-scheme: dark;
 }
 
@@ -14,7 +18,7 @@ html {
   color: #ffffff;
   scroll-behavior: smooth;
   /* Keep anchored section headings clear of the 64px sticky navbar. */
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 5.5rem;
 }
 
 /* Prevent CSS smooth-scrolling from fighting Lenis RAF interpolation when active. */
@@ -31,6 +35,7 @@ body {
   background-color: #08090c;
   color: #ffffff;
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
 }
 
 /* High-Glare Outdoor Focus Ring */
@@ -51,8 +56,7 @@ body {
 
 /*
  * Editorial type scale. Fluid sizes keep a fixed ratio between the hero
- * display line and section headings at every breakpoint (the previous fixed
- * steps rendered both at 48px between 640px and 1023px).
+ * display line and section headings at every breakpoint.
  *   display  40px @375 → 53px @768 → 72px cap
  *   section  30px @375 → 38px @768 → 48px cap
  *   lede     17px @375 → 20px cap
@@ -79,16 +83,20 @@ body {
   }
 }
 
-/* Keep anchor navigation comfortable without forcing motion on sensitive users. */
+/* Keep anchor navigation and UI feedback calm for reduced-motion preferences. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .reading-progress {
+    transition: none;
   }
 }
 
 /*
  * Article reading progress (components/ReadingProgress.tsx). The component
- * already publishes --progress; this is the bar it was written for.
+ * publishes --progress; this bar reflects scroll progression across articles.
  */
 .reading-progress {
   position: fixed;

@@ -1,15 +1,14 @@
 import type { ReactNode } from 'react';
 
-import { Footer } from '@/components/Footer';
-import { Navbar } from '@/components/Navbar';
+interface WritingLayoutProps {
+  children: ReactNode;
+}
 
-// Writing routes previously had neither the site navigation nor a footer.
-export default function WritingLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return (
-    <>
-      <Navbar />
-      {children}
-      <Footer />
-    </>
-  );
+/**
+ * Intentionally omits a `metadata.title` override so child routes
+ * (`/writing` and `/writing/[slug]`) inherit the root `app/layout.tsx`
+ * title template once without duplicating " · Oscar Ndugbu".
+ */
+export default function WritingLayout({ children }: WritingLayoutProps) {
+  return <div className="min-h-screen bg-zinc-950 text-zinc-100">{children}</div>;
 }

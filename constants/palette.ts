@@ -1,3 +1,5 @@
+import { CV_ASSET_PATH } from '@/lib/config';
+
 export interface PaletteItem {
   id: string;
   title: string;
@@ -19,10 +21,18 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
   {
     id: 'proj-yap-engine',
     title: 'YapCommerce // The Yap Engine',
-    subtitle: 'Zero-USD Cloud-LLM Multi-Agent Local GGUF Pipeline',
-    href: '/work/swarmxq',
+    subtitle: 'Local GGUF Multi-Agent Video & Commerce Pipeline',
+    href: '/work/yap-engine',
     category: 'project',
     keywords: ['yap', 'gguf', 'fastify', 'agents', 'tiktok', 'yapcommerce'],
+  },
+  {
+    id: 'proj-swarmxq',
+    title: 'SwarmXQ Agent Orchestration',
+    subtitle: 'Bounded Multi-Agent Execution & Local Inference Routing',
+    href: '/work/swarmxq',
+    category: 'project',
+    keywords: ['swarmxq', 'agents', 'orchestration', 'inference', 'gguf'],
   },
   {
     id: 'proj-taxbridge',
@@ -33,12 +43,28 @@ export const STATIC_PALETTE_ITEMS: PaletteItem[] = [
     keywords: ['taxbridge', 'fintech', 'nigeria', 'offline', 'zod', 'crdt'],
   },
   {
+    id: 'nav-identity',
+    title: 'Engineering Profile & Contact Ledger',
+    subtitle: 'Staff Backend & Platform Engineer — Capabilities, Email & CV',
+    href: '/#identity',
+    category: 'navigation',
+    keywords: ['profile', 'identity', 'oscar', 'scardubu', 'contact', 'email'],
+  },
+  {
     id: 'nav-writing',
     title: 'Engineering Monographs & Writing',
     subtitle: 'Deep dives into low-memory ML and emerging-market systems',
     href: '/writing',
     category: 'navigation',
     keywords: ['blog', 'writing', 'articles', 'monographs'],
+  },
+  {
+    id: 'sys-resume',
+    title: 'Open Résumé (CV.PDF)',
+    subtitle: 'Canonical PDF profile for Oscar Ndugbu',
+    href: CV_ASSET_PATH,
+    category: 'system',
+    keywords: ['cv', 'resume', 'pdf', 'download', 'credentials'],
   },
 ];
 

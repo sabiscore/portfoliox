@@ -13,6 +13,8 @@ html {
   background-color: #08090c;
   color: #ffffff;
   scroll-behavior: smooth;
+  /* Keep anchored section headings clear of the 64px sticky navbar. */
+  scroll-padding-top: 5rem;
 }
 
 body {
@@ -37,9 +39,53 @@ body {
   transform: translateZ(0);
 }
 
+/*
+ * Editorial type scale. Fluid sizes keep a fixed ratio between the hero
+ * display line and section headings at every breakpoint (the previous fixed
+ * steps rendered both at 48px between 640px and 1023px).
+ *   display  40px @375 → 53px @768 → 72px cap
+ *   section  30px @375 → 38px @768 → 48px cap
+ *   lede     17px @375 → 20px cap
+ */
+@layer components {
+  .type-display {
+    font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .type-section {
+    font-size: clamp(1.875rem, 1.3rem + 2.2vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .type-lede {
+    font-size: clamp(1.0625rem, 0.98rem + 0.3vw, 1.25rem);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+}
+
 /* Keep anchor navigation comfortable without forcing motion on sensitive users. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+}
+
+/*
+ * Article reading progress (components/ReadingProgress.tsx). The component
+ * already publishes --progress; this is the bar it was written for.
+ */
+.reading-progress {
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: 60;
+  height: 2px;
+  width: var(--progress, 0%);
+  background-color: #00d9ff;
+  pointer-events: none;
 }

@@ -7,7 +7,8 @@ type ListProps = ComponentPropsWithoutRef<'ul'>;
 type OrderedListProps = ComponentPropsWithoutRef<'ol'>;
 type ListItemProps = ComponentPropsWithoutRef<'li'>;
 type BlockquoteProps = ComponentPropsWithoutRef<'blockquote'>;
-type CodeProps = ComponentPropsWithoutRef<'code'>;
+type CodeProps = ComponentPropsWithoutRef<'code'> & { 'data-language'?: string };
+type PreProps = ComponentPropsWithoutRef<'pre'>;
 type TableProps = ComponentPropsWithoutRef<'table'>;
 type ThProps = ComponentPropsWithoutRef<'th'>;
 type TdProps = ComponentPropsWithoutRef<'td'>;
@@ -66,8 +67,16 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </blockquote>
     ),
+    pre: ({ children, ...props }: PreProps) => (
+      <pre
+        className="my-6 max-w-full overflow-x-auto border border-white/10 bg-[#0E0E10] py-4 text-[13px] leading-6 [&>code]:grid [&_[data-line]]:px-4"
+        {...props}
+      >
+        {children}
+      </pre>
+    ),
     code: ({ children, className, ...props }: CodeProps) => {
-      const isInline = !className;
+      const isInline = !className && !props['data-language'];
       if (isInline) {
         return (
           <code

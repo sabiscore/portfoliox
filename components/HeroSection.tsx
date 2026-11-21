@@ -1,58 +1,90 @@
 import React from 'react';
 import Link from 'next/link';
 import { IdentityCard } from '@/components/IdentityCard';
-import { LiveActivityBar } from '@/components/Liveactivitybar';
+import { CV_ASSET_PATH } from '@/lib/config';
 
-interface FeaturedProject {
-  slug: string;
-  name: string;
-  domainRole: string;
-  evidenceNote: string;
-  architectureSummary: string;
-  embeddedStack: string[];
-  evidenceStatus: 'PUBLIC DEMO' | 'PUBLIC SOURCE' | 'ACTIVE BUILD';
+// Canonical public profile (verified 2026-11-20). The `sabiscore` account hosts
+// this portfolio's repository, not the SabiScore product source.
+const GITHUB_PROFILE_URL = 'https://github.com/Scardubu';
+
+interface CapabilityRow {
+  label: string;
+  terms: readonly string[];
 }
 
-const FEATURED_PROJECTS: readonly FeaturedProject[] = [
+const CAPABILITY_LEDGER: readonly CapabilityRow[] = [
+  { label: 'Backend', terms: ['Fastify', 'Python', 'TypeScript'] },
+  { label: 'Data', terms: ['PostgreSQL', 'Redis', 'DuckDB'] },
+  { label: 'AI systems', terms: ['Inference', 'Model pipelines'] },
+  { label: 'Engineering', terms: ['Fail-closed', 'Observable', 'Recoverable'] },
+] as const;
+
+interface DesignTheme {
+  code: string;
+  title: string;
+  spec: string;
+  focusTag: string;
+}
+
+// Cross-project themes (moved from the identity card, copy unchanged). Rendered
+// on the server as a full-width strip so the hero split stays balanced.
+const DESIGN_THEMES: readonly DesignTheme[] = [
   {
-    slug: 'sabiscore',
-    name: 'SabiScore',
-    domainRole: 'Quantitative Football Markets & Probabilistic Forecasting',
-    evidenceNote: 'Public product demo · private performance artifacts are not published here',
-    architectureSummary:
-      'Out-of-core Polars and DuckDB feature processing, odds de-vigging, ensemble evaluation, and a version-aware fallback path.',
-    embeddedStack: ['Polars', 'DuckDB', 'PyArrow', 'FastAPI', 'Next.js 15'],
-    evidenceStatus: 'PUBLIC DEMO',
+    code: '01',
+    title: 'Local model inference',
+    spec: 'Quantized GGUF workflows with local execution paths where the project environment supports them.',
+    focusTag: 'LOCAL INFERENCE',
   },
   {
-    slug: 'yap-engine',
-    name: 'YapCommerce // The Yap Engine',
-    domainRole: 'Autonomous Multi-Agent Media & Social Commerce Pipeline',
-    evidenceNote: 'Public architecture record · no production throughput SLO is claimed',
-    architectureSummary:
-      'Local model routing and stage-oriented agent orchestration, with schema validation and content-addressed checkpoints for restartable media workflows.',
-    embeddedStack: ['GGUF Local LLM', 'Fastify', 'TypeScript', 'Zod', 'PM2'],
-    evidenceStatus: 'PUBLIC SOURCE',
+    code: '02',
+    title: 'Out-of-core data processing',
+    spec: 'Polars, PyArrow, and DuckDB pipelines for analytical workloads with explicit memory constraints.',
+    focusTag: 'BOUNDED DATA',
   },
   {
-    slug: 'taxbridge',
-    name: 'TaxBridge',
-    domainRole: 'Offline-First Nigerian Fintech & Fiscal Compliance Ledger',
-    evidenceNote: 'Active build · NRS DigiTax integration and policy validation remain in progress',
-    architectureSummary:
-      'Tax workflow architecture for intermittent connectivity, explicit organization context, background processing, and append-oriented audit records.',
-    embeddedStack: ['Fastify', 'DuckDB', 'Zod', 'SQLite CRDT', 'Tailwind'],
-    evidenceStatus: 'ACTIVE BUILD',
+    code: '03',
+    title: 'Quantitative model evaluation',
+    spec: 'Market de-vigging, Dixon-Coles modelling, calibration checks, and conservative decision rules.',
+    focusTag: 'MODEL EVALUATION',
+  },
+  {
+    code: '04',
+    title: 'Resilient fintech workflows',
+    spec: 'Offline-first mobile queues, runtime schema validation, and idempotent API boundaries; provider integrations are tracked explicitly.',
+    focusTag: 'RECOVERY DESIGN',
   },
 ] as const;
+
+function CapabilityLedger(): React.JSX.Element {
+  return (
+    <dl className="grid grid-cols-2 gap-px border border-white/10 bg-white/10">
+      {CAPABILITY_LEDGER.map((row) => (
+        <div key={row.label} className="bg-[#08090C] p-3.5">
+          <dt className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+            {row.label}
+          </dt>
+          {/* One term per line: no separators to orphan at narrow cell widths */}
+          {row.terms.map((term, index) => (
+            <dd
+              key={term}
+              className={`font-mono text-xs font-semibold leading-5 text-zinc-100 ${index === 0 ? 'mt-1.5' : ''}`}
+            >
+              {term}
+            </dd>
+          ))}
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 export function HeroSection(): React.JSX.Element {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative min-h-screen w-full overflow-hidden bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
+      className="relative w-full overflow-hidden border-b border-white/10 bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
     >
-      {/* Kinetic 1px Coordinate Grid + Subtle Radial Cursor Illumination */}
+      {/* 1px coordinate grid + single low-intensity radial wash */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px]"
@@ -62,188 +94,120 @@ export function HeroSection(): React.JSX.Element {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_circle_at_20%_15%,rgba(0,217,255,0.06),transparent_75%)]"
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-6 lg:px-8">
-        {/* Top Terminal Pulse Navigation Strip */}
-        <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border border-white/10 bg-[#0E0E10]/85 px-4 py-2.5 backdrop-blur-xl">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-2 w-2 rounded-full bg-[#00FF66]" />
-            <span className="font-mono text-xs font-semibold tracking-widest text-white uppercase">
-              SCARDUBU.DEV // ENGINEERING PORTFOLIO
-            </span>
-            <span className="hidden border border-white/10 bg-[#08090C] px-2 py-0.5 font-mono text-[11px] text-zinc-400 md:inline-block">
-              LAGOS, NIGERIA
-            </span>
-          </div>
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:px-8 lg:pt-20">
+        {/* Editorial split: 7 columns narrative + 5 columns identity ledger */}
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
+          <div className="lg:col-span-7">
+            <p className="inline-flex items-center gap-2.5 border border-[#00D9FF]/40 bg-[#0E0E10]/90 px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-[#00D9FF]">
+              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#00D9FF]" />
+              STAFF BACKEND &amp; PLATFORM ENGINEER
+            </p>
 
-          <nav aria-label="Primary Jump Links" className="flex flex-wrap items-center gap-2">
-            {[
-              { href: '#deployments', label: 'Selected work' },
-              { href: '#architecture-index', label: 'Live activity' },
-              { href: '/writing', label: 'Engineering notes' },
-              { href: '/cv/oscar-ndugbu-resume.pdf', label: 'Download résumé' },
-            ].map((item) => (
+            <h1
+              id="hero-heading"
+              className="type-display mt-6 max-w-[15ch] font-display font-bold text-white"
+            >
+              Systems you can trust at <span className="text-[#00D9FF]">2&nbsp;AM.</span>
+            </h1>
+
+            <p className="type-lede mt-6 max-w-[60ch] text-zinc-300">
+              <strong className="font-semibold text-white">Oscar Ndugbu</strong> builds backend
+              services, data platforms, AI infrastructure, and fintech systems with explicit
+              failure boundaries, observable behavior, and deliberate recovery paths.
+            </p>
+
+            {/* Primary and secondary calls to action: 48px minimum touch geometry */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
-                key={item.href}
-                href={item.href}
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-transparent px-3 font-mono text-xs text-zinc-300 transition-colors hover:border-[#00D9FF]/40 hover:bg-[#08090C] hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </header>
-
-        {/* Main Hero Editorial Split: 7 Columns Narrative + 5 Columns Identity Ledger */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start">
-          <div className="space-y-8 lg:col-span-7">
-            <div className="inline-flex items-center gap-2.5 border border-[#00D9FF]/40 bg-[#0E0E10]/90 px-3.5 py-1.5 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-[#00D9FF]" />
-              <span className="font-mono text-xs font-medium tracking-wider text-[#00D9FF] uppercase">
-                STAFF BACKEND &amp; PLATFORM ENGINEER
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              <h1
-                id="hero-heading"
-                className="max-w-[15ch] font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.06]"
-              >
-                Systems you can trust at <span className="text-[#00D9FF]">2 AM.</span>
-              </h1>
-              <p className="max-w-2xl text-base leading-relaxed text-zinc-300 sm:text-lg">
-                Staff Backend and Platform Engineer focused on reliable backend services,
-                distributed systems, AI infrastructure, and resilient fintech products. The work turns
-                operational constraints into systems with explicit failure boundaries, observable
-                behavior, and deliberate recovery paths.
-              </p>
-            </div>
-
-            {/* High-Glare 44px Minimum Touch Geometry CTA Matrix */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link
-                href="#deployments"
-                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center gap-3 border border-[#00D9FF] bg-[#00D9FF]/15 px-6 py-3 font-sans text-sm font-semibold tracking-normal text-white backdrop-blur-md transition-colors hover:bg-[#00D9FF]/25 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                href="#projects"
+                className="group inline-flex min-h-[48px] min-w-[44px] w-full items-center justify-center gap-3 border border-[#00D9FF] bg-[#00D9FF] px-6 py-3 font-sans text-sm font-semibold text-[#08090C] transition-colors hover:border-[#7AEAFF] hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090C] motion-safe:active:translate-y-px sm:w-auto"
               >
                 <span>Explore selected work</span>
-                <span aria-hidden="true" className="text-[#00D9FF]">
-                  ↗
+                <span
+                  aria-hidden="true"
+                  className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:translate-y-0.5"
+                >
+                  ↓
                 </span>
               </Link>
 
               <Link
                 href="/writing"
-                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center border border-white/15 bg-[#0E0E10]/90 px-6 py-3 font-sans text-sm font-medium tracking-normal text-zinc-200 backdrop-blur-md transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                className="inline-flex min-h-[48px] min-w-[44px] w-full items-center justify-center border border-white/20 bg-[#0E0E10]/90 px-6 py-3 font-sans text-sm font-medium text-zinc-100 transition-colors hover:border-[#00D9FF]/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] sm:w-auto"
               >
                 Read engineering notes
               </Link>
-
-              <a
-                href="https://github.com/sabiscore"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[48px] min-w-[44px] items-center justify-center border border-white/10 bg-[#08090C] px-4 py-3 font-mono text-xs text-zinc-300 transition-colors hover:border-[#00FF66]/40 hover:text-[#00FF66] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FF66]"
-              >
-                SabiScore on GitHub ↗
-              </a>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-6 sm:grid-cols-4">
-              {[
-                { label: 'BACKEND', value: 'Fastify · Python · TypeScript' },
-                { label: 'DATA', value: 'PostgreSQL · Redis · DuckDB' },
-                { label: 'AI SYSTEMS', value: 'Inference · Model pipelines' },
-                { label: 'ENGINEERING', value: 'Fail-closed · Observable · Recoverable' },
-              ].map((stat) => (
-                <div key={stat.label} className="border border-white/10 bg-[#0E0E10]/80 p-3">
-                  <span className="block font-mono text-[10px] tracking-wider text-zinc-400 uppercase">
-                    {stat.label}
-                  </span>
-                  <span className="mt-1 block font-mono text-xs font-semibold leading-5 text-zinc-200">
-                    {stat.value}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {/* Tertiary evidence links */}
+            <ul className="mt-4 flex flex-wrap items-center gap-x-5 font-mono text-xs">
+              <li>
+                <a
+                  href={CV_ASSET_PATH}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                >
+                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">Résumé (PDF)</span>
+                  <span aria-hidden="true" className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5">↗</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                >
+                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">GitHub @Scardubu</span>
+                  <span aria-hidden="true" className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5">↗</span>
+                </a>
+              </li>
+            </ul>
           </div>
 
-          {/* Right Column: Editorial Identity Ledger */}
+          {/* Right column: identity, capability ledger, direct actions */}
           <div id="identity" className="scroll-mt-24 lg:col-span-5">
-            <IdentityCard />
+            <IdentityCard>
+              <CapabilityLedger />
+            </IdentityCard>
           </div>
         </div>
 
-        <div id="architecture-index" className="mt-12 scroll-mt-24">
-          <LiveActivityBar />
-        </div>
-
-        <div id="deployments" className="mt-14 scroll-mt-24 space-y-6">
-          <div className="flex flex-col justify-between gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-end">
-            <div>
-              <span className="font-mono text-xs tracking-widest text-[#00D9FF] uppercase">
-                SELECTED ENGINEERING WORK
-              </span>
-              <h2 className="mt-1 font-display text-2xl font-bold text-white sm:text-3xl">
-                Architecture, constraints, and implementation
-              </h2>
-            </div>
-            <span className="font-mono text-xs text-zinc-400">
-              PUBLIC RECORDS · EVIDENCE BOUNDARIES STATED
-            </span>
+        {/* Cross-project design themes */}
+        <div className="mt-14 border-t border-white/10 pt-8 lg:mt-16">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+            <h2
+              id="design-focus-heading"
+              className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300"
+            >
+              Design focus
+            </h2>
+            <p className="text-sm text-zinc-400">
+              The recurring engineering themes across the project records.
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {FEATURED_PROJECTS.map((deployment) => (
-              <article
-                key={deployment.slug}
-                className="flex flex-col justify-between border border-white/10 bg-[#0E0E10]/90 p-6 backdrop-blur-xl transition-colors duration-200 hover:border-[#00D9FF]/40"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#00D9FF]">
-                      {deployment.evidenceStatus}
-                    </span>
-                    <span className="max-w-[22rem] text-right font-mono text-[10px] leading-4 text-zinc-500">
-                      {deployment.evidenceNote}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="font-display text-xl font-bold text-white">
-                      {deployment.name}
-                    </h3>
-                    <p className="mt-1 font-mono text-xs text-[#00D9FF]">
-                      {deployment.domainRole}
-                    </p>
-                  </div>
-
-                  <p className="text-sm leading-relaxed text-zinc-300">
-                    {deployment.architectureSummary}
-                  </p>
+          <ol
+            aria-labelledby="design-focus-heading"
+            className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {DESIGN_THEMES.map((theme) => (
+              <li key={theme.code} className="flex flex-col bg-[#0E0E10] p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <span aria-hidden="true" className="font-mono text-xs text-[#00D9FF]">
+                    {theme.code}
+                  </span>
+                  <span className="border border-white/10 px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-zinc-400">
+                    {theme.focusTag}
+                  </span>
                 </div>
-
-                <div className="mt-6 space-y-4 border-t border-white/10 pt-4">
-                  <div className="flex flex-wrap gap-1.5">
-                    {deployment.embeddedStack.map((tech) => (
-                      <span
-                        key={tech}
-                        className="border border-white/10 bg-[#08090C] px-2.5 py-1 font-mono text-[11px] text-zinc-200"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <Link
-                    href={`/work/${deployment.slug}`}
-                    className="inline-flex min-h-[44px] w-full items-center justify-between border border-white/10 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-medium text-white transition-colors hover:border-[#00D9FF]/40 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
-                  >
-                    <span>OPEN_CASE_DOSSIER</span>
-                    <span aria-hidden="true">↗</span>
-                  </Link>
-                </div>
-              </article>
+                <h3 className="mt-4 font-display text-base font-semibold leading-snug text-white">
+                  {theme.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-zinc-400">{theme.spec}</p>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </div>
     </section>

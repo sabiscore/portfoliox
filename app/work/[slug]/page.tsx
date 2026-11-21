@@ -80,10 +80,10 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#00D9FF]">
               ENGINEERING CASE STUDY
             </p>
-            <h1 className="mt-4 max-w-[18ch] font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="type-display mt-4 max-w-[18ch] font-display font-bold text-white">
               {title}
             </h1>
-            <p className="mt-5 max-w-[68ch] text-base leading-8 text-zinc-300 sm:text-lg">
+            <p className="type-lede mt-5 max-w-[68ch] text-zinc-300">
               {summary}
             </p>
             {tags.length > 0 ? (
@@ -106,7 +106,7 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
             </article>
 
             <aside className="h-fit border-t border-white/10 pt-6 lg:sticky lg:top-24 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
                 PROJECT INDEX
               </p>
               <nav aria-label="Other engineering case studies" className="mt-4">
@@ -129,7 +129,7 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
               >
                 DISCUSS A SYSTEM
               </Link>
-              <p className="mt-4 text-xs leading-6 text-zinc-500">
+              <p className="mt-4 text-xs leading-6 text-zinc-400">
                 Implementation notes and evidence boundaries are stated in the project record. Private
                 operational artifacts are not presented as public benchmarks.
               </p>

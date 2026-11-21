@@ -20,10 +20,11 @@ test.describe('Current portfolio interactions', () => {
 
     const nav = page.getByRole('navigation', { name: 'Primary system navigation' });
     await expect(nav.getByRole('link', { name: /PROJECTS/i })).toHaveAttribute('href', '/#projects');
-    await expect(nav.getByRole('link', { name: /FAILURE MODES/i })).toHaveAttribute(
+    await expect(nav.getByRole('link', { name: /ENGINEERING/i })).toHaveAttribute(
       'href',
       '/#failure-modes'
     );
+    await expect(nav.getByRole('link', { name: /CONTACT/i })).toHaveAttribute('href', '/#contact');
     await expect(nav.getByRole('link', { name: /WRITING/i })).toHaveAttribute(
       'href',
       '/writing'
@@ -52,32 +53,40 @@ test.describe('Current portfolio interactions', () => {
   test('hero exposes both primary calls to action and the identity ledger', async ({ page }) => {
     await gotoHome(page);
 
-    await expect(page.getByRole('link', { name: /INSPECT_SYSTEM_ARCHITECTURE/i })).toHaveAttribute(
+    const hero = page.locator('section[aria-labelledby="hero-heading"]');
+    await expect(hero.getByRole('link', { name: /Explore selected work/i })).toHaveAttribute(
       'href',
-      '#deployments'
+      '#projects'
     );
-    await expect(page.getByRole('link', { name: /READ_ENGINEERING_MONOGRAPHS/i })).toHaveAttribute(
+    await expect(hero.getByRole('link', { name: /Read engineering notes/i })).toHaveAttribute(
       'href',
       '/writing'
     );
+    await expect(hero).toContainText('Oscar Ndugbu');
     await expect(page.getByLabel('Staff Backend and Platform Engineer profile')).toBeVisible();
-    await expect(page.locator(`a[href="/cv/oscar-ndugbu-resume.pdf"]`).first()).toBeVisible();
+    await expect(page.locator(`a[href="/cv/oscar-ndugbu-resume.pdf"]:visible`).first()).toBeVisible();
   });
 
-  test('architecture index switches project records without claiming live telemetry', async ({ page }) => {
+  test('project secondary links are labelled by what they open', async ({ page }) => {
     await gotoHome(page);
 
-    const index = page.locator('#architecture-index');
-    await expect(
-      index.getByRole('heading', { name: 'Systems, constraints, and implementation choices' })
-    ).toBeVisible();
-    await expect(index).toContainText('not a live production monitor');
+    const projects = page.locator('#projects');
+    const sabiscore = projects.locator('article').filter({ hasText: 'SabiScore' });
+    await expect(sabiscore.getByRole('link', { name: /Live demo/i })).toHaveAttribute(
+      'href',
+      'https://sabiscore.app'
+    );
+    await expect(sabiscore.getByRole('link', { name: /View source/i })).toHaveCount(0);
 
-    const yapNode = index.getByRole('button', { name: /Yap Engine/i });
-    await yapNode.click();
-    await expect(yapNode).toHaveAttribute('aria-pressed', 'true');
-    await expect(index).toContainText('content-addressed inputs');
-    await expect(index).toContainText('No throughput or production latency SLO is claimed here.');
+    const yap = projects.locator('article').filter({ hasText: 'Yap Engine' });
+    await expect(yap.getByRole('link', { name: /Read case study/i })).toHaveAttribute(
+      'href',
+      '/work/yap-engine'
+    );
+    await expect(yap.getByRole('link', { name: /View source/i })).toHaveAttribute(
+      'href',
+      'https://github.com/sabiscore/the-yap-engine'
+    );
   });
 
   test('project cards link to their case-study routes', async ({ page }) => {
@@ -109,7 +118,7 @@ test.describe('Current portfolio interactions', () => {
     await form.locator('#contact-message').fill('short');
     await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
 
-    await expect(form.getByRole('alert')).toContainText('SCHEMA_VALIDATION_ERROR');
+    await expect(form.getByRole('alert')).toContainText('Check the form');
   });
 
   test('contact form displays its acknowledgement after a successful dispatch', async ({
@@ -145,7 +154,7 @@ test.describe('Current portfolio interactions', () => {
     );
     await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
 
-    await expect(form.getByRole('status')).toContainText('ACK_RECEIVED');
+    await expect(form.getByRole('status')).toContainText('Message sent');
   });
 
   test('contact form provides a direct-email fallback when the endpoint fails', async ({
@@ -172,8 +181,8 @@ test.describe('Current portfolio interactions', () => {
     );
     await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
 
-    await expect(form.getByRole('alert')).toContainText('TRANSMISSION_FALLBACK');
-    await expect(page.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
+    await expect(form.getByRole('alert')).toContainText('could not be sent');
+    await expect(page.locator(`#contact a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
   });
 
   test('case study routes render their matching project identity', async ({ page }) => {

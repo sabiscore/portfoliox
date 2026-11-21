@@ -1,6 +1,9 @@
 import type { JSX } from 'react';
 import Link from 'next/link';
 
+import { getWritingPosts } from '@/lib/content';
+import { formatDate } from '@/lib/utils';
+
 interface FailureBoundaryPattern {
   id: string;
   domain: string;
@@ -51,6 +54,59 @@ const FAILURE_BOUNDARY_PATTERNS: readonly FailureBoundaryPattern[] = [
   },
 ];
 
+/** Newest three published notes (content/writing, sorted by date in lib/content). */
+async function LatestNotes(): Promise<JSX.Element | null> {
+  const latestNotes = (await getWritingPosts()).slice(0, 3);
+  if (latestNotes.length === 0) return null;
+
+  return (
+      <div className="border-t border-white/10 pt-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h3
+            id="latest-notes-heading"
+            className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300"
+          >
+            The reasoning, written down
+          </h3>
+          <Link
+            href="/writing"
+            className="group inline-flex min-h-[44px] items-center gap-2 font-mono text-xs uppercase tracking-wider text-[#00D9FF] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+          >
+            <span>All engineering notes</span>
+            <span
+              aria-hidden="true"
+              className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:translate-x-0.5"
+            >
+              →
+            </span>
+          </Link>
+        </div>
+        <ol
+          aria-labelledby="latest-notes-heading"
+          className="mt-4 divide-y divide-white/10 border-y border-white/10"
+        >
+          {latestNotes.map((note) => (
+            <li key={note.slug}>
+              <Link
+                href={`/writing/${note.slug}`}
+                className="group grid gap-1 py-4 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00D9FF] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-baseline sm:gap-6 sm:px-2"
+              >
+                <span className="font-display text-base font-semibold leading-snug text-white group-hover:text-[#00D9FF]">
+                  {note.title}
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
+                  <time dateTime={note.date}>{formatDate(note.date)}</time>
+                  {' · '}
+                  {note.readingTime} min read
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </div>
+  );
+}
+
 export function ProductionPatterns(): JSX.Element {
   return (
     <section
@@ -65,7 +121,7 @@ export function ProductionPatterns(): JSX.Element {
           </p>
           <h2
             id="failure-modes-heading"
-            className="font-display text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl"
+            className="type-section font-display font-bold text-white"
           >
             Failure modes, designed deliberately.
           </h2>
@@ -83,7 +139,7 @@ export function ProductionPatterns(): JSX.Element {
               className="flex min-w-0 flex-col border border-white/10 border-t-2 border-t-[#00D9FF]/60 bg-[#0E0E10] p-5 transition-colors hover:border-[#00D9FF]/35 sm:p-6"
             >
               <div className="flex items-start justify-between gap-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
                   {pattern.domain}
                 </p>
                 <span className="font-mono text-[10px] text-[#00D9FF]">0{index + 1}</span>
@@ -97,21 +153,23 @@ export function ProductionPatterns(): JSX.Element {
               <p className="mt-4 flex-1 text-sm leading-6 text-zinc-300">{pattern.mechanism}</p>
 
               <div className="mt-6 border-t border-white/10 pt-4">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
                   Evidence boundary
                 </p>
                 <p className="mt-2 text-xs leading-5 text-zinc-400">{pattern.evidenceBoundary}</p>
                 <Link
                   href={pattern.href}
-                  className="mt-4 inline-flex min-h-[44px] w-full items-center justify-between border border-white/15 bg-[#08090C] px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                  className="group mt-4 inline-flex min-h-[44px] w-full items-center justify-between border border-white/15 bg-[#08090C] px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
                 >
                   <span>READ {pattern.evidenceRecord}</span>
-                  <span aria-hidden="true" className="text-[#00D9FF]">↗</span>
+                  <span aria-hidden="true" className="text-[#00D9FF] motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5">↗</span>
                 </Link>
               </div>
             </article>
           ))}
         </div>
+
+        <LatestNotes />
       </div>
     </section>
   );

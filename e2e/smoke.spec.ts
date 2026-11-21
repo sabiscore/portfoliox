@@ -90,10 +90,12 @@ test.describe('Production portfolio smoke tests', () => {
     test.skip(!isMobile, 'This test is scoped to the mobile navigation layout.');
     await goto(page);
 
-    const menuButton = page.getByRole('button', { name: 'Open navigation menu' });
+    const menuButton = page.locator('button[aria-controls="mobile-navigation-drawer"]');
+    await expect(menuButton).toHaveAccessibleName('Open navigation menu');
     await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
     await menuButton.click();
     await expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    await expect(menuButton).toHaveAccessibleName('Close navigation menu');
     await expect(page.locator('#mobile-navigation-drawer')).toBeVisible();
 
     await page.getByRole('button', { name: 'Close navigation menu' }).click();
@@ -103,18 +105,16 @@ test.describe('Production portfolio smoke tests', () => {
     );
   });
 
-  test('architecture selection uses an accessible live region without claiming live telemetry', async ({ page }) => {
+  test('project implementation details use a native, keyboard-operable disclosure', async ({ page }) => {
     await goto(page);
 
-    const architectureIndex = page.locator('#architecture-index');
-    const announcement = architectureIndex.locator('[aria-live="polite"][aria-atomic="true"]');
-    await expect(announcement).toBeVisible();
-    await expect(architectureIndex).toContainText('not a live production monitor');
-
-    const yapEngine = architectureIndex.getByRole('button', { name: /Yap Engine/i });
-    await yapEngine.click();
-    await expect(yapEngine).toHaveAttribute('aria-pressed', 'true');
-    await expect(announcement).toContainText('content-addressed inputs');
+    const yapCard = page.locator('#projects article').filter({ hasText: 'Yap Engine' });
+    const disclosure = yapCard.locator('details');
+    await expect(disclosure).not.toHaveAttribute('open', '');
+    await yapCard.locator('summary').focus();
+    await page.keyboard.press('Enter');
+    await expect(disclosure).toHaveAttribute('open', '');
+    await expect(yapCard).toContainText('Checkpointed orchestration preserves intermediate stage results');
   });
 
   test('representative routes have no serious or critical accessibility violations', async ({
@@ -138,12 +138,16 @@ test.describe('Production portfolio smoke tests', () => {
     }
   });
 
-  test('main landmark and primary architecture sections are present', async ({ page }) => {
+  test('main landmark and primary sections are present without duplicate project indexes', async ({ page }) => {
     await goto(page);
 
     await expect(page.locator('main#main-content')).toHaveCount(1);
-    await expect(page.locator('#architecture-index')).toBeAttached();
-    await expect(page.locator('#deployments')).toBeAttached();
+    await expect(page.locator('#projects')).toBeAttached();
+    await expect(page.locator('#failure-modes')).toBeAttached();
+    await expect(page.locator('#contact')).toBeAttached();
+    // The hero no longer repeats the project records shown in section 01.
+    await expect(page.locator('#architecture-index')).toHaveCount(0);
+    await expect(page.locator('#deployments')).toHaveCount(0);
   });
 
   test('contact section exposes the canonical email and labelled brief form', async ({ page }) => {
@@ -153,8 +157,8 @@ test.describe('Production portfolio smoke tests', () => {
     await expect(section).toBeAttached();
     await expect(section.getByRole('heading', { name: 'Discuss a system.' })).toBeVisible();
     await expect(section.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
-    await expect(section.locator('#contact-name')).toHaveAccessibleName(/NAME \/\/ IDENTIFIER/i);
-    await expect(section.locator('#contact-email')).toHaveAccessibleName(/RETURN ENDPOINT/i);
+    await expect(section.locator('#contact-name')).toHaveAccessibleName(/^NAME/i);
+    await expect(section.locator('#contact-email')).toHaveAccessibleName(/^EMAIL/i);
     await expect(section.locator('#contact-inquiry-type')).toHaveAccessibleName(/ENGAGEMENT TYPE/i);
     await expect(section.locator('#contact-timeline')).toHaveAccessibleName(/TIMELINE/i);
     await expect(section.locator('#contact-scope')).toHaveAccessibleName(/SYSTEM DOMAIN/i);
@@ -164,7 +168,7 @@ test.describe('Production portfolio smoke tests', () => {
 
   test('resume link points to the canonical PDF asset', async ({ page }) => {
     await goto(page);
-    const resumeLink = page.locator('a[href="/cv/oscar-ndugbu-resume.pdf"]').first();
+    const resumeLink = page.locator('a[href="/cv/oscar-ndugbu-resume.pdf"]:visible').first();
     await expect(resumeLink).toBeVisible();
     await expect(resumeLink).toHaveAttribute('target', '_blank');
   });
@@ -244,7 +248,7 @@ test.describe('Production portfolio smoke tests', () => {
   test('footer renders its current operating statement and external destinations', async ({ page }) => {
     await goto(page);
 
-    const footer = page.locator('footer');
+    const footer = page.getByRole('contentinfo');
     await expect(footer).toBeVisible();
     await expect(footer).toContainText(
       'BACKEND SYSTEMS · PLATFORM INFRASTRUCTURE · AI ENGINEERING'

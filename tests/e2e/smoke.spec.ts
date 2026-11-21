@@ -11,11 +11,13 @@ test('hero is visible above the fold', async ({ page }) => {
   await expect(
     page.getByRole('heading', {
       level: 1,
-      name: /The system has to work at 2am/i,
+      name: /Systems you can trust at 2\s*AM/i,
     })
   ).toBeVisible();
   await expect(page.getByText('Oscar Ndugbu', { exact: true }).first()).toBeVisible();
-  await expect(page.locator('#hero')).not.toContainText(/Updated June 2026/i);
+  await expect(page.locator('section[aria-labelledby="hero-heading"]')).not.toContainText(
+    /Updated June 2026/i
+  );
 });
 
 test('mobile viewport has no horizontal overflow', async ({ page, browserName }) => {

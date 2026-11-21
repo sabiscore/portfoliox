@@ -48,7 +48,7 @@ export function ContactSection(): React.JSX.Element {
   const [formState, setFormState] = useState<InquiryPayload>(INITIAL_PAYLOAD);
   const [status, setStatus] = useState<'IDLE' | 'SUBMITTING' | 'SENT' | 'ERROR'>('IDLE');
   const [errorMessage, setErrorMessage] = useState('');
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const directEmail = CONTACT_EMAIL;
@@ -63,11 +63,12 @@ export function ContactSection(): React.JSX.Element {
   const handleCopyEmail = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(directEmail);
-      setCopiedEmail(true);
+      setCopyState('copied');
       if (resetTimer.current) clearTimeout(resetTimer.current);
-      resetTimer.current = setTimeout(() => setCopiedEmail(false), 2500);
+      resetTimer.current = setTimeout(() => setCopyState('idle'), 2500);
     } catch {
-      setCopiedEmail(false);
+      // Clipboard access is blocked in some embedded browsers; the address stays visible above.
+      setCopyState('failed');
     }
   }, [directEmail]);
 
@@ -92,7 +93,7 @@ export function ContactSection(): React.JSX.Element {
       const firstIssue = parsed.error.issues[0];
       setStatus('ERROR');
       setErrorMessage(
-        `SCHEMA_VALIDATION_ERROR: ${firstIssue?.message ?? 'Complete all required fields.'}`
+        `Check the form: ${firstIssue?.message ?? 'Complete all required fields.'}`
       );
       return;
     }
@@ -115,7 +116,7 @@ export function ContactSection(): React.JSX.Element {
     } catch {
       setStatus('ERROR');
       setErrorMessage(
-        'TRANSMISSION_FALLBACK: The contact endpoint is unavailable. Use the direct email address below to send the brief.'
+        `The message could not be sent right now. Email ${directEmail} directly and the brief will arrive the same way.`
       );
     }
   };
@@ -137,7 +138,7 @@ export function ContactSection(): React.JSX.Element {
             </p>
             <h2
               id="contact-section-heading"
-              className="font-display text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl"
+              className="type-section font-display font-bold text-white"
             >
               Discuss a system.
             </h2>
@@ -152,10 +153,10 @@ export function ContactSection(): React.JSX.Element {
               <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
                 DIRECT CONTACT
               </span>
-              <span className="font-mono text-[11px] text-zinc-500">LAGOS · UTC+1</span>
+              <span className="font-mono text-[11px] text-zinc-400">LAGOS · UTC+1</span>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">
                 Email
               </p>
               <p className="mt-1 break-all font-mono text-sm font-semibold text-white sm:text-base">
@@ -168,17 +169,21 @@ export function ContactSection(): React.JSX.Element {
                 onClick={() => void handleCopyEmail()}
                 className="inline-flex min-h-[44px] flex-1 items-center justify-center border border-white/20 bg-[#08090C] px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
               >
-                {copiedEmail ? 'COPIED TO CLIPBOARD ✓' : 'COPY ADDRESS'}
+                {copyState === 'copied' ? 'COPIED TO CLIPBOARD ✓' : 'COPY ADDRESS'}
               </button>
               <a
                 href={`mailto:${directEmail}`}
                 className="inline-flex min-h-[44px] items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-[#00D9FF] transition-colors hover:bg-[#00D9FF]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
               >
-                MAIL CLIENT ↗
+                EMAIL DIRECTLY ↗
               </a>
             </div>
-            <p role="status" aria-live="polite" aria-atomic="true" className="min-h-4 text-xs text-zinc-500">
-              {copiedEmail ? 'Email address copied.' : ''}
+            <p role="status" aria-live="polite" aria-atomic="true" className="min-h-4 text-xs text-zinc-400">
+              {copyState === 'copied'
+                ? 'Email address copied.'
+                : copyState === 'failed'
+                  ? 'Copy is unavailable in this browser. Select the address above or use Email directly.'
+                  : ''}
             </p>
           </div>
         </div>
@@ -188,7 +193,7 @@ export function ContactSection(): React.JSX.Element {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="contact-name" className="block font-mono text-xs uppercase tracking-wider text-zinc-300">
-                  Name // Identifier *
+                  Name *
                 </label>
                 <input
                   id="contact-name"
@@ -205,7 +210,7 @@ export function ContactSection(): React.JSX.Element {
               </div>
               <div className="space-y-2">
                 <label htmlFor="contact-email" className="block font-mono text-xs uppercase tracking-wider text-zinc-300">
-                  Return endpoint (email) *
+                  Email *
                 </label>
                 <input
                   id="contact-email"
@@ -299,9 +304,10 @@ export function ContactSection(): React.JSX.Element {
                 value={formState.stakes}
                 onChange={(event) => updateField('stakes', event.target.value)}
                 placeholder="What is at risk if this remains unresolved?"
+                aria-describedby="contact-stakes-hint"
                 className={fieldClass}
               />
-              <p className="text-xs leading-5 text-zinc-500">
+              <p id="contact-stakes-hint" className="text-xs leading-5 text-zinc-400">
                 A sentence is enough. This helps establish scope before the first conversation.
               </p>
             </div>
@@ -332,7 +338,7 @@ export function ContactSection(): React.JSX.Element {
 
             {status === 'SENT' ? (
               <div role="status" className="border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-3 font-mono text-xs leading-5 text-[#00D9FF]">
-                ACK_RECEIVED: The inquiry was accepted by the contact service.
+                Message sent. The inquiry was accepted by the contact service.
               </div>
             ) : null}
 

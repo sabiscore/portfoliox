@@ -53,7 +53,7 @@ describe('Current portfolio geometry and accessibility contracts', () => {
     // Locate the real CTA elements by their public destinations. This keeps
     // the geometry contract coupled to the rendered links rather than
     // historical implementation-marker names.
-    const inspectIndex = hero.indexOf('href="#deployments"');
+    const inspectIndex = hero.indexOf('href="#projects"');
     const inspectStart = hero.lastIndexOf('<Link', inspectIndex);
     const inspectEnd = hero.indexOf('</Link>', inspectIndex);
     const inspectCta =
@@ -69,7 +69,7 @@ describe('Current portfolio geometry and accessibility contracts', () => {
         ? hero.slice(writingStart, writingEnd)
         : '';
 
-    expect(inspectCta).toContain('href="#deployments"');
+    expect(inspectCta).toContain('href="#projects"');
     expect(inspectCta).toContain('min-h-[48px]');
     expect(inspectCta).toContain('min-w-[44px]');
     expect(writingCta).toContain('href="/writing"');

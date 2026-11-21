@@ -131,8 +131,8 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
         tabIndex={-1}
         className="min-h-screen bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
       >
-        <section className="pt-[calc(var(--nav-height,72px)+3rem)] pb-20">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="pt-10 pb-20 sm:pt-14">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{
@@ -150,22 +150,22 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
             {/* Strict 44px Minimum Touch Geometry Back Link */}
             <Link
               href="/writing"
-              className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 border border-white/10 bg-[#0E0E10]/90 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-[#00D9FF] uppercase backdrop-blur-md transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 border border-white/10 bg-[#0E0E10]/90 px-4 py-2.5 font-mono text-xs font-medium tracking-wider text-[#00D9FF] uppercase backdrop-blur-md transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
             >
               <span aria-hidden="true">←</span>
-              <span>BACK_TO_WRITING</span>
+              <span>BACK TO WRITING</span>
             </Link>
 
             <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
               <div className="min-w-0">
                 <header className="mb-10 max-w-[65ch] border-b border-white/10 pb-8">
                   <StaticSectionIntro
-                    eyebrowLabel="Engineering Monograph"
+                    eyebrowLabel="Engineering Note"
                     headingId="writing-article-heading"
                     title={<>{post.frontmatter.title}</>}
                     description={post.frontmatter.summary}
-                    titleClassName="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl mt-2"
-                    descriptionClassName="text-zinc-300 mt-4 text-base sm:text-lg leading-relaxed"
+                    titleClassName="type-section mt-3 font-display font-bold text-white"
+                    descriptionClassName="type-lede mt-4 text-zinc-300"
                   />
                   <div className="mt-6 flex flex-wrap items-center gap-3 font-mono text-xs text-zinc-400">
                     <time dateTime={post.frontmatter.date} className="text-[#00D9FF]">
@@ -180,7 +180,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                   </div>
                 </header>
 
-                <article className="prose prose-invert max-w-none pb-16">
+                <article className="prose prose-invert max-w-[72ch] pb-16 prose-headings:font-display prose-headings:tracking-tight prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-3 prose-h2:text-white prose-h3:text-[#00D9FF] prose-p:leading-8 prose-p:text-zinc-300 prose-li:text-zinc-300 prose-strong:text-white prose-a:text-[#00D9FF] prose-a:underline-offset-4 hover:prose-a:text-white prose-code:before:content-none prose-code:after:content-none">
                   {post.content}
                 </article>
 
@@ -190,13 +190,13 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                     className="mb-16 border border-white/10 bg-[#0E0E10]/90 p-6 backdrop-blur-xl"
                   >
                     <span className="font-mono text-xs tracking-widest text-[#00D9FF] uppercase">
-                      CONTINUE_READING // RELATED_MONOGRAPHS
+                      CONTINUE READING // RELATED NOTES
                     </span>
                     <h2
                       id="related-writing-heading"
                       className="mt-2 font-display text-2xl font-bold text-white"
                     >
-                      Related Architectural Analyses
+                      Related Engineering Notes
                     </h2>
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
                       {relatedPosts.map((entry: RankedWritingPost) => (
@@ -220,10 +220,15 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
 
                           <Link
                             href={`/writing/${entry.slug}`}
-                            className="mt-5 inline-flex min-h-[44px] items-center justify-between border border-white/10 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs font-medium text-[#00D9FF] transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+                            className="group mt-5 inline-flex min-h-[44px] items-center justify-between border border-white/10 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs font-medium text-[#00D9FF] transition-colors hover:border-[#00D9FF]/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
                           >
-                            <span>READ_ARTICLE</span>
-                            <span aria-hidden="true">↗</span>
+                            <span>READ ARTICLE</span>
+                            <span
+                              aria-hidden="true"
+                              className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+                            >
+                              ↗
+                            </span>
                           </Link>
                         </article>
                       ))}
@@ -233,10 +238,10 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
               </div>
 
               {/* Right Telemetry & Metadata Sidebar */}
-              <aside className="space-y-4 xl:sticky xl:top-[calc(var(--nav-height,72px)+2rem)]">
+              <aside className="space-y-4 xl:sticky xl:top-24">
                 <div className="border border-white/10 bg-[#0E0E10]/90 p-5 backdrop-blur-xl">
                   <span className="font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase">
-                    TELEMETRY // AT_A_GLANCE
+                    AT A GLANCE
                   </span>
                   <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
                     {articleMeta.map((item: { label: string; value: string }) => (
@@ -253,7 +258,7 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
                 {tags.length > 0 ? (
                   <div className="border border-white/10 bg-[#0E0E10]/90 p-5 backdrop-blur-xl">
                     <span className="font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase">
-                      INDEXED_TOPICS
+                      TOPICS
                     </span>
                     <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-4">
                       {tags.map((tag: string) => (
@@ -270,9 +275,9 @@ export default async function WritingPostPage({ params }: WritingPageProps) {
 
                 <Link
                   href="/writing"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase transition-colors hover:bg-[#00D9FF]/20 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00D9FF]"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-2.5 font-mono text-xs font-semibold tracking-wider text-[#00D9FF] uppercase transition-colors hover:bg-[#00D9FF]/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
                 >
-                  BROWSE_ALL_WRITING
+                  ALL WRITING
                 </Link>
               </aside>
             </div>

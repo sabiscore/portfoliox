@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { ArchDecision } from '@/components/ArchDecision';
 import { BrandWordmark } from '@/components/BrandWordmark';
 import { isQualifyingCommitMessage } from '@/components/Liveactivitybar';
+import { STATIC_PALETTE_ITEMS, getProjectPaletteCommand } from '@/constants/palette';
 import { CV_ASSET_PATH } from '@/lib/config';
 import { formatDate } from '@/lib/utils';
 
@@ -43,9 +44,10 @@ describe('Production refinement P0/P1 contracts', () => {
     ];
 
     for (const message of lowSignalMessages) {
-      expect(isQualifyingCommitMessage(message), `Expected low-signal rejection for "${String(message)}"`).toBe(
-        false
-      );
+      expect(
+        isQualifyingCommitMessage(message),
+        `Expected low-signal rejection for "${String(message)}"`
+      ).toBe(false);
     }
 
     const qualifyingMessages = [
@@ -55,7 +57,10 @@ describe('Production refinement P0/P1 contracts', () => {
     ];
 
     for (const message of qualifyingMessages) {
-      expect(isQualifyingCommitMessage(message), `Expected acceptance for "${message}"`).toBe(true);
+      expect(
+        isQualifyingCommitMessage(message),
+        `Expected acceptance for "${message}"`
+      ).toBe(true);
     }
   });
 
@@ -107,6 +112,7 @@ describe('Production refinement P0/P1 contracts', () => {
       'components/ContactSection.tsx',
       'components/Footer.tsx',
       'components/CommandPalette.tsx',
+      'constants/palette.ts',
     ]) {
       const source = read(file);
       expect(source, `${file} should import CV_ASSET_PATH`).toContain('CV_ASSET_PATH');
@@ -147,6 +153,42 @@ describe('Production refinement P0/P1 contracts', () => {
     expect(projects).toContain('sm:flex-row sm:flex-wrap sm:items-center');
     expect(projects).toContain('min-h-11 w-full');
     expect(projects).toContain('sm:w-auto');
-    expect(projects).toContain('grid-cols-1 gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3');
+    expect(projects).toContain(
+      'grid-cols-1 gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3'
+    );
+  });
+
+  it('enforces token-only Tailwind styling and primary/secondary CTA hierarchy on Hero and IdentityCard', () => {
+    const upgradedFiles = [
+      'components/HeroSection.tsx',
+      'components/IdentityCard.tsx',
+      'components/IdentityCardMotion.tsx',
+      'components/identityCardStyles.ts',
+      'components/CopyEmail.tsx',
+      'components/cinematic/HeroPortraitShader.tsx',
+    ];
+    const arbitraryUtilityPattern = /\b(?:bg|text|border|min-h|min-w|max-w|grid-cols|aspect|tracking|z)-\[[^\]]+\]/;
+
+    for (const file of upgradedFiles) {
+      const source = read(file);
+      expect(source, `${file} must not use arbitrary Tailwind bracket tokens`).not.toMatch(
+        arbitraryUtilityPattern
+      );
+    }
+
+    const identity = read('components/IdentityCard.tsx');
+    expect(identity).toContain('<CopyEmail');
+    expect(identity).toContain('variant="primary"');
+    expect(identity).toContain('oscar-headshot.jpg');
+    expect(identity).toContain('identity-portrait-scrim');
+  });
+
+  it('keeps command palette work routes, identity anchor, and canonical CV entry synchronized', () => {
+    expect(getProjectPaletteCommand('yap-engine')?.href).toBe('/work/yap-engine');
+    expect(getProjectPaletteCommand('swarmxq')?.href).toBe('/work/swarmxq');
+    expect(getProjectPaletteCommand('sabiscore')?.href).toBe('/work/sabiscore');
+    expect(getProjectPaletteCommand('taxbridge')?.href).toBe('/work/taxbridge');
+    expect(STATIC_PALETTE_ITEMS.some((item) => item.href === '/#identity')).toBe(true);
+    expect(STATIC_PALETTE_ITEMS.some((item) => item.href === CV_ASSET_PATH)).toBe(true);
   });
 });

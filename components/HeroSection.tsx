@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { IdentityCard } from '@/components/IdentityCard';
+import { IdentityCardMotion } from '@/components/IdentityCardMotion';
 import { CV_ASSET_PATH } from '@/lib/config';
 
 // Canonical public profiles (verified against structured data and repository records).
@@ -16,7 +17,7 @@ interface CapabilityRow {
 const CAPABILITY_LEDGER: readonly CapabilityRow[] = [
   { label: 'Backend', terms: ['Fastify', 'Python', 'TypeScript'] },
   { label: 'Data', terms: ['PostgreSQL', 'Redis', 'DuckDB'] },
-  { label: 'AI systems', terms: ['Inference', 'Model pipelines'] },
+  { label: 'AI systems', terms: ['Local GGUF', 'Inference', 'Model pipelines'] },
   { label: 'Engineering', terms: ['Fail-closed', 'Observable', 'Recoverable'] },
 ] as const;
 
@@ -58,14 +59,14 @@ function CapabilityLedger(): React.JSX.Element {
   return (
     <dl className="grid grid-cols-2 gap-px border border-white/10 bg-white/10">
       {CAPABILITY_LEDGER.map((row) => (
-        <div key={row.label} className="bg-[#08090C] p-3.5">
-          <dt className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+        <div key={row.label} className="flex flex-col bg-obsidian-base p-3.5 sm:p-4">
+          <dt className="font-mono text-2xs font-medium uppercase tracking-kicker text-zinc-400">
             {row.label}
           </dt>
           {row.terms.map((term, index) => (
             <dd
               key={term}
-              className={`font-mono text-xs font-semibold leading-5 text-zinc-100 ${index === 0 ? 'mt-1.5' : ''}`}
+              className={`font-mono text-xs font-semibold leading-5 text-zinc-100 ${index === 0 ? 'mt-2' : ''}`}
             >
               {term}
             </dd>
@@ -80,35 +81,35 @@ export function HeroSection(): React.JSX.Element {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative w-full overflow-hidden border-b border-white/10 bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
+      className="relative w-full overflow-hidden border-b border-white/10 bg-obsidian-base text-white selection:bg-accent-cyan/20 selection:text-accent-cyan"
     >
       {/* 1px coordinate grid + single low-intensity radial wash */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px]"
+        className="hero-grid-overlay pointer-events-none absolute inset-0"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_circle_at_20%_15%,rgba(0,217,255,0.06),transparent_75%)]"
+        className="hero-radial-wash pointer-events-none absolute inset-0"
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-10 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:px-8 lg:pt-20">
+      <div className="relative z-10 mx-auto max-w-hero px-4 pt-10 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:px-8 lg:pt-20">
         {/* Editorial split: 7 columns narrative + 5 columns identity ledger */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
           <div className="lg:col-span-7">
-            <p className="inline-flex items-center gap-2.5 border border-[#00D9FF]/40 bg-[#0E0E10]/90 px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-[#00D9FF]">
-              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#00D9FF]" />
+            <p className="inline-flex items-center gap-2.5 border border-accent-cyan/40 bg-obsidian-surface/90 px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-accent-cyan">
+              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent-cyan" />
               STAFF BACKEND &amp; PLATFORM ENGINEER
             </p>
 
             <h1
               id="hero-heading"
-              className="type-display mt-6 max-w-[15ch] font-display font-bold text-white"
+              className="type-display mt-6 max-w-heading font-display font-bold text-white"
             >
-              Systems you can trust at <span className="text-[#00D9FF]">2&nbsp;AM.</span>
+              Systems you can trust at <span className="text-accent-cyan">2&nbsp;AM.</span>
             </h1>
 
-            <p className="type-lede mt-6 max-w-[60ch] text-zinc-300">
+            <p className="type-lede mt-6 max-w-prose text-zinc-300">
               <strong className="font-semibold text-white">Oscar Ndugbu</strong> builds backend
               services, data platforms, AI infrastructure, and fintech systems with explicit
               failure boundaries, observable behavior, and deliberate recovery paths.
@@ -118,7 +119,7 @@ export function HeroSection(): React.JSX.Element {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 href="#projects"
-                className="group inline-flex min-h-[48px] min-w-[44px] w-full items-center justify-center gap-3 border border-[#00D9FF] bg-[#00D9FF] px-6 py-3 font-sans text-sm font-semibold text-[#08090C] transition-colors hover:border-[#7AEAFF] hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090C] motion-safe:active:translate-y-px sm:w-auto"
+                className="group inline-flex min-h-cta min-w-touch w-full items-center justify-center gap-3 border border-accent-cyan bg-accent-cyan px-6 py-3 font-sans text-sm font-semibold text-obsidian-base transition-colors hover:border-accent-cyanHover hover:bg-accent-cyanHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-base motion-safe:active:translate-y-px sm:w-auto"
               >
                 <span>Explore selected work</span>
                 <span
@@ -131,7 +132,7 @@ export function HeroSection(): React.JSX.Element {
 
               <Link
                 href="/writing"
-                className="inline-flex min-h-[48px] min-w-[44px] w-full items-center justify-center border border-white/20 bg-[#0E0E10]/90 px-6 py-3 font-sans text-sm font-medium text-zinc-100 transition-colors hover:border-[#00D9FF]/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] sm:w-auto"
+                className="inline-flex min-h-cta min-w-touch w-full items-center justify-center border border-white/20 bg-obsidian-surface/90 px-6 py-3 font-sans text-sm font-medium text-zinc-100 transition-colors hover:border-accent-cyan/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan sm:w-auto"
               >
                 Read engineering notes
               </Link>
@@ -144,9 +145,9 @@ export function HeroSection(): React.JSX.Element {
                   href={CV_ASSET_PATH}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                  className="group inline-flex min-h-touch items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
                 >
-                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">
+                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-accent-cyan">
                     Résumé (PDF)
                   </span>
                   <span
@@ -162,9 +163,9 @@ export function HeroSection(): React.JSX.Element {
                   href={GITHUB_PROFILE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                  className="group inline-flex min-h-touch items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
                 >
-                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">
+                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-accent-cyan">
                     GitHub @Scardubu
                   </span>
                   <span
@@ -180,9 +181,9 @@ export function HeroSection(): React.JSX.Element {
                   href={LINKEDIN_PROFILE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex min-h-[44px] items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                  className="group inline-flex min-h-touch items-center gap-1.5 px-1 text-zinc-300 transition-colors hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
                 >
-                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-[#00D9FF]">
+                  <span className="underline decoration-white/25 underline-offset-4 group-hover:decoration-accent-cyan">
                     LinkedIn
                   </span>
                   <span
@@ -198,9 +199,11 @@ export function HeroSection(): React.JSX.Element {
 
           {/* Right column: structured identity ledger (no repeated bio prose) */}
           <div id="identity" className="scroll-mt-24 lg:col-span-5">
-            <IdentityCard>
-              <CapabilityLedger />
-            </IdentityCard>
+            <IdentityCardMotion>
+              <IdentityCard>
+                <CapabilityLedger />
+              </IdentityCard>
+            </IdentityCardMotion>
           </div>
         </div>
 
@@ -209,7 +212,7 @@ export function HeroSection(): React.JSX.Element {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
             <h2
               id="design-focus-heading"
-              className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300"
+              className="font-mono text-xs font-semibold uppercase tracking-section text-zinc-300"
             >
               Design focus
             </h2>
@@ -222,12 +225,12 @@ export function HeroSection(): React.JSX.Element {
             className="mt-6 grid grid-cols-1 gap-px border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4"
           >
             {DESIGN_THEMES.map((theme) => (
-              <li key={theme.code} className="flex flex-col bg-[#0E0E10] p-5">
+              <li key={theme.code} className="flex flex-col bg-obsidian-surface p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <span aria-hidden="true" className="font-mono text-xs text-[#00D9FF]">
+                  <span aria-hidden="true" className="font-mono text-xs text-accent-cyan">
                     {theme.code}
                   </span>
-                  <span className="border border-white/10 px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-zinc-400">
+                  <span className="border border-white/10 bg-obsidian-base px-1.5 py-0.5 font-mono text-2xs tracking-wide text-zinc-400">
                     {theme.focusTag}
                   </span>
                 </div>

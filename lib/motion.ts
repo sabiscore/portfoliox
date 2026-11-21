@@ -14,6 +14,13 @@ export const SPRING_SNAPPY: Transition = {
   mass: 0.8,
 };
 
+export const SPRING_CRISP: Transition = {
+  type: 'spring',
+  stiffness: 340,
+  damping: 28,
+  mass: 0.75,
+};
+
 export const FADE_UP_VARIANTS: Variants = {
   hidden: {
     opacity: 0,
@@ -30,6 +37,19 @@ export const FADE_UP_VARIANTS: Variants = {
     transition: {
       duration: 0.18,
     },
+  },
+};
+
+export const IDENTITY_CARD_VARIANTS: Variants = {
+  rest: {
+    opacity: 1,
+    y: 0,
+    transition: SPRING_CRISP,
+  },
+  active: {
+    opacity: 1,
+    y: 0,
+    transition: SPRING_CRISP,
   },
 };
 
@@ -53,7 +73,7 @@ export function ensureTransition(transition?: Transition): Transition | undefine
     ('hidden' in transition || 'visible' in transition || 'exit' in transition)
   ) {
     console.warn(
-      '[motion] Invalid transition object received. Variants were passed into transition.'
+      'motion: Invalid transition object received. Variants were passed into transition.'
     );
 
     return SPRING_SMOOTH;

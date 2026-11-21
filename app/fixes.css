@@ -1,23 +1,31 @@
 /*
  * Obsidian Nocturne v2 — Structural Override Normalization
- * Neutralizes legacy radial washes, drop-shadows, and colliding FAB overlays.
+ * Neutralizes legacy radial washes, drop-shadows, and colliding FAB overlays
+ * while preserving the calibrated Identity Card hairline specular highlights.
  */
 
 html,
 body {
   background-color: #08090C;
-  color: #F3F4F6;
+  color: #FFFFFF;
   overflow-x: hidden;
 }
 
-/* Enforce crisp 1px borders and eliminate legacy soft shadows */
+/* Enforce crisp 1px borders and eliminate legacy soft shadows on generic cards */
 .glass-card,
 .liquid-glass,
 .surface-card {
   background-color: #0E0E10;
-  border: 1px solid #1F222A;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: none;
   backdrop-filter: none;
+}
+
+/* Prevent horizontal bleed inside narrow 375px viewports on identity and ledger blocks */
+#identity,
+.identity-card-shell {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* Hide any legacy floating mail FAB that collides with mobile cards */

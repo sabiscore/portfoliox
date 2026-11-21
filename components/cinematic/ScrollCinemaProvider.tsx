@@ -334,9 +334,11 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
     };
 
     const reducedMotionAtBoot = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointerAtBoot = window.matchMedia('(pointer: fine)').matches;
     const coarsePointerAtBoot = window.matchMedia('(pointer: coarse)').matches;
     const compactViewportAtBoot = window.matchMedia('(max-width: 767px)').matches;
-    const touchAtBoot = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    const touchOnlyAtBoot =
+      !finePointerAtBoot && (navigator.maxTouchPoints > 0 || 'ontouchstart' in window);
 
     if (
       reducedMotion ||
@@ -344,7 +346,7 @@ export function ScrollCinemaProvider({ children }: Readonly<{ children: ReactNod
       isTouchDevice ||
       coarsePointerAtBoot ||
       compactViewportAtBoot ||
-      touchAtBoot
+      touchOnlyAtBoot
     ) {
       if (lenisRef.current) {
         try {

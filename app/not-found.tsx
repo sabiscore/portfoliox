@@ -1,38 +1,51 @@
-import React from "react";
-import Link from "next/link";
-import { Terminal, ArrowLeft } from "lucide-react";
+import React from 'react';
+import Link from 'next/link';
 
-export default function NotFoundPage() {
+import { Footer } from '@/components/Footer';
+import { Navbar } from '@/components/Navbar';
+
+export default function NotFoundPage(): React.JSX.Element {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-obsidian-base px-4 py-12 text-obsidian-text">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-6">
-        <div
-          className="absolute inset-x-0 top-0 h-px bg-illuminate-emerald"
-          aria-hidden="true"
-        />
+    <div className="flex min-h-screen flex-col bg-[#08090C] text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]">
+      <Navbar />
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex flex-1 items-center justify-center px-4 py-16 sm:px-6 lg:px-8"
+      >
+        <div className="w-full max-w-lg border border-white/10 border-t-2 border-t-[#00D9FF]/60 bg-[#0E0E10] p-6 sm:p-8">
+          <p className="inline-flex items-center gap-2 border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#00D9FF]">
+            HTTP 404 // ROUTE UNMAPPED
+          </p>
 
-        <div className="mb-4 inline-flex items-center gap-2 rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1 font-mono text-micro text-accent-emerald">
-          <Terminal className="h-3.5 w-3.5" />
-          <span>HTTP 404 // ROUTE UNMAPPED</span>
+          <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            Requested page not found.
+          </h1>
+
+          <p className="mt-3 text-sm leading-6 text-zinc-300">
+            This address does not match an active case study, engineering note, or portfolio
+            section.
+          </p>
+
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 bg-[#00D9FF] px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[#08090C] transition-colors hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E10]"
+            >
+              <span aria-hidden="true">←</span>
+              <span>Back to portfolio</span>
+            </Link>
+
+            <Link
+              href="/writing"
+              className="inline-flex min-h-[48px] items-center justify-center border border-white/20 bg-[#08090C] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+            >
+              Engineering notes
+            </Link>
+          </div>
         </div>
-
-        <h1 className="mb-2 font-sans text-2xl font-bold tracking-tight text-obsidian-text">
-          Requested specification not found.
-        </h1>
-
-        <p className="mb-6 font-sans text-sm leading-relaxed text-obsidian-muted">
-          The URI does not match any active case study, architectural pattern,
-          or engineering guide in the ledger.
-        </p>
-
-        <Link
-          href="/"
-          className="inline-flex min-h-touch w-full items-center justify-center gap-2 rounded-lg border border-accent-emerald bg-accent-emerald px-5 font-sans text-sm font-semibold text-obsidian-base transition-colors hover:bg-accent-cyan hover:border-accent-cyan"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Return to primary portfolio</span>
-        </Link>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

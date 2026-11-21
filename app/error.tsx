@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import { ShieldAlert, RotateCcw, Home } from "lucide-react";
-import Link from "next/link";
+import React, { useEffect } from 'react';
+import Link from 'next/link';
+
+import { CONTACT_EMAIL } from '@/lib/config';
 
 export default function GlobalErrorBoundary({
   error,
@@ -10,58 +11,64 @@ export default function GlobalErrorBoundary({
 }: {
   error: Error & { digest?: string };
   reset: () => void;
-}) {
+}): React.JSX.Element {
   useEffect(() => {
-    console.error("[FAIL-CLOSED BOUNDARY]:", error);
+    console.error('[FAIL-CLOSED BOUNDARY]:', error);
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-obsidian-base px-4 py-12 text-obsidian-text">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-obsidian-border bg-obsidian-surface p-6">
-        <div
-          className="absolute inset-x-0 top-0 h-px bg-illuminate-cyan"
-          aria-hidden="true"
-        />
-
-        <div className="mb-4 inline-flex items-center gap-2 rounded border border-obsidian-border bg-obsidian-elevated px-2.5 py-1 font-mono text-micro text-accent-cyan">
-          <ShieldAlert className="h-3.5 w-3.5" />
-          <span>RUNTIME FAULT ISOLATED</span>
-        </div>
-
-        <h1 className="mb-2 font-sans text-2xl font-bold tracking-tight text-obsidian-text">
-          Subsystem boundary tripped.
-        </h1>
-
-        <p className="mb-4 font-sans text-sm leading-relaxed text-obsidian-muted">
-          The view encountered an unexpected state and failed closed to preserve
-          session integrity.
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-screen items-center justify-center bg-[#08090C] px-4 py-16 text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
+    >
+      <div className="w-full max-w-lg border border-white/10 border-t-2 border-t-[#00D9FF]/60 bg-[#0E0E10] p-6 sm:p-8">
+        <p className="inline-flex items-center gap-2 border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#00D9FF]">
+          RUNTIME FAULT ISOLATED
         </p>
 
-        {error?.digest && (
-          <div className="mb-6 rounded-lg border border-obsidian-border bg-obsidian-base p-3 font-mono text-micro text-obsidian-dim">
-            DIGEST: <span className="text-obsidian-text">{error.digest}</span>
-          </div>
-        )}
+        <h1 className="mt-5 font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          Something interrupted this view.
+        </h1>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <p className="mt-3 text-sm leading-6 text-zinc-300">
+          The page encountered an unexpected runtime error and stopped rendering to avoid broken
+          state. You can retry the view or return to the homepage.
+        </p>
+
+        {error?.digest ? (
+          <div className="mt-5 border border-white/10 bg-[#08090C] px-3.5 py-2.5 font-mono text-xs text-zinc-400">
+            DIGEST: <span className="text-zinc-100">{error.digest}</span>
+          </div>
+        ) : null}
+
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
             onClick={reset}
-            className="inline-flex min-h-touch flex-1 items-center justify-center gap-2 rounded-lg border border-accent-emerald bg-accent-emerald px-4 font-sans text-sm font-semibold text-obsidian-base transition-colors hover:bg-accent-cyan hover:border-accent-cyan"
+            className="inline-flex min-h-[48px] flex-1 items-center justify-center bg-[#00D9FF] px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[#08090C] transition-colors hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E0E10]"
           >
-            <RotateCcw className="h-4 w-4" />
-            <span>Retry state transition</span>
+            Try again
           </button>
 
           <Link
             href="/"
-            className="inline-flex min-h-touch flex-1 items-center justify-center gap-2 rounded-lg border border-obsidian-border bg-obsidian-elevated px-4 font-sans text-sm font-medium text-obsidian-text transition-colors hover:border-accent-cyan hover:text-accent-cyan"
+            className="inline-flex min-h-[48px] flex-1 items-center justify-center border border-white/20 bg-[#08090C] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/50 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
           >
-            <Home className="h-4 w-4 text-accent-cyan" />
-            <span>Return to base</span>
+            Back to portfolio
           </Link>
         </div>
+
+        <p className="mt-5 border-t border-white/10 pt-4 font-mono text-xs text-zinc-400">
+          Need to reach Oscar directly?{' '}
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="text-[#00D9FF] underline underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+          >
+            {CONTACT_EMAIL}
+          </a>
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

@@ -13,7 +13,7 @@ export default function HomePage(): React.JSX.Element {
     <div className="relative min-h-screen bg-[#08090C] text-white selection:bg-[#00D9FF] selection:text-[#08090C]">
       <GradientMeshMotion />
       <Navbar />
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

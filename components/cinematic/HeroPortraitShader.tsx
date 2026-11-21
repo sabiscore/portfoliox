@@ -68,28 +68,27 @@ void main() {
   vec2 centered = uv - 0.5;
   centered.x *= uResolution.x / max(uResolution.y, 1.0);
 
-  vec2 cursor = (uPointer - 0.5) * vec2(uResolution.x / max(uResolution.y, 1.0), 1.0);
-  float t = uTime * 0.08;
+  float t = uTime * 0.06;
 
   vec2 drift = vec2(
-    fbm(uv * 2.3 + vec2(t * 0.18, -t * 0.08)),
-    fbm(uv * 3.1 - vec2(t * 0.11, t * 0.14))
+    fbm(uv * 2.1 + vec2(t * 0.14, -t * 0.06)),
+    fbm(uv * 2.8 - vec2(t * 0.09, t * 0.12))
   );
 
-  float field = fbm(uv * 4.5 + drift * 1.15 + vec2(0.0, t * 0.35));
-  float halo = smoothstep(0.5, 0.02, length(uv - uPointer));
-  float vignette = smoothstep(1.0, 0.18, length(centered));
-  float pulse = 0.62 + 0.38 * sin(t * 1.45 + drift.x * 2.2);
+  float field = fbm(uv * 3.8 + drift * 0.9 + vec2(0.0, t * 0.25));
+  float halo = smoothstep(0.58, 0.08, length(uv - uPointer));
+  float rim = smoothstep(0.24, 0.72, length(centered));
+  float pulse = 0.72 + 0.28 * sin(t * 1.1 + drift.x * 1.8);
 
-  vec3 base = mix(uWash, vec3(0.03, 0.06, 0.1), field * 0.85);
-  vec3 tint = uAccent * (0.12 + halo * 0.2 + field * 0.18);
+  vec3 base = mix(uWash, vec3(0.02, 0.05, 0.08), field * 0.7);
+  vec3 tint = uAccent * (0.08 + halo * 0.14 + field * 0.12);
 
-  float alpha = clamp((0.1 + field * 0.34 + halo * 0.12) * vignette * pulse, 0.0, 0.68) * uIntensity;
+  float alpha = clamp((0.06 + field * 0.2 + halo * 0.1) * rim * pulse, 0.0, 0.42) * uIntensity;
   gl_FragColor = vec4(base + tint, alpha);
 }
 `;
 
-function getShaderTier() {
+function getShaderTier(): 'low' | 'medium' | 'high' {
   if (typeof window === 'undefined') {
     return 'low';
   }
@@ -140,7 +139,7 @@ export function HeroPortraitShader() {
       antialias: false,
       depth: false,
       stencil: false,
-      powerPreference: 'high-performance',
+      powerPreference: 'low-power',
       preserveDrawingBuffer: false,
     });
 
@@ -153,11 +152,11 @@ export function HeroPortraitShader() {
 
     const uniforms = {
       uResolution: { value: new THREE.Vector2(1, 1) },
-      uPointer: { value: new THREE.Vector2(0.5, 0.38) },
+      uPointer: { value: new THREE.Vector2(0.5, 0.34) },
       uTime: { value: 0 },
-      uIntensity: { value: tier === 'high' ? 1 : 0.82 },
-      uAccent: { value: new THREE.Color('#67e8f9') },
-      uWash: { value: new THREE.Color('#08111c') },
+      uIntensity: { value: tier === 'high' ? 0.65 : 0.48 },
+      uAccent: { value: new THREE.Color('#00D9FF') },
+      uWash: { value: new THREE.Color('#08090C') },
     };
 
     const material = new THREE.ShaderMaterial({
@@ -196,7 +195,7 @@ export function HeroPortraitShader() {
     };
 
     const resetPointer = () => {
-      uniforms.uPointer.value.set(0.5, 0.38);
+      uniforms.uPointer.value.set(0.5, 0.34);
     };
 
     const observer =
@@ -239,7 +238,7 @@ export function HeroPortraitShader() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-[1] h-full w-full mix-blend-screen opacity-70"
+      className="portrait-shader-canvas"
     />
   );
 }

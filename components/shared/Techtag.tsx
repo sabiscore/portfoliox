@@ -1,30 +1,28 @@
-import React from "react";
-
-export interface TechtagProps {
+export interface TechTagProps {
   label: string;
-  variant?: "default" | "cyan" | "emerald";
+  tone?: 'default' | 'accent' | 'positive';
   className?: string;
 }
 
-export const Techtag: React.FC<TechtagProps> = ({
-  label,
-  variant = "default",
-  className = "",
-}) => {
-  const variantStyles =
-    variant === "cyan"
-      ? "border-accent-cyan/50 bg-obsidian-elevated text-accent-cyan"
-      : variant === "emerald"
-        ? "border-accent-emerald/50 bg-obsidian-elevated text-accent-emerald"
-        : "border-obsidian-border bg-obsidian-base text-obsidian-muted";
+const TONE_CLASSES: Record<NonNullable<TechTagProps['tone']>, string> = {
+  default: 'border-white/10 bg-zinc-900 text-zinc-300',
+  accent: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-300',
+  positive: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
+};
 
+export function TechTag({
+  label,
+  tone = 'default',
+  className = '',
+}: TechTagProps) {
   return (
     <span
-      className={`inline-flex min-h-pill items-center rounded border px-2.5 py-1 font-mono text-micro ${variantStyles} ${className}`}
+      className={`inline-flex items-center rounded-md border px-2.5 py-1 font-mono text-xs font-medium tracking-tight ${TONE_CLASSES[tone]} ${className}`}
     >
       {label}
     </span>
   );
-};
+}
 
-export default Techtag;
+export const Techtag = TechTag;
+export default TechTag;

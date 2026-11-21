@@ -2,6 +2,9 @@
 
 import type { JSX, ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { m } from 'framer-motion';
+
+import { IDENTITY_CARD_VARIANTS } from '@/lib/motion';
 
 type IdentityCardMotionProps = {
   children: ReactNode;
@@ -15,14 +18,15 @@ export function IdentityCardMotion({
   const [heroCardReady, setHeroCardReady] = useState(false);
 
   useEffect(() => {
-    if (!window.matchMedia('(max-width: 767px)').matches) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !window.matchMedia('(max-width: 767px)').matches) {
       setHeroCardReady(true);
       return;
     }
 
     const reveal = () => setHeroCardReady(true);
-    const idle = window.requestIdleCallback?.(reveal, { timeout: 1500 });
-    const timer = window.setTimeout(reveal, 1500);
+    const idle = window.requestIdleCallback?.(reveal, { timeout: 1200 });
+    const timer = window.setTimeout(reveal, 1200);
 
     return () => {
       if (idle !== undefined) window.cancelIdleCallback?.(idle);
@@ -31,11 +35,14 @@ export function IdentityCardMotion({
   }, []);
 
   return (
-    <div
-      className={['identity-card-motion', className].join(' ')}
+    <m.div
+      variants={IDENTITY_CARD_VARIANTS}
+      initial={false}
+      animate={heroCardReady ? 'active' : 'rest'}
+      className={['identity-card-motion', className].filter(Boolean).join(' ')}
       data-hero-card-ready={heroCardReady ? 'true' : 'false'}
     >
       {children}
-    </div>
+    </m.div>
   );
 }

@@ -2,6 +2,28 @@
 
 This file is reserved for release corrections and follow-up notes for the portfolio production surface.
 
+## 2026-11-21 — Production portfolio refinement, conversion optimization & profile asset verification
+
+**Profile picture audit (confirmed against repository source and disk assets):**
+- Canonical active asset: `public/headshot.webp` (`/headshot.webp`), intrinsic size `680 × 680 px` (`1:1` WebP VP8, `48.53 KB` — within the `≤ 80 KB` asset budget).
+- Active rendering in `components/IdentityCard.tsx`: `64 × 64 px` (`h-16 w-16`, `fill`, `sizes="64px"`, `priority`, `object-cover`), matching the `1:1` source ratio, `next.config.ts` `imageSizes` (`64`, `128`), and the `tests/unit/milestone2-geometry.test.ts` mobile geometry lock. Also referenced as `Person.image` in `app/lib/structured-data.ts`.
+- Unreferenced archive copies confirmed on disk: `public/images/oscar-headshot.jpg` (`1086 × 1448 px`, `377.40 KB`) and `public/images/scar-headshot.jpeg` (`1254 × 1254 px`, `241.70 KB`).
+
+**Changes applied:**
+- **Anchor navigation precision (`app/globals.css`, `components/cinematic/ScrollCinemaProvider.tsx`, `components/Navbar.tsx`)**: Added `.lenis.lenis-smooth { scroll-behavior: auto !important; }`, disabled Lenis's competing `anchors` handler (`anchors: false`), removed the inverted `-sectionOffset` (`+88px`) offset, and wired same-page homepage hash links in both desktop and mobile navigation through `useScrollCinema().scrollToSection`. Eliminated the ~378px desktop overshoot and 1-frame teleport flash so target headings clear the sticky 64px navbar cleanly.
+- **Contact conversion & WCAG a11y (`components/ContactSection.tsx`)**: Added scannable engagement-format framing, shortened `<select>` option labels (`Architecture / consulting`, `Staff / principal role`, `Advisory / leadership`, `Exploring / flexible`) to eliminate mid-word clipping at `375px–1440px`, and replaced single-field validation with simultaneous multi-field `aria-invalid` + per-field inline error messages linked via `aria-describedby`.
+- **Footer & mobile IdentityCard polish (`components/Footer.tsx`, `components/IdentityCard.tsx`, `components/HeroSection.tsx`)**: Replaced ragged footer link wrapping with a symmetrical `grid-cols-2 sm:grid-cols-4` (`2×4` mobile, `4×2` tablet/desktop) layout including LinkedIn and RSS; paired `ENGINEERING PROFILE` and `LAGOS, NG` on a single top row in `IdentityCard.tsx` to eliminate mobile badge orphaning; added canonical LinkedIn link in `HeroSection.tsx`.
+- **Unified case-study metadata & route parity (`lib/work-meta.ts`, `components/ProjectsSection.tsx`, `app/work/layout.tsx`, `app/work/[slug]/page.tsx`, `app/writing/page.tsx`, `app/writing/[slug]/page.tsx`, `mdx-components.tsx`)**: Centralized project domains, WCAG 1.4.1 status badges, evidence boundaries, links, and `WORK_CASE_ORDER`; added `<Footer />` to `/work/*`; aligned `/writing/[slug]` sticky sidebar to `lg:` (`1024px+`), replaced `Surface: Technical Monograph` with `Author: Oscar Ndugbu`, and completed `TechArticle` JSON-LD (`image`, `publisher`, `dateModified`, `mainEntityOfPage`); refined MDX links, headings (`scroll-mt-24`), and prose spacing.
+- **MDX accuracy & unified OLED OG/manifest (`content/work/sabiscore.mdx`, `content/work/ml-consulting.mdx`, `components/OGImage.tsx`, `app/layout.tsx`, `app/lib/structured-data.ts`, `app/og/route.tsx`, `app/api/og/route.tsx`, `app/work/[slug]/og/route.tsx`, `public/manifest.json`)**: Updated SabiScore demo link to `https://sabiscore.app`, linked ML Consulting CTA to `/#contact`, replaced stale `/og-image.png` placeholder references with `/opengraph-image` / `/twitter-image`, unified `/og`, `/api/og`, and `/work/[slug]/og` to `<OGImage />`, and aligned manifest colors to `#08090C`.
+- **Documentation refresh (`README.md`, `PROJECT.md`, `docs/deployment-history/CORRECTIONS.md`, `docs/deployment-history/SETUP_AND_IMPLEMENTATION.md`, `docs/deployment-history/BLOG_GUIDE.md`, `docs/release-certification-2026-08-26.md`)**: Cleaned corrupted `[span_N]` tags, aligned docs with the claim ledger and active App Router architecture, and recorded canonical profile-picture specs.
+
+**Validation after the November 21 refinement pass:**
+- `pnpm run prebuild` (`verify-app-router`, `verify-ui-contracts` V16–V19, `eslint .`, `tsc --noEmit -p tsconfig.typecheck.json`, `vitest run` 5 files / 25 tests, `audit:copy`): **PASSED** (exit `0`).
+- `pnpm run build` (`next build`): **PASSED** (28/28 static routes generated cleanly).
+- Playwright Chromium (`e2e/smoke.spec.ts`, `tests/portfolio.spec.ts`, `e2e/scroll-responsiveness.spec.ts`, `tests/e2e/user-journey.spec.ts`) & Mobile Chrome (`e2e/smoke.spec.ts`): **PASSED** (35 passed / 2 pre-existing skipped on Chromium; 19 passed / 2 skipped on Mobile Chrome; 0 failed).
+- Live browser visual/DOM QA across `1440×900`, `1024×800`, and `375×812`: **PASSED** (0 console errors, 0 failed network requests, anchor clearance verified, 4-field validation verified, zero mobile overflow, sticky sidebars verified).
+- Pre-existing failure note: `e2e/scroll-engine.spec.ts` remains broken against retired legacy selectors (`.site-grain`, `body.nav-open`, `#section-testimonials`, `.metrics-grid`) removed prior to this pass; WebKit/Firefox binaries were not installed locally.
+
 ## 2026-06-05 — API hardening: query bounds, analytics sanitisation, rate-limit map pruning + formatter pass
 
 **Full codebase audit findings (all non-functional issues confirmed clean):**

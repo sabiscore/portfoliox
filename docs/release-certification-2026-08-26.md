@@ -1,8 +1,8 @@
 # Release Certification — August 26, 2026
 
-* **Auditor**: Oscar Ndugbu (Staff Backend & Platform Engineer)[span_20](start_span)[span_20](end_span)
-* **Target Environment**: Production Vercel Deployment & Linux Workstation Host[span_21](start_span)[span_21](end_span)
-* **Scope**: Portfoliox frontend refactor, mobile view ergonomics, Obsidian Nocturne v2 token compliance, and zero-arbitrary-Tailwind lint enforcement[span_22](start_span)[span_22](end_span).
+* **Auditor**: Oscar Ndugbu (Staff Backend & Platform Engineer)
+* **Target Environment**: Production Vercel Deployment & Linux Workstation Host
+* **Scope**: Portfoliox frontend refactor, mobile view ergonomics, Obsidian Nocturne v2 token compliance, and zero-arbitrary-Tailwind lint enforcement.
 
 ## Certification Checklist
 * [x] Mobile viewport typography alignment (zero right-ragging, 100% container width utilization on `<400px` screens).

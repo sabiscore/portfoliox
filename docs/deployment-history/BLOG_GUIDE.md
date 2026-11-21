@@ -1,166 +1,105 @@
-# Blog Publishing Guide
+# Engineering Writing Publishing Guide
 
-## Quick Start: Publish a New Post in 5 Minutes
+## Quick Start: Publish a New Engineering Note
 
-### Method 1: Interactive CLI (Recommended)
+Writing entries live in `content/writing/*.mdx`, are compiled by [`lib/content.ts`](../../lib/content.ts), and render at `/writing`, `/writing/[slug]`, and `/rss.xml`.
 
-```bash
-npm run new-post
-```
+### Manual Creation
 
-Follow the prompts, then edit the generated file.
-
-### Method 2: Manual Creation
-
-1. **Copy template:**
+1. **Create a slugged MDX file:**
    ```bash
-   cp content/blog/_TEMPLATE.mdx content/blog/your-post-slug.mdx
+   # Slug must match /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+   touch content/writing/your-post-slug.mdx
    ```
 
-2. **Edit frontmatter:** Update title, date, category, tags, excerpt
+2. **Add frontmatter:** Provide `title`, `date`, `summary`, `tags`, and optional `featured`.
 
-3. **Write content:** Use Markdown/MDX syntax
+3. **Write content:** Use standard Markdown/MDX with GFM tables and fenced code blocks (`rehype-pretty-code` with `github-dark-dimmed` + `rehype-slug` heading anchors).
 
 4. **Preview locally:**
    ```bash
-   npm run dev
-   # Visit http://localhost:3000/blog/your-post-slug
+   pnpm run dev
+   # Visit http://localhost:3000/writing/your-post-slug
    ```
 
-5. **Publish:**
+5. **Run verification gates before publishing:**
    ```bash
-   git add content/blog/your-post-slug.mdx
-   git commit -m "Add blog: Your Post Title"
+   pnpm run prebuild
+   pnpm run build
+   ```
+
+6. **Publish:**
+   ```bash
+   git add content/writing/your-post-slug.mdx
+   git commit -m "docs(writing): add your post title"
    git push origin main
    ```
 
-Vercel auto-deploys in ~2 minutes. Check https://scardubu.dev/blog
+Vercel auto-deploys from `main`. Check `https://scardubu.dev/writing` and `https://scardubu.dev/rss.xml`.
 
 ---
 
 ## Frontmatter Reference
 
+Defined by `WritingFrontmatter` in [`lib/content.ts`](../../lib/content.ts):
+
 ```yaml
 ---
-title: "Your Post Title"           # Required
-publishedAt: "2024-12-08"          # Required (YYYY-MM-DD)
-readTime: "10 min"                 # Required
-category: "production-ml"          # Required (see categories below)
-tags: ["python", "fastapi", "ml"]  # Required (array of strings)
-excerpt: "Brief description"       # Required (1-2 sentences)
-featured: false                    # Optional (true = show on homepage)
+title: 'Your Engineering Note Title'     # Required
+date: '2026-11-21'                       # Required (ISO YYYY-MM-DD; used for reverse-chronological sort)
+summary: 'Concise 1–2 sentence summary.' # Required (used on index, OG description, and RSS)
+tags:                                    # Optional (array of topic strings)
+  - 'Backend Engineering'
+  - 'Production Systems'
+featured: false                          # Optional (boolean)
 ---
 ```
 
-### Available Categories
-
-| Category Key     | Display Name              |
-|------------------|---------------------------|
-| `production-ml`  | Production ML Systems     |
-| `mlops`          | MLOps & Infrastructure    |
-| `ai-nigeria`     | AI in Nigeria & Africa    |
-| `full-stack-ml`  | Full-Stack ML Engineering |
-
-### Common Tags
-
-- `production-ml`, `mlops`, `deployment`, `monitoring`
-- `fastapi`, `python`, `docker`, `kubernetes`
-- `xgboost`, `ensemble`, `deep-learning`
-- `nigeria`, `africa`, `startups`
+> **Note:** `readingTime` is computed automatically by `lib/content.ts` at `220` words/min; do not hardcode it in frontmatter.
 
 ---
 
-## Content Best Practices
+## Evidence & Copy Standards
 
-### Structure
+- Follow [`docs/claim-ledger.md`](../claim-ledger.md): distinguish architectural intent from measured production outcomes, and never publish unlinked benchmark metrics.
+- `pnpm run audit:copy` scans `content/` as part of `pnpm run prebuild` and blocks banned unverified claims or placeholder text (`TODO`, `FIXME`, `PLACEHOLDER`).
 
-1. **Hook (1 para):** Problem/question that grabs attention
-2. **Context (2-3 paras):** Why this matters, who it's for
-3. **Main Content (sections):** Step-by-step with code examples
-4. **Conclusion:** Key takeaways + CTA
+---
+
+## Formatting & Media
 
 ### Code Blocks
 
-Use syntax highlighting:
+Use fenced code blocks with an explicit language identifier:
 
 ````markdown
 ```python
-import xgboost as xgb
-model = xgb.XGBClassifier()
+async def score_fixture(payload: ScoreRequest) -> ScoreResponse:
+    ...
 ```
 ````
 
+### Links & Headings
+
+- Headings (`h2`, `h3`) automatically receive `scroll-mt-24` and slug IDs via `rehype-slug` + `mdx-components.tsx`.
+- External links automatically open in a new tab with `rel="noopener noreferrer"`.
+- Internal links should target canonical routes (`/writing/[slug]`, `/work/[slug]`, `/#contact`).
+
 ### Images
 
-Place in `public/blog/[post-slug]/`:
+Place static article images under `public/images/` (or a dedicated subfolder under `public/`) and optimize them before committing:
 
 ```markdown
-![Alt text](/blog/your-post-slug/diagram.png)
-```
-
-### Internal Links
-
-```markdown
-[Related Post](/blog/ensemble-models-production)
+![Descriptive alt text](/images/your-diagram.webp)
 ```
 
 ---
 
 ## Deployment Checklist
 
-- [ ] Frontmatter complete and valid
-- [ ] Excerpt compelling (shows in previews)
-- [ ] Code blocks tested and formatted
-- [ ] Images optimized (<200KB each)
-- [ ] Internal links working
-- [ ] Preview looks good locally
-- [ ] Commit message descriptive
-- [ ] Pushed to main branch
-
----
-
-## Troubleshooting
-
-### Post not showing?
-
-1. Check frontmatter syntax (valid YAML)
-2. Ensure `publishedAt` is today or earlier
-3. Clear Next.js cache: `rm -rf .next && npm run dev`
-
-### Build failing?
-
-1. Check Vercel dashboard for errors
-2. Validate MDX syntax: https://mdxjs.com/playground/
-
-### Images not loading?
-
-1. Verify path: `/blog/[slug]/image.png`
-2. Check file exists in `public/blog/[slug]/`
-
----
-
-## Advanced: Schedule Posts
-
-1. Set future `publishedAt` date
-2. Commit to separate branch
-3. Merge to main on publish day
-4. Or use GitHub Actions for automated scheduling
-
----
-
-## Maintenance
-
-**Weekly:**
-- Review live metrics accuracy
-- Check GitHub API rate limits
-- Update blog posts as needed
-
-**Monthly:**
-- Update patterns array in ProductionPatternsVisualization
-- Refresh live metrics mock data with real DB queries
-- Review analytics for feature performance
-
-**Quarterly:**
-- Audit blog post quality
-- Update reading time estimates
-- Refresh related post algorithms
+- [ ] Slug is lowercase hyphenated (`a-z`, `0-9`, `-`)
+- [ ] Frontmatter has `title`, `date`, `summary`, and `tags`
+- [ ] Claims comply with `docs/claim-ledger.md`
+- [ ] `pnpm run prebuild` passes (lint, type-check, unit tests, `audit:copy`)
+- [ ] `pnpm run build` generates `/writing/[slug]` cleanly
+- [ ] Previewed on desktop (`1024px+` sticky sidebar) and mobile (`375px`)

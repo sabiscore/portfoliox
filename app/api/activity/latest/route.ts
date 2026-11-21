@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { isQualifyingCommitMessage, sanitizeCommitTitle } from '@/lib/activity-filter';
+
 export const revalidate = 300;
 
 export interface LatestActivityPayload {
@@ -8,124 +10,155 @@ export interface LatestActivityPayload {
   message: string;
   timestamp: string | null;
   url: string | null;
-  source: 'github' | 'fallback';
+  source: 'github' | 'vercel-build-metadata' | 'fallback';
+  commitHash: string | null;
+  commitMessage: string | null;
+  branch: string | null;
+  committedAt: string | null;
 }
 
-interface GitHubPushEvent {
-  type?: string;
-  created_at?: string;
-  repo?: { name?: string };
-  payload?: {
-    commits?: Array<{
-      sha?: string;
-      message?: string;
-    }>;
+interface GitHubRepoCommit {
+  sha?: string;
+  html_url?: string;
+  commit?: {
+    message?: string;
+    author?: { date?: string } | null;
+    committer?: { date?: string } | null;
   };
 }
 
-const GITHUB_USERNAME = process.env.GITHUB_USERNAME ?? 'scardubz';
-
-const LOW_SIGNAL_COMMIT_PATTERNS: readonly RegExp[] = [
-  /^(chore|style|docs|ci|build|wip|merge|format|lint|bump)\b/i,
-  /^update\s+(tailwind|css|styles?|deps|dependencies|readme|lockfile|packages?|config)\b/i,
-  /^fix\s+(typo|formatting|lint|css|whitespace)\b/i,
-  /^merge\s+(pull request|branch|remote-tracking)\b/i,
-  /^initial\s+commit$/i,
-];
+const GITHUB_REPOSITORY = 'sabiscore/portfoliox';
+const GITHUB_COMMITS_URL = `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits?per_page=20`;
 
 const FALLBACK_ACTIVITY: LatestActivityPayload = {
   kind: 'status',
-  repo: 'sabiscore/portfoliox',
-  message: 'Production systems online · UTC+1',
+  repo: GITHUB_REPOSITORY,
+  message: 'Production build verified · UTC+1',
   timestamp: null,
-  url: `https://github.com/${GITHUB_USERNAME}`,
+  url: `https://github.com/${GITHUB_REPOSITORY}`,
   source: 'fallback',
+  commitHash: null,
+  commitMessage: null,
+  branch: process.env.VERCEL_GIT_COMMIT_REF ?? null,
+  committedAt: null,
 };
 
-function sanitizeCommitTitle(rawMessage: string): string {
-  return rawMessage.split('\n')[0]?.trim().replace(/\.+$/, '') ?? '';
+function normalizeIsoTimestamp(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? null : new Date(parsed).toISOString();
 }
 
-function isHighSignalCommit(message: string): boolean {
-  const cleaned = sanitizeCommitTitle(message);
-  if (cleaned.length < 12) return false;
-  return !LOW_SIGNAL_COMMIT_PATTERNS.some((pattern) => pattern.test(cleaned));
+function buildVercelMetadataFallback(): LatestActivityPayload {
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA ?? null;
+  const rawMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE ?? null;
+  const branch = process.env.VERCEL_GIT_COMMIT_REF ?? null;
+  const committedAt = normalizeIsoTimestamp(process.env.VERCEL_GIT_COMMIT_AUTHOR_DATE ?? null);
+
+  if (rawMessage && isQualifyingCommitMessage(rawMessage)) {
+    const cleaned = sanitizeCommitTitle(rawMessage);
+    const shortSha = sha ? sha.slice(0, 7).toUpperCase() : null;
+    return {
+      kind: 'commit',
+      repo: GITHUB_REPOSITORY,
+      message: cleaned,
+      timestamp: committedAt,
+      url: sha
+        ? `https://github.com/${GITHUB_REPOSITORY}/commit/${sha}`
+        : `https://github.com/${GITHUB_REPOSITORY}`,
+      source: 'vercel-build-metadata',
+      commitHash: shortSha,
+      commitMessage: cleaned,
+      branch,
+      committedAt,
+    };
+  }
+
+  return {
+    ...FALLBACK_ACTIVITY,
+    branch,
+    commitHash: sha ? sha.slice(0, 7).toUpperCase() : null,
+  };
 }
 
-export async function GET() {
+export async function GET(): Promise<NextResponse<LatestActivityPayload>> {
+  const cacheHeaders = {
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+  };
+
   try {
     const headers: HeadersInit = {
       Accept: 'application/vnd.github+json',
-      'User-Agent': 'scardubu-portfolio-activity',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'User-Agent': 'scardubu.dev-activity-latest',
     };
 
     if (process.env.GITHUB_TOKEN) {
       headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
     }
 
-    const response = await fetch(
-      `https://api.github.com/users/${encodeURIComponent(GITHUB_USERNAME)}/events/public?per_page=30`,
-      {
-        headers,
-        next: { revalidate },
-        signal: AbortSignal.timeout(4500),
-      },
-    );
+    const response = await fetch(GITHUB_COMMITS_URL, {
+      headers,
+      next: { revalidate },
+      signal: AbortSignal.timeout(4500),
+    });
 
     if (!response.ok) {
-      return NextResponse.json(FALLBACK_ACTIVITY, {
+      return NextResponse.json(buildVercelMetadataFallback(), {
         status: 200,
-        headers: {
-          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-        },
+        headers: cacheHeaders,
       });
     }
 
-    const events = (await response.json()) as GitHubPushEvent[];
-
-    for (const event of events) {
-      if (event.type !== 'PushEvent' || !event.payload?.commits?.length) {
-        continue;
-      }
-
-      const repoName = event.repo?.name ?? '';
-      const commits = [...event.payload.commits].reverse();
-
-      for (const commit of commits) {
-        const title = sanitizeCommitTitle(commit.message ?? '');
-        if (!isHighSignalCommit(title)) continue;
-
-        const payload: LatestActivityPayload = {
-          kind: 'commit',
-          repo: repoName,
-          message: title,
-          timestamp: event.created_at ?? null,
-          url:
-            repoName && commit.sha
-              ? `https://github.com/${repoName}/commit/${commit.sha}`
-              : repoName
-                ? `https://github.com/${repoName}`
-                : null,
-          source: 'github',
-        };
-
-        return NextResponse.json(payload, {
-          status: 200,
-          headers: {
-            'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-          },
-        });
-      }
+    const rawPayload: unknown = await response.json();
+    if (!Array.isArray(rawPayload)) {
+      return NextResponse.json(buildVercelMetadataFallback(), {
+        status: 200,
+        headers: cacheHeaders,
+      });
     }
 
-    return NextResponse.json(FALLBACK_ACTIVITY, {
+    const commits = rawPayload as GitHubRepoCommit[];
+
+    for (const entry of commits) {
+      const title = sanitizeCommitTitle(entry?.commit?.message ?? '');
+      if (!isQualifyingCommitMessage(title)) continue;
+
+      const timestamp = normalizeIsoTimestamp(
+        entry.commit?.author?.date ?? entry.commit?.committer?.date ?? null
+      );
+      const shortSha = entry.sha ? entry.sha.slice(0, 7).toUpperCase() : null;
+
+      return NextResponse.json(
+        {
+          kind: 'commit',
+          repo: GITHUB_REPOSITORY,
+          message: title,
+          timestamp,
+          url:
+            entry.html_url ??
+            (entry.sha
+              ? `https://github.com/${GITHUB_REPOSITORY}/commit/${entry.sha}`
+              : `https://github.com/${GITHUB_REPOSITORY}`),
+          source: 'github',
+          commitHash: shortSha,
+          commitMessage: title,
+          branch: process.env.VERCEL_GIT_COMMIT_REF ?? 'main',
+          committedAt: timestamp,
+        },
+        {
+          status: 200,
+          headers: cacheHeaders,
+        }
+      );
+    }
+
+    return NextResponse.json(buildVercelMetadataFallback(), {
       status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
-      },
+      headers: cacheHeaders,
     });
   } catch {
-    return NextResponse.json(FALLBACK_ACTIVITY, {
+    return NextResponse.json(buildVercelMetadataFallback(), {
       status: 200,
       headers: {
         'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300',

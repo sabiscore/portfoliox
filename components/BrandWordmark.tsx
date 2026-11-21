@@ -1,40 +1,71 @@
-import Link from 'next/link';
+import type { HTMLAttributes } from 'react';
 
-export interface BrandWordmarkProps {
-  href?: string;
-  brandLabel?: string;
-  monogram?: string;
+export type BrandWordmarkSize = 'nav' | 'hero' | 'compact' | 'social';
+export type BrandWordmarkTone = 'light' | 'dark' | 'accent';
+export type BrandWordmarkElement = 'span' | 'div';
+
+export type BrandWordmarkProps = {
+  as?: BrandWordmarkElement;
+  size?: BrandWordmarkSize;
+  tone?: BrandWordmarkTone;
+  label?: string;
   className?: string;
-}
+} & Omit<HTMLAttributes<HTMLElement>, 'children' | 'aria-label'>;
+
+const WORDMARK = 'SCARDUBU' as const;
+
+const glyphClassMap: Record<string, string> = {
+  S: 'brand-wordmark__glyph--s',
+  C: 'brand-wordmark__glyph--c',
+  A: 'brand-wordmark__glyph--a',
+  R: 'brand-wordmark__glyph--r',
+  D: 'brand-wordmark__glyph--d',
+  U: 'brand-wordmark__glyph--u',
+  B: 'brand-wordmark__glyph--b',
+};
 
 export function BrandWordmark({
-  href = '/',
-  brandLabel = 'Scardubu',
-  monogram = 'ON',
+  as = 'span',
+  size = 'nav',
+  tone = 'light',
+  label = 'Oscar Ndugbu — Home',
   className = '',
+  ...props
 }: BrandWordmarkProps) {
-  return (
-    <Link
-      href={href}
-      aria-label={`${brandLabel} — Oscar Ndugbu Home`}
-      className={`group inline-flex min-h-11 items-center gap-2.5 rounded-md px-1.5 text-zinc-50 transition-colors duration-200 hover:text-cyan-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 motion-reduce:transition-none ${className}`}
-    >
-      {/* Decorative emblem — hidden from screen readers and text crawlers */}
-      <span
-        aria-hidden="true"
-        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-cyan-400/30 bg-zinc-900 font-mono text-xs font-bold tracking-tight text-cyan-400 transition-colors duration-200 group-hover:border-cyan-300 group-hover:bg-cyan-400/10 motion-reduce:transition-none"
-      >
-        {monogram}
-      </span>
+  const Component = as;
 
-      {/* Visible brand mark — aria-hidden because root Link carries the canonical accessible name */}
-      <span
-        aria-hidden="true"
-        className="font-mono text-sm font-semibold tracking-tight text-zinc-50 transition-colors duration-200 group-hover:text-cyan-300 motion-reduce:transition-none"
-      >
-        {brandLabel}
+  return (
+    <Component
+      {...props}
+      role="img"
+      aria-label={label}
+      className={[
+        'brand-wordmark',
+        `brand-wordmark--${size}`,
+        `brand-wordmark--${tone}`,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <span aria-hidden="true" className="brand-wordmark__inner">
+        {WORDMARK.split('').map((glyph, index) => (
+          <span
+            key={`${glyph}-${index}`}
+            className={[
+              'brand-wordmark__glyph',
+              glyphClassMap[glyph],
+              index === 6 ? 'brand-wordmark__glyph--bu-entry' : '',
+              index === 7 ? 'brand-wordmark__glyph--bu-exit' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {glyph}
+          </span>
+        ))}
       </span>
-    </Link>
+    </Component>
   );
 }
 

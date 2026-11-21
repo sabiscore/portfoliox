@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 
+import { isQualifyingCommitMessage, sanitizeCommitTitle } from '@/lib/activity-filter';
+
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const GITHUB_REPOSITORY = 'sabiscore/portfoliox';
-const GITHUB_COMMITS_URL = `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits?per_page=1`;
+const GITHUB_COMMITS_URL = `https://api.github.com/repos/${GITHUB_REPOSITORY}/commits?per_page=20`;
 
 const NO_STORE_HEADERS = {
   'Cache-Control': 'private, no-store, no-cache, max-age=0, must-revalidate',
@@ -64,10 +66,10 @@ function fallbackActivity(checkedAt: string, status = 200): NextResponse {
 }
 
 function trimCommitMessage(message: string): string {
-  const line = message.split('\n')[0]?.trim() ?? '';
+  const line = sanitizeCommitTitle(message);
 
   if (!line) {
-    return 'Building in production';
+    return 'Production build verified';
   }
 
   if (line.length <= 60) {
@@ -78,16 +80,23 @@ function trimCommitMessage(message: string): string {
 }
 
 interface GitHubCommit {
-  sha: string;
-  commit: {
-    message: string;
-    author: {
-      date: string;
+  sha?: string;
+  commit?: {
+    message?: string;
+    author?: {
+      date?: string;
     } | null;
     committer?: {
-      date: string;
+      date?: string;
     } | null;
   };
+}
+
+function resolveValidCommitDate(entry: GitHubCommit): Date | null {
+  const commitDate = entry.commit?.author?.date ?? entry.commit?.committer?.date;
+  if (!commitDate) return null;
+  const parsed = new Date(commitDate);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 export async function GET(): Promise<NextResponse> {
@@ -96,6 +105,7 @@ export async function GET(): Promise<NextResponse> {
   try {
     const response = await fetch(GITHUB_COMMITS_URL, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(4500),
       headers: {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
@@ -112,7 +122,12 @@ export async function GET(): Promise<NextResponse> {
       throw new Error(`GitHub API ${response.status}`);
     }
 
-    const commits = (await response.json()) as GitHubCommit[];
+    const rawPayload: unknown = await response.json();
+    if (!Array.isArray(rawPayload)) {
+      throw new Error('GitHub commits response was not an array');
+    }
+
+    const commits = rawPayload as GitHubCommit[];
 
     if (!commits.length) {
       return jsonResponse({
@@ -126,28 +141,40 @@ export async function GET(): Promise<NextResponse> {
       });
     }
 
-    const commit = commits[0];
+    let matchedCommit: { sha: string; message: string; createdAt: Date } | null = null;
+    for (const entry of commits) {
+      const rawMessage = entry?.commit?.message ?? '';
+      if (!isQualifyingCommitMessage(rawMessage)) continue;
+      const createdAt = resolveValidCommitDate(entry);
+      if (!createdAt) continue;
 
-    const commitDate =
-      commit.commit.author?.date ??
-      commit.commit.committer?.date;
-
-    if (!commitDate) {
-      throw new Error('Latest GitHub commit has no usable timestamp');
+      matchedCommit = {
+        sha: entry.sha ? entry.sha.slice(0, 7) : 'unknown',
+        message: rawMessage,
+        createdAt,
+      };
+      break;
     }
 
-    const createdAt = new Date(commitDate);
-
-    if (Number.isNaN(createdAt.getTime())) {
-      throw new Error('Latest GitHub commit has an invalid timestamp');
+    if (!matchedCommit) {
+      return jsonResponse({
+        ago: 'Verified',
+        type: 'StatusEvent',
+        repo: GITHUB_REPOSITORY,
+        sha: commits[0]?.sha ? commits[0].sha.slice(0, 7) : 'unknown',
+        message: 'Production build verified',
+        checkedAt,
+        availability: 'empty',
+      });
     }
 
     return jsonResponse({
-      ago: formatAgo(createdAt),
+      ago: formatAgo(matchedCommit.createdAt),
       type: 'PushEvent',
       repo: GITHUB_REPOSITORY,
-      sha: commit.sha.slice(0, 7),
-      message: trimCommitMessage(commit.commit.message),
+      sha: matchedCommit.sha,
+      message: trimCommitMessage(matchedCommit.message),
+      createdAt: matchedCommit.createdAt.toISOString(),
       checkedAt,
       availability: 'available',
     });

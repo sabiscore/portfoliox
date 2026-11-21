@@ -140,10 +140,10 @@ export function Navbar(): React.JSX.Element {
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            aria-label="Scardubu — home"
+            aria-label="Oscar Ndugbu — Home"
             className="inline-flex min-h-[44px] items-center gap-3 font-display text-base font-bold tracking-[0.28em] text-white transition-colors hover:text-[#00D9FF] sm:text-lg"
           >
-            <span>SCARDUBU</span>
+            <span aria-hidden="true">SCARDUBU</span>
           </Link>
 
           <span className="hidden items-center border border-white/10 bg-[#0E0E10] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-300 xl:inline-flex">

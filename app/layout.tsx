@@ -28,7 +28,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
+  title: {
+    default: 'Oscar Ndugbu (@Scardubu) — Staff Backend and Platform Engineer',
+    template: '%s · Oscar Ndugbu',
+  },
   description:
     'Staff Backend and Platform Engineer in Lagos, Nigeria. Engineering reliable backend services, data-intensive platforms, AI infrastructure, and resilient fintech systems.',
   manifest: '/manifest.json',

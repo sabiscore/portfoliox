@@ -115,6 +115,11 @@ const nextConfig: NextConfig = {
     return [
       // CV path normalisation — legacy PDF/DOCX aliases
       {
+        source: '/oscar-scardubu-resume.pdf',
+        destination: '/cv/oscar-ndugbu-resume.pdf',
+        permanent: true,
+      },
+      {
         source: '/cv/oscar-ndugbu-cv.pdf',
         destination: '/cv/oscar-ndugbu-resume.pdf',
         permanent: true,

@@ -11,7 +11,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDate(
   dateString: string,
-  options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: '2-digit' }
+  options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    timeZone: 'UTC',
+  }
 ): string {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) {

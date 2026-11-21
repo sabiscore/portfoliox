@@ -12,6 +12,8 @@ import {
   Code2,
 } from "lucide-react";
 
+import { CV_ASSET_PATH } from "@/lib/config";
+
 interface CommandOption {
   id: string;
   label: string;
@@ -73,7 +75,7 @@ const COMMAND_OPTIONS: CommandOption[] = [
     id: "asset-resume",
     label: "Download Resume (oscar-ndugbu-resume.pdf)",
     category: "ARTIFACT",
-    href: "/cv/oscar-ndugbu-resume.pdf",
+    href: CV_ASSET_PATH,
     external: true,
   },
 ];

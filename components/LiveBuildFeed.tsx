@@ -9,6 +9,7 @@ import { m, useReducedMotion } from 'framer-motion';
 import { Activity, FileText, GitCommit } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { isQualifyingCommitMessage } from '@/components/Liveactivitybar';
 import { springs } from '@/lib/motionVariants';
 import { formatMonthYear } from '@/lib/utils';
 
@@ -70,14 +71,17 @@ export function LiveBuildFeed() {
 
         if (githubRes.status === 'fulfilled' && githubRes.value.ok) {
           type GitHubActivity = {
+            availability?: string;
             createdAt?: string;
             message?: string;
             repo?: string;
             sha?: string;
           };
           const event = (await githubRes.value.json()) as GitHubActivity;
-          if (event.createdAt && event.message) {
+          if (event.availability !== 'unavailable') {
             successfulSources += 1;
+          }
+          if (event.createdAt && event.message && isQualifyingCommitMessage(event.message)) {
             combined.push({
               id: event.sha ?? `commit-${event.createdAt}`,
               type: 'commit',

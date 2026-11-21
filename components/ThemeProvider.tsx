@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react';
 
@@ -21,32 +20,43 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+/**
+ * Obsidian Nocturne v2 is a dedicated dark-surface design system.
+ * Locking resolved theme semantics to dark prevents stale `localStorage`
+ * preferences from an earlier release from flipping native scrollbars or
+ * form controls into light mode against #08090C backgrounds.
+ */
 export function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
-  const [theme, setThemeState] = useState<Theme>('dark');
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark');
-
   useEffect(() => {
-    const stored = globalThis.localStorage.getItem('theme');
-    const initialTheme: Theme = stored === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = 'dark';
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    document.documentElement.style.colorScheme = 'dark';
 
-    setThemeState(initialTheme);
+    try {
+      if (globalThis.localStorage.getItem('theme') === 'light') {
+        globalThis.localStorage.setItem('theme', 'dark');
+      }
+    } catch {
+      // Ignore storage access restrictions in private or sandboxed contexts.
+    }
   }, []);
 
-  useEffect(() => {
-    setResolvedTheme(theme);
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.classList.toggle('light', theme === 'light');
-    document.documentElement.style.colorScheme = theme;
-  }, [theme]);
-
-  const setTheme = useCallback((nextTheme: Theme) => {
-    globalThis.localStorage.setItem('theme', nextTheme);
-    setThemeState(nextTheme);
+  const setTheme = useCallback((_nextTheme: Theme) => {
+    document.documentElement.dataset.theme = 'dark';
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    document.documentElement.style.colorScheme = 'dark';
+    try {
+      globalThis.localStorage.setItem('theme', 'dark');
+    } catch {
+      // Ignore storage access restrictions.
+    }
   }, []);
 
-  const value = useMemo(
-    () => ({ theme, resolvedTheme, setTheme }),
-    [resolvedTheme, setTheme, theme]
+  const value = useMemo<ThemeContextValue>(
+    () => ({ theme: 'dark', resolvedTheme: 'dark', setTheme }),
+    [setTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

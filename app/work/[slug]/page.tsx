@@ -4,10 +4,16 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { generateProjectSchema } from '@/app/lib/structured-data';
+import { ArticleOutline } from '@/components/ArticleOutline';
 import { ReadingProgress } from '@/components/ReadingProgress';
-import { getWorkCase, getWorkCases } from '@/lib/content';
 import { SITE_URL } from '@/lib/config';
-import { STATUS_TONE, WORK_CASE_META, WORK_CASE_ORDER } from '@/lib/work-meta';
+import { getWorkCase, getWorkCases, getWritingPosts } from '@/lib/content';
+import {
+  getRelatedWritingSlugsForWork,
+  STATUS_TONE,
+  WORK_CASE_META,
+  WORK_CASE_ORDER,
+} from '@/lib/work-meta';
 
 type WorkPageProps = Readonly<{
   params: Promise<{ slug: string }>;
@@ -64,7 +70,11 @@ export async function generateMetadata({ params }: WorkPageProps): Promise<Metad
 
 export default async function WorkCasePage({ params }: WorkPageProps): Promise<JSX.Element> {
   const { slug } = await params;
-  const [workCase, workCases] = await Promise.all([getWorkCase(slug), getWorkCases()]);
+  const [workCase, workCases, writingPosts] = await Promise.all([
+    getWorkCase(slug),
+    getWorkCases(),
+    getWritingPosts(),
+  ]);
 
   if (!workCase) {
     notFound();
@@ -75,13 +85,21 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
   const statusTone = recordMeta ? STATUS_TONE[recordMeta.status] : null;
   const canonical = `${SITE_URL}/work/${slug}`;
 
-  const moreCases = workCases
-    .filter((entry) => entry.slug !== slug)
-    .sort((left, right) => {
-      const leftRank = WORK_CASE_ORDER.indexOf(left.slug);
-      const rightRank = WORK_CASE_ORDER.indexOf(right.slug);
-      return (leftRank === -1 ? 99 : leftRank) - (rightRank === -1 ? 99 : rightRank);
-    });
+  const orderedCases = [...workCases].sort((left, right) => {
+    const leftRank = WORK_CASE_ORDER.indexOf(left.slug);
+    const rightRank = WORK_CASE_ORDER.indexOf(right.slug);
+    return (leftRank === -1 ? 99 : leftRank) - (rightRank === -1 ? 99 : rightRank);
+  });
+  const currentCaseIndex = orderedCases.findIndex((entry) => entry.slug === slug);
+  const previousCase = currentCaseIndex > 0 ? orderedCases[currentCaseIndex - 1] : null;
+  const nextCase =
+    currentCaseIndex >= 0 && currentCaseIndex < orderedCases.length - 1
+      ? orderedCases[currentCaseIndex + 1]
+      : null;
+  const moreCases = orderedCases.filter((entry) => entry.slug !== slug);
+
+  const relatedWritingSlugs = new Set(getRelatedWritingSlugsForWork(slug));
+  const relatedNotes = writingPosts.filter((post) => relatedWritingSlugs.has(post.slug));
 
   const structuredData =
     slug === 'ml-consulting'
@@ -113,9 +131,9 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-h-screen bg-[#08090C] pb-20 text-white selection:bg-[#00D9FF]/20 selection:text-[#00D9FF]"
+        className="min-h-screen bg-obsidian-base pb-20 text-white selection:bg-accent-cyan/20 selection:text-accent-cyan"
       >
-        <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12 lg:px-8">
+        <div className="mx-auto max-w-hero px-4 pt-8 sm:px-6 sm:pt-12 lg:px-8">
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
@@ -125,7 +143,7 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
 
           <Link
             href="/#projects"
-            className="inline-flex min-h-[44px] items-center gap-2 border border-white/15 bg-[#0E0E10] px-4 py-2.5 font-mono text-xs tracking-wider text-[#00D9FF] transition-colors hover:border-[#00D9FF]/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090C]"
+            className="inline-flex min-h-touch items-center gap-2 border border-white/15 bg-obsidian-surface px-4 py-2.5 font-mono text-xs tracking-wider text-accent-cyan transition-colors hover:border-accent-cyan/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-base"
           >
             <span aria-hidden="true">←</span>
             <span>BACK TO PROJECTS</span>
@@ -133,12 +151,12 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
 
           <header className="mt-10 max-w-4xl border-b border-white/10 pb-10 sm:mt-12 sm:pb-12">
             <div className="flex flex-wrap items-center gap-3">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#00D9FF]">
+              <p className="font-mono text-micro font-semibold uppercase tracking-section text-accent-cyan">
                 {recordMeta ? recordMeta.domain : 'ENGINEERING CASE STUDY'}
               </p>
               {recordMeta && statusTone ? (
                 <span
-                  className={`inline-flex min-h-6 items-center gap-1.5 border px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider ${statusTone.chip}`}
+                  className={`inline-flex min-h-6 items-center gap-1.5 border px-2 py-1 font-mono text-2xs font-semibold uppercase tracking-wider ${statusTone.chip}`}
                 >
                   <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${statusTone.dot}`} />
                   {recordMeta.status}
@@ -146,10 +164,10 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
               ) : null}
             </div>
 
-            <h1 className="type-display mt-4 max-w-[18ch] font-display font-bold text-white">
+            <h1 className="type-display mt-4 max-w-heading font-display font-bold text-white">
               {title}
             </h1>
-            <p className="type-lede mt-5 max-w-[68ch] text-zinc-300">{summary}</p>
+            <p className="type-lede mt-5 max-w-prose text-zinc-300">{summary}</p>
 
             {(recordMeta?.demoHref || recordMeta?.sourceHref) ? (
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -158,7 +176,7 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
                     href={recordMeta.demoHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex min-h-[48px] items-center justify-center gap-2 bg-[#00D9FF] px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[#08090C] transition-colors hover:bg-[#7AEAFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090C]"
+                    className="group inline-flex min-h-cta items-center justify-center gap-2 bg-accent-cyan px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-obsidian-base transition-colors hover:bg-accent-cyanHover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-base"
                   >
                     <span>Live demo</span>
                     <span
@@ -174,7 +192,7 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
                     href={recordMeta.sourceHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex min-h-[48px] items-center justify-center gap-2 border border-white/20 bg-[#0E0E10] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-[#00D9FF]/60 hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                    className="group inline-flex min-h-cta items-center justify-center gap-2 border border-white/20 bg-obsidian-surface px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:border-accent-cyan/60 hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
                   >
                     <span>View source</span>
                     <span
@@ -193,7 +211,7 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
                 {tags.map((tag: string) => (
                   <li
                     key={tag}
-                    className="inline-flex min-h-[32px] items-center border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] text-zinc-300"
+                    className="inline-flex min-h-chip items-center border border-white/10 bg-obsidian-surface px-2.5 py-1 font-mono text-micro text-zinc-300"
                   >
                     {tag}
                   </li>
@@ -202,21 +220,98 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
             ) : null}
           </header>
 
-          <div className="grid gap-12 pt-10 lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-16 lg:pt-14">
-            <article className="min-w-0 max-w-[72ch]">{workCase.content}</article>
+          <div className="work-detail-grid grid gap-12 pt-10 lg:gap-16 lg:pt-14">
+            <div className="min-w-0 max-w-prose">
+              <article>{workCase.content}</article>
+
+              {(previousCase || nextCase) ? (
+                <nav
+                  aria-label="Case study pagination"
+                  className="mt-14 grid grid-cols-1 gap-3 border-t border-white/10 pt-8 sm:grid-cols-2"
+                >
+                  {previousCase ? (
+                    <Link
+                      href={`/work/${previousCase.slug}`}
+                      className="group flex min-h-touch flex-col justify-between border border-white/10 bg-obsidian-surface p-4 transition-colors hover:border-accent-cyan/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
+                    >
+                      <span className="font-mono text-2xs uppercase tracking-kicker text-zinc-400">
+                        ← Previous case study
+                      </span>
+                      <span className="mt-2 font-display text-base font-semibold text-white group-hover:text-accent-cyan">
+                        {previousCase.title}
+                      </span>
+                      {WORK_CASE_META[previousCase.slug] ? (
+                        <span className="mt-1 font-mono text-2xs uppercase tracking-domain text-zinc-400">
+                          {WORK_CASE_META[previousCase.slug].domain}
+                        </span>
+                      ) : null}
+                    </Link>
+                  ) : (
+                    <div aria-hidden="true" className="hidden sm:block" />
+                  )}
+
+                  {nextCase ? (
+                    <Link
+                      href={`/work/${nextCase.slug}`}
+                      className="group flex min-h-touch flex-col justify-between border border-white/10 bg-obsidian-surface p-4 text-left transition-colors hover:border-accent-cyan/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan sm:text-right"
+                    >
+                      <span className="font-mono text-2xs uppercase tracking-kicker text-zinc-400">
+                        Next case study ›
+                      </span>
+                      <span className="mt-2 font-display text-base font-semibold text-white group-hover:text-accent-cyan">
+                        {nextCase.title}
+                      </span>
+                      {WORK_CASE_META[nextCase.slug] ? (
+                        <span className="mt-1 font-mono text-2xs uppercase tracking-domain text-zinc-400">
+                          {WORK_CASE_META[nextCase.slug].domain}
+                        </span>
+                      ) : null}
+                    </Link>
+                  ) : null}
+                </nav>
+              ) : null}
+            </div>
 
             <aside className="h-fit space-y-6 border-t border-white/10 pt-6 lg:sticky lg:top-24 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+              <ArticleOutline headings={workCase.headings} />
+
               {recordMeta ? (
-                <div className="border border-white/10 bg-[#0E0E10] p-4">
-                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#00D9FF]">
+                <div className="border border-white/10 bg-obsidian-surface p-4">
+                  <p className="font-mono text-2xs font-semibold uppercase tracking-kicker text-accent-cyan">
                     EVIDENCE BOUNDARY
                   </p>
                   <p className="mt-2 text-xs leading-5 text-zinc-300">{recordMeta.evidence}</p>
                 </div>
               ) : null}
 
+              {relatedNotes.length > 0 ? (
+                <div className="border border-white/10 bg-obsidian-surface p-4">
+                  <p className="font-mono text-2xs font-semibold uppercase tracking-kicker text-accent-cyan">
+                    RELATED ENGINEERING NOTES
+                  </p>
+                  <ul className="mt-2 divide-y divide-white/10">
+                    {relatedNotes.map((note) => (
+                      <li key={note.slug}>
+                        <Link
+                          href={`/writing/${note.slug}`}
+                          className="group flex min-h-touch items-center justify-between gap-2 py-2.5 text-xs leading-5 text-zinc-200 transition-colors hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
+                        >
+                          <span>{note.title}</span>
+                          <span
+                            aria-hidden="true"
+                            className="shrink-0 font-mono text-accent-cyan motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+                          >
+                            ↗
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               <div>
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                <p className="font-mono text-2xs font-semibold uppercase tracking-kicker text-zinc-400">
                   PROJECT INDEX
                 </p>
                 <nav aria-label="Other engineering case studies" className="mt-3">
@@ -225,12 +320,12 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
                       <li key={entry.slug}>
                         <Link
                           href={`/work/${entry.slug}`}
-                          className="group flex min-h-[44px] items-center justify-between gap-2 py-2.5 text-sm text-zinc-300 transition-colors hover:text-[#00D9FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                          className="group flex min-h-touch items-center justify-between gap-2 py-2.5 text-sm text-zinc-300 transition-colors hover:text-accent-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
                         >
                           <span className="truncate">{entry.title}</span>
                           <span
                             aria-hidden="true"
-                            className="shrink-0 font-mono text-xs text-zinc-500 transition-colors group-hover:text-[#00D9FF]"
+                            className="shrink-0 font-mono text-xs text-zinc-400 transition-colors group-hover:text-accent-cyan"
                           >
                             ↗
                           </span>
@@ -242,8 +337,8 @@ export default async function WorkCasePage({ params }: WorkPageProps): Promise<J
               </div>
 
               <Link
-                href="/#contact"
-                className="inline-flex min-h-[44px] w-full items-center justify-center border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#00D9FF] transition-colors hover:bg-[#00D9FF]/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+                href="/?intent=consulting#contact"
+                className="inline-flex min-h-touch w-full items-center justify-center border border-accent-cyan/40 bg-accent-cyan/10 px-4 py-3 font-mono text-micro font-semibold uppercase tracking-wider text-accent-cyan transition-colors hover:bg-accent-cyan/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
               >
                 DISCUSS A SYSTEM
               </Link>

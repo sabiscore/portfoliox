@@ -97,11 +97,11 @@ export async function POST(request: Request) {
       subject,
       text: `Name: ${data.name}
 Email: ${data.email}
-Company: ${data.company ?? '-'}
-Scope: ${data.scope ?? '-'}
-Type: ${data.inquiryType ?? '-'}
+Company: ${data.company || '-'}
+Scope: ${data.scope || '-'}
+Type: ${data.inquiryType || '-'}
 Timeline: ${data.timeline}
-Stakes: ${data.stakes ?? '-'}
+Stakes: ${data.stakes || '-'}
 
 Message:
 ${data.message}`,

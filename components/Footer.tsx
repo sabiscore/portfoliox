@@ -4,7 +4,10 @@ import React from 'react';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 
 const footerLinkClass =
-  'min-h-11 px-3 inline-flex items-center justify-center gap-1.5 border border-white/15 hover:border-accent-cyan bg-obsidian-surface font-mono text-micro uppercase tracking-wider text-zinc-200 hover:text-accent-cyan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan whitespace-nowrap';
+  'group min-h-touch px-3 inline-flex items-center justify-center gap-1.5 border border-white/15 hover:border-accent-cyan bg-obsidian-surface font-mono text-micro uppercase tracking-wider text-zinc-200 hover:text-accent-cyan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan motion-safe:active:translate-y-px whitespace-nowrap';
+
+const arrowClass =
+  'motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5';
 
 export function Footer(): React.JSX.Element {
   const year = new Date().getFullYear();
@@ -27,7 +30,7 @@ export function Footer(): React.JSX.Element {
 
         <nav aria-label="Footer" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <a href={`mailto:${CONTACT_EMAIL}`} className={footerLinkClass}>
-            EMAIL
+            <span>EMAIL</span>
           </a>
           <a
             href={CV_ASSET_PATH}
@@ -35,7 +38,10 @@ export function Footer(): React.JSX.Element {
             rel="noopener noreferrer"
             className={footerLinkClass}
           >
-            RÉSUMÉ ↗
+            <span>RÉSUMÉ</span>
+            <span aria-hidden="true" className={arrowClass}>
+              ↗
+            </span>
           </a>
           <a
             href="https://github.com/scardubu"
@@ -43,7 +49,10 @@ export function Footer(): React.JSX.Element {
             rel="noopener noreferrer"
             className={footerLinkClass}
           >
-            GITHUB ↗
+            <span>GITHUB</span>
+            <span aria-hidden="true" className={arrowClass}>
+              ↗
+            </span>
           </a>
           <a
             href="https://linkedin.com/in/oscardubu"
@@ -51,7 +60,10 @@ export function Footer(): React.JSX.Element {
             rel="noopener noreferrer"
             className={footerLinkClass}
           >
-            LINKEDIN ↗
+            <span>LINKEDIN</span>
+            <span aria-hidden="true" className={arrowClass}>
+              ↗
+            </span>
           </a>
           <a
             href="https://sabiscore.app"
@@ -59,13 +71,16 @@ export function Footer(): React.JSX.Element {
             rel="noopener noreferrer"
             className={footerLinkClass}
           >
-            SABISCORE.APP ↗
+            <span>SABISCORE.APP</span>
+            <span aria-hidden="true" className={arrowClass}>
+              ↗
+            </span>
           </a>
           <Link href="/writing" className={footerLinkClass}>
-            WRITING
+            <span>WRITING</span>
           </Link>
           <a href="/rss.xml" className={footerLinkClass}>
-            RSS
+            <span>RSS</span>
           </a>
           <a
             href="https://github.com/sabiscore/portfoliox"
@@ -73,7 +88,10 @@ export function Footer(): React.JSX.Element {
             rel="noopener noreferrer"
             className={footerLinkClass}
           >
-            SITE SOURCE ↗
+            <span>SITE SOURCE</span>
+            <span aria-hidden="true" className={arrowClass}>
+              ↗
+            </span>
           </a>
         </nav>
       </div>

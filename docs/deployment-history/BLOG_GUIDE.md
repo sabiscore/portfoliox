@@ -70,7 +70,7 @@ featured: false                          # Optional (boolean)
 
 ### Code Blocks
 
-Use fenced code blocks with an explicit language identifier:
+Use fenced code blocks with an explicit language identifier. [`mdx-components.tsx`](../../mdx-components.tsx) wraps every `<pre>` block in [`CodeBlockClient`](../../components/CodeBlockClient.tsx) with a language header, `COPY` button (`>= 44px` touch target + polite live-region feedback), and horizontal-scroll-safe `.mdx-code-pre` typography:
 
 ````markdown
 ```python
@@ -79,11 +79,13 @@ async def score_fixture(payload: ScoreRequest) -> ScoreResponse:
 ```
 ````
 
-### Links & Headings
+### Links, Headings & Automatic Outline
 
-- Headings (`h2`, `h3`) automatically receive `scroll-mt-24` and slug IDs via `rehype-slug` + `mdx-components.tsx`.
+- `h2` headings are extracted automatically by `extractMarkdownHeadings` + `slugifyHeading` in [`lib/content.ts`](../../lib/content.ts) (matching `rehype-slug` / `github-slugger`) to populate the sticky [`ArticleOutline`](../../components/ArticleOutline.tsx) sidebar ("On this page" TOC + one-click **Copy section link**).
+- `h2` and `h3` headings receive `scroll-mt-24` and slug IDs via `rehype-slug` + `mdx-components.tsx`; `h2` headings also expose a hover/focus `#` permalink anchor.
 - External links automatically open in a new tab with `rel="noopener noreferrer"`.
 - Internal links should target canonical routes (`/writing/[slug]`, `/work/[slug]`, `/#contact`).
+- To cross-link a new article with matching case studies on `/writing`, `/writing/[slug]`, and `/work/[slug]`, add its slug mapping to `WRITING_TO_WORK_SLUGS` in [`lib/work-meta.ts`](../../lib/work-meta.ts).
 
 ### Images
 

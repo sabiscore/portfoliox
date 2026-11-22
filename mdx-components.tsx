@@ -1,6 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 import type { MDXComponents } from 'mdx/types';
 
+import { ArchDecision } from '@/components/ArchDecision';
+import { CodeBlockClient } from '@/components/CodeBlockClient';
+
 type HeadingProps = ComponentPropsWithoutRef<'h1'>;
 type ParagraphProps = ComponentPropsWithoutRef<'p'>;
 type AnchorProps = ComponentPropsWithoutRef<'a'>;
@@ -12,13 +15,14 @@ type OrderedListProps = ComponentPropsWithoutRef<'ol'>;
 type ListItemProps = ComponentPropsWithoutRef<'li'>;
 type BlockquoteProps = ComponentPropsWithoutRef<'blockquote'>;
 type CodeProps = ComponentPropsWithoutRef<'code'> & { 'data-language'?: string };
-type PreProps = ComponentPropsWithoutRef<'pre'>;
+type PreProps = ComponentPropsWithoutRef<'pre'> & { 'data-language'?: string };
 type TableProps = ComponentPropsWithoutRef<'table'>;
 type ThProps = ComponentPropsWithoutRef<'th'>;
 type TdProps = ComponentPropsWithoutRef<'td'>;
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
+    ArchDecision,
     h1: ({ children, ...props }: HeadingProps) => (
       <h1
         className="mt-10 mb-4 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl"
@@ -27,17 +31,27 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </h1>
     ),
-    h2: ({ children, ...props }: ComponentPropsWithoutRef<'h2'>) => (
+    h2: ({ children, id, ...props }: ComponentPropsWithoutRef<'h2'>) => (
       <h2
-        className="mt-10 mb-4 border-b border-white/10 pb-3 font-display text-2xl font-bold tracking-tight text-white scroll-mt-24"
+        id={id}
+        className="group mt-10 mb-4 scroll-mt-24 border-b border-white/10 pb-3 font-display text-2xl font-bold tracking-tight text-white"
         {...props}
       >
         {children}
+        {id ? (
+          <a
+            href={`#${id}`}
+            aria-label="Direct link to section"
+            className="ml-2 inline-block font-mono text-base font-normal text-zinc-400 opacity-0 transition-opacity hover:text-accent-cyan focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan group-hover:opacity-100 motion-reduce:transition-none"
+          >
+            #
+          </a>
+        ) : null}
       </h2>
     ),
     h3: ({ children, ...props }: ComponentPropsWithoutRef<'h3'>) => (
       <h3
-        className="mt-7 mb-2.5 font-display text-xl font-semibold text-[#00D9FF] scroll-mt-24"
+        className="mt-7 mb-2.5 scroll-mt-24 font-display text-xl font-semibold text-accent-cyan"
         {...props}
       >
         {children}
@@ -55,7 +69,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
           href={href}
           target={target ?? (isExternal ? '_blank' : undefined)}
           rel={rel ?? (isExternal ? 'noopener noreferrer' : undefined)}
-          className="font-medium text-[#00D9FF] underline decoration-[#00D9FF]/50 underline-offset-4 transition-colors hover:text-white hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9FF]"
+          className="font-medium text-accent-cyan underline decoration-accent-cyan/50 underline-offset-4 transition-colors hover:text-white hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
           {...props}
         >
           {children}
@@ -90,26 +104,21 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ),
     blockquote: ({ children, ...props }: BlockquoteProps) => (
       <blockquote
-        className="my-6 border-l-2 border-[#00D9FF] bg-[#0E0E10] px-4 py-3 font-mono text-xs text-zinc-200"
+        className="my-6 border-l-2 border-accent-cyan bg-obsidian-surface px-4 py-3 font-mono text-xs text-zinc-200"
         {...props}
       >
         {children}
       </blockquote>
     ),
     pre: ({ children, ...props }: PreProps) => (
-      <pre
-        className="my-6 max-w-full overflow-x-auto border border-white/10 bg-[#0E0E10] py-4 text-[13px] leading-6 [&>code]:grid [&_[data-line]]:px-4"
-        {...props}
-      >
-        {children}
-      </pre>
+      <CodeBlockClient {...props}>{children}</CodeBlockClient>
     ),
     code: ({ children, className, ...props }: CodeProps) => {
       const isInline = !className && !props['data-language'];
       if (isInline) {
         return (
           <code
-            className="border border-white/10 bg-[#0E0E10] px-1.5 py-0.5 font-mono text-xs text-[#00D9FF]"
+            className="border border-white/10 bg-obsidian-surface px-1.5 py-0.5 font-mono text-xs text-accent-cyan"
             {...props}
           >
             {children}
@@ -123,7 +132,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       );
     },
     table: ({ children, ...props }: TableProps) => (
-      <div className="my-6 w-full overflow-x-auto border border-white/10 bg-[#0E0E10]">
+      <div className="my-6 w-full overflow-x-auto border border-white/10 bg-obsidian-surface">
         <table className="w-full border-collapse text-left font-mono text-xs" {...props}>
           {children}
         </table>
@@ -131,7 +140,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ),
     th: ({ children, ...props }: ThProps) => (
       <th
-        className="border-b border-white/10 bg-[#08090C] px-4 py-3 font-semibold text-[#00D9FF] uppercase"
+        className="border-b border-white/10 bg-obsidian-base px-4 py-3 font-semibold uppercase text-accent-cyan"
         {...props}
       >
         {children}

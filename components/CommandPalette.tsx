@@ -2,7 +2,7 @@
 
 import { ArrowUpRight, Code2, FileText, Layers, Search, Terminal, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { STATIC_PALETTE_ITEMS, type PaletteItem } from '@/constants/palette';
 import { CV_ASSET_PATH } from '@/lib/config';
@@ -21,7 +21,7 @@ const SECTION_COMMANDS: readonly CommandOption[] = [
   {
     id: 'nav-projects',
     label: '01 // Selected Work & Case Studies',
-    subtitle: 'TaxBridge, SabiScore, Yap Engine & UBEC Data Pipeline',
+    subtitle: 'SabiScore, TaxBridge, The Yap Engine & UBEC Data Pipeline',
     category: 'NAVIGATION',
     href: '/#projects',
     keywords: ['projects', 'work', 'case studies', 'flagship'],
@@ -62,10 +62,23 @@ const COMMAND_OPTIONS: readonly CommandOption[] = [
   ...STATIC_PALETTE_ITEMS.map(mapPaletteItem),
 ];
 
+type CommandPaletteWindow = Window & {
+  __commandPaletteRequested?: boolean;
+};
+
 export const CommandPalette: React.FC = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const commandWindow = window as CommandPaletteWindow;
+    if (commandWindow.__commandPaletteRequested) {
+      commandWindow.__commandPaletteRequested = false;
+      return true;
+    }
+    return false;
+  });
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
   const filtered = useMemo(() => {
@@ -80,15 +93,19 @@ export const CommandPalette: React.FC = () => {
     );
   }, [query]);
 
-  const closePalette = useCallback(() => {
+  const closePalette = useCallback((restoreFocus = true) => {
     setOpen(false);
     setQuery('');
     setActiveIndex(0);
+    if (restoreFocus) {
+      previousFocusRef.current?.focus();
+    }
+    previousFocusRef.current = null;
   }, []);
 
   const handleSelect = useCallback(
     (item: CommandOption) => {
-      closePalette();
+      closePalette(false);
       if (item.external) {
         window.open(item.href, '_blank', 'noopener,noreferrer');
       } else {
@@ -106,7 +123,15 @@ export const CommandPalette: React.FC = () => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
-        setOpen((prev) => !prev);
+        const commandWindow = window as CommandPaletteWindow;
+        commandWindow.__commandPaletteRequested = false;
+        if (open) {
+          closePalette();
+        } else {
+          previousFocusRef.current =
+            document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          setOpen(true);
+        }
         return;
       }
 
@@ -127,8 +152,22 @@ export const CommandPalette: React.FC = () => {
       }
     };
 
+    const handleOpenRequest = () => {
+      const commandWindow = window as CommandPaletteWindow;
+      commandWindow.__commandPaletteRequested = false;
+      if (!open) {
+        previousFocusRef.current =
+          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      }
+      setOpen(true);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('command-palette:open', handleOpenRequest);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('command-palette:open', handleOpenRequest);
+    };
   }, [activeIndex, closePalette, filtered, handleSelect, open]);
 
   if (!open) return null;
@@ -158,7 +197,7 @@ export const CommandPalette: React.FC = () => {
           />
           <button
             type="button"
-            onClick={closePalette}
+            onClick={() => closePalette()}
             aria-label="Close command palette"
             className="min-h-touch min-w-touch bg-obsidian-base hover:border-accent-cyan hover:text-accent-cyan focus-visible:ring-accent-cyan inline-flex items-center justify-center border border-white/15 text-zinc-300 transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >

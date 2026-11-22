@@ -10,7 +10,7 @@ import { generatePersonSchema } from '@/app/lib/structured-data';
 
 export default function HomePage(): React.JSX.Element {
   return (
-    <div className="relative min-h-screen bg-[#08090C] text-white selection:bg-[#00D9FF] selection:text-[#08090C]">
+    <div className="bg-obsidian-base selection:bg-accent-cyan selection:text-obsidian-base relative min-h-screen text-white">
       <GradientMeshMotion />
       <Navbar />
       <main id="main-content" tabIndex={-1}>

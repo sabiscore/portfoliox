@@ -52,7 +52,7 @@ describe('contactSchema honeypot contract', () => {
     expect(result.success).toBe(false);
   });
 
-  it('requires the stakes and timeline fields in the API contract', () => {
+  it('requires the stakes and timeline fields for consulting inquiries', () => {
     const incompleteBrief = {
       name: validBrief.name,
       email: validBrief.email,
@@ -60,5 +60,23 @@ describe('contactSchema honeypot contract', () => {
     };
 
     expect(contactSchema.safeParse(incompleteBrief).success).toBe(false);
+  });
+
+  it('allows quick recruiter hiring inquiries without consulting stakes', () => {
+    const hiringBrief = {
+      name: 'Adaobi Okafor',
+      email: 'recruiter@company.com',
+      company: 'Fintech Co',
+      inquiryType: 'job',
+      timeline: 'exploring',
+      message: 'Hiring for a Staff Backend Engineer role on our core payments platform.',
+    };
+
+    const result = contactSchema.safeParse(hiringBrief);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.inquiryType).toBe('job');
+      expect(result.data.stakes).toBe('');
+    }
   });
 });

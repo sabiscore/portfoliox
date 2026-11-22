@@ -36,12 +36,12 @@ export function StaticSectionIntro({
       <div>
         <p
           className={clsx(
-            'flex items-center gap-2.5 font-mono text-xs tracking-[0.2em] uppercase',
+            'flex items-center gap-2.5 font-mono text-xs tracking-section uppercase',
             eyebrowClassName
           )}
         >
           {eyebrowNumber ? (
-            <span className="font-bold text-[#00D9FF]" aria-hidden="true">
+            <span className="font-bold text-accent-cyan" aria-hidden="true">
               {eyebrowNumber}
             </span>
           ) : null}

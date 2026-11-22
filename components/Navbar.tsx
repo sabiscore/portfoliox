@@ -97,6 +97,12 @@ export function Navbar(): React.JSX.Element {
     setIsMobileMenuOpen(false);
   }, []);
 
+  const openCommandPalette = useCallback(() => {
+    const commandWindow = window as Window & { __commandPaletteRequested?: boolean };
+    commandWindow.__commandPaletteRequested = true;
+    window.dispatchEvent(new CustomEvent('command-palette:open'));
+  }, []);
+
   const handleSamePageAnchorClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>, href: string, closeDrawer = false) => {
       if (closeDrawer) closeMobileMenu();
@@ -229,6 +235,18 @@ export function Navbar(): React.JSX.Element {
             className="min-h-touch min-w-touch bg-obsidian-surface hover:border-accent-cyan hover:text-accent-cyan inline-flex items-center justify-center border border-white/20 font-mono text-sm text-white transition-colors lg:hidden"
           >
             {isMobileMenuOpen ? '✕' : '☰'}
+          </button>
+
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            aria-label="Open quick navigation palette (Command K)"
+            className="min-h-touch bg-obsidian-surface hover:border-accent-cyan hover:text-accent-cyan hidden items-center gap-1.5 border border-white/15 px-3 font-mono text-xs tracking-wider text-zinc-300 transition-colors motion-safe:active:translate-y-px lg:order-first lg:inline-flex"
+          >
+            <span>JUMP</span>
+            <kbd className="border border-white/15 bg-obsidian-base px-1.5 py-0.5 text-2xs text-zinc-400">
+              ⌘K
+            </kbd>
           </button>
         </div>
       </nav>

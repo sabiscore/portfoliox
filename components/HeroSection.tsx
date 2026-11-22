@@ -31,26 +31,26 @@ interface DesignTheme {
 const DESIGN_THEMES: readonly DesignTheme[] = [
   {
     code: '01',
-    title: 'Local model inference',
-    spec: 'Quantized GGUF workflows with local execution paths where the project environment supports them.',
+    title: 'Local-first AI workflows',
+    spec: 'Runs models locally where host hardware permits — reducing external API dependency while keeping outputs schema-checked.',
     focusTag: 'LOCAL INFERENCE',
   },
   {
     code: '02',
-    title: 'Out-of-core data processing',
-    spec: 'Polars, PyArrow, and DuckDB pipelines for analytical workloads with explicit memory constraints.',
+    title: 'Fast data on tight hardware',
+    spec: 'Processes large analytical workloads on modest servers using memory-bounded Polars, PyArrow, and DuckDB pipelines.',
     focusTag: 'BOUNDED DATA',
   },
   {
     code: '03',
-    title: 'Quantitative model evaluation',
-    spec: 'Market de-vigging, Dixon-Coles modelling, calibration checks, and conservative decision rules.',
+    title: 'Honest probability modeling',
+    spec: 'Evaluates football forecasts against live market odds with overround removal, calibration checks, and conservative decision rules.',
     focusTag: 'MODEL EVALUATION',
   },
   {
     code: '04',
-    title: 'Resilient fintech workflows',
-    spec: 'Offline-first mobile queues, runtime schema validation, and idempotent API boundaries; provider integrations are tracked explicitly.',
+    title: 'Resilient financial workflows',
+    spec: 'Protects SME tax filings from duplicate writes and unstable mobile networks via offline queues and replay-safe APIs.',
     focusTag: 'RECOVERY DESIGN',
   },
 ] as const;
@@ -110,9 +110,10 @@ export function HeroSection(): React.JSX.Element {
             </h1>
 
             <p className="type-lede mt-6 max-w-prose text-zinc-300">
-              <strong className="font-semibold text-white">Oscar Ndugbu</strong> builds backend
-              services, data platforms, AI infrastructure, and fintech systems with explicit
-              failure boundaries, observable behavior, and deliberate recovery paths.
+              <strong className="font-semibold text-white">Oscar Ndugbu</strong> is a Staff Backend
+              and Platform Engineer with a decade of federal-scale data systems experience —
+              building fault-tolerant fintech platforms, national data pipelines, and real-time AI
+              products engineered to fail safely and run fast on tight hardware.
             </p>
 
             {/* Primary and secondary calls to action: 48px minimum touch geometry */}
@@ -217,7 +218,7 @@ export function HeroSection(): React.JSX.Element {
               Design focus
             </h2>
             <p className="text-sm text-zinc-400">
-              The recurring engineering themes across the project records.
+              Four engineering habits behind every production system below.
             </p>
           </div>
           <ol

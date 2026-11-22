@@ -61,6 +61,7 @@ export function DeferredCommandPalette() {
 
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
         requestMount();
       }
     };

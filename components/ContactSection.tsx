@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   CONTACT_INQUIRY_TYPES,
@@ -11,9 +11,12 @@ import {
 import { useCopyEmail } from '@/components/CopyEmail';
 import { CONTACT_EMAIL, CV_ASSET_PATH } from '@/lib/config';
 
+type ContactMode = 'hiring' | 'consulting';
+
 interface InquiryPayload {
   name: string;
   email: string;
+  company: string;
   scope: (typeof CONTACT_SCOPES)[number];
   inquiryType: (typeof CONTACT_INQUIRY_TYPES)[number];
   timeline: (typeof CONTACT_TIMELINES)[number];
@@ -21,15 +24,18 @@ interface InquiryPayload {
   message: string;
 }
 
-const INITIAL_PAYLOAD: InquiryPayload = {
+const INITIAL_HIRING_PAYLOAD: InquiryPayload = {
   name: '',
   email: '',
+  company: '',
   scope: 'Backend & Platform Infrastructure',
-  inquiryType: 'consulting',
+  inquiryType: 'job',
   timeline: 'exploring',
   stakes: '',
   message: '',
 };
+
+const CONSULTING_INQUIRY_TYPES = ['consulting', 'collaboration', 'advisory'] as const;
 
 const INQUIRY_TYPE_LABELS: Record<InquiryPayload['inquiryType'], string> = {
   job: 'Staff / principal role',
@@ -63,6 +69,7 @@ const ENGAGEMENT_FORMATS: ReadonlyArray<{ title: string; detail: string }> = [
 const FIELD_IDS: Partial<Record<keyof InquiryPayload, string>> = {
   name: 'contact-name',
   email: 'contact-email',
+  company: 'contact-company',
   inquiryType: 'contact-inquiry-type',
   timeline: 'contact-timeline',
   scope: 'contact-scope',
@@ -70,13 +77,65 @@ const FIELD_IDS: Partial<Record<keyof InquiryPayload, string>> = {
   message: 'contact-message',
 };
 
+function readIntentFromLocation(): 'hiring' | 'consulting' | 'collaboration' | 'advisory' | null {
+  if (typeof window === 'undefined') return null;
+
+  const searchIntent = new URLSearchParams(window.location.search).get('intent');
+  const hashQueryIndex = window.location.hash.indexOf('?');
+  const hashIntent =
+    hashQueryIndex >= 0
+      ? new URLSearchParams(window.location.hash.slice(hashQueryIndex + 1)).get('intent')
+      : null;
+
+  const raw = (hashIntent ?? searchIntent ?? '').trim().toLowerCase();
+  if (raw === 'hiring' || raw === 'job') return 'hiring';
+  if (raw === 'consulting' || raw === 'collaboration' || raw === 'advisory') return raw;
+  return null;
+}
+
 export function ContactSection(): React.JSX.Element {
-  const [formState, setFormState] = useState<InquiryPayload>(INITIAL_PAYLOAD);
+  const [mode, setMode] = useState<ContactMode>('hiring');
+  const [formState, setFormState] = useState<InquiryPayload>(INITIAL_HIRING_PAYLOAD);
   const [status, setStatus] = useState<'IDLE' | 'SUBMITTING' | 'SENT' | 'ERROR'>('IDLE');
   const [errorMessage, setErrorMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof InquiryPayload, string>>>({});
   const directEmail = CONTACT_EMAIL;
   const { status: copyState, copy: handleCopyEmail } = useCopyEmail(directEmail);
+
+  useEffect(() => {
+    const syncIntentFromUrl = () => {
+      const intent = readIntentFromLocation();
+      if (!intent) return;
+      if (intent === 'hiring') {
+        setMode('hiring');
+        setFormState((current) => ({ ...current, inquiryType: 'job' }));
+      } else {
+        setMode('consulting');
+        setFormState((current) => ({ ...current, inquiryType: intent }));
+      }
+    };
+
+    syncIntentFromUrl();
+    window.addEventListener('hashchange', syncIntentFromUrl);
+    window.addEventListener('popstate', syncIntentFromUrl);
+    return () => {
+      window.removeEventListener('hashchange', syncIntentFromUrl);
+      window.removeEventListener('popstate', syncIntentFromUrl);
+    };
+  }, []);
+
+  const switchMode = (nextMode: ContactMode) => {
+    setMode(nextMode);
+    setFieldErrors({});
+    if (status === 'ERROR' || status === 'SENT') {
+      setStatus('IDLE');
+      setErrorMessage('');
+    }
+    setFormState((current) => ({
+      ...current,
+      inquiryType: nextMode === 'hiring' ? 'job' : current.inquiryType === 'job' ? 'consulting' : current.inquiryType,
+    }));
+  };
 
   const updateField = <K extends keyof InquiryPayload>(field: K, value: InquiryPayload[K]) => {
     setFormState((current) => ({ ...current, [field]: value }));
@@ -98,10 +157,22 @@ export function ContactSection(): React.JSX.Element {
     setErrorMessage('');
     setFieldErrors({});
 
-    const parsed = contactSchema.safeParse({
-      ...formState,
-      honeypot: '',
-    });
+    const submissionPayload =
+      mode === 'hiring'
+        ? {
+            ...formState,
+            scope: undefined,
+            inquiryType: 'job' as const,
+            stakes: '',
+            honeypot: '',
+          }
+        : {
+            ...formState,
+            company: formState.company || undefined,
+            honeypot: '',
+          };
+
+    const parsed = contactSchema.safeParse(submissionPayload);
 
     if (!parsed.success) {
       const nextErrors: Partial<Record<keyof InquiryPayload, string>> = {};
@@ -137,7 +208,10 @@ export function ContactSection(): React.JSX.Element {
 
       setStatus('SENT');
       setFieldErrors({});
-      setFormState(INITIAL_PAYLOAD);
+      setFormState({
+        ...INITIAL_HIRING_PAYLOAD,
+        inquiryType: mode === 'hiring' ? 'job' : 'consulting',
+      });
     } catch {
       setStatus('ERROR');
       setErrorMessage(
@@ -171,8 +245,8 @@ export function ContactSection(): React.JSX.Element {
               Discuss a system.
             </h2>
             <p className="text-sm leading-relaxed text-zinc-300 sm:text-base">
-              For backend and platform opportunities, architecture reviews, technical
-              collaborations, and advisory work across Nigeria and remote teams.
+              For Staff and Principal engineering roles, scoped architecture reviews, and technical
+              collaborations across Nigeria and remote teams.
             </p>
           </header>
 
@@ -274,6 +348,48 @@ export function ContactSection(): React.JSX.Element {
         </div>
 
         <div className="bg-obsidian-surface min-w-0 border border-white/10 p-5 sm:p-8 lg:col-span-7">
+          {/* Adaptive Intent Selector: fast recruiter note vs full consulting brief */}
+          <div
+            role="group"
+            aria-label="Inquiry mode"
+            className="mb-6 grid grid-cols-1 gap-2 border-b border-white/10 pb-5 sm:grid-cols-2"
+          >
+            <button
+              type="button"
+              aria-pressed={mode === 'hiring'}
+              onClick={() => switchMode('hiring')}
+              className={`min-h-touch flex flex-col items-start justify-center border px-4 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan ${
+                mode === 'hiring'
+                  ? 'border-accent-cyan bg-accent-cyan/10 text-white'
+                  : 'border-white/15 bg-obsidian-base text-zinc-300 hover:border-white/30 hover:text-white'
+              }`}
+            >
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                Hiring / Staff Role
+              </span>
+              <span className="mt-0.5 text-xs text-zinc-400">
+                Quick recruiter or hiring-manager note
+              </span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={mode === 'consulting'}
+              onClick={() => switchMode('consulting')}
+              className={`min-h-touch flex flex-col items-start justify-center border px-4 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan ${
+                mode === 'consulting'
+                  ? 'border-accent-cyan bg-accent-cyan/10 text-white'
+                  : 'border-white/15 bg-obsidian-base text-zinc-300 hover:border-white/30 hover:text-white'
+              }`}
+            >
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                Architecture &amp; Consulting
+              </span>
+              <span className="mt-0.5 text-xs text-zinc-400">
+                Scoped system audit, build, or advisory
+              </span>
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -321,7 +437,7 @@ export function ContactSection(): React.JSX.Element {
                   aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
                   value={formState.email}
                   onChange={(event) => updateField('email', event.target.value)}
-                  placeholder="cto@organization.com"
+                  placeholder={mode === 'hiring' ? 'recruiter@company.com' : 'cto@organization.com'}
                   className={getFieldClass('email')}
                 />
                 {fieldErrors.email ? (
@@ -332,117 +448,172 @@ export function ContactSection(): React.JSX.Element {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label
-                  htmlFor="contact-inquiry-type"
-                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
-                >
-                  Engagement type *
-                </label>
-                <select
-                  id="contact-inquiry-type"
-                  name="inquiryType"
-                  value={formState.inquiryType}
-                  onChange={(event) =>
-                    updateField('inquiryType', event.target.value as InquiryPayload['inquiryType'])
-                  }
-                  className={getFieldClass('inquiryType')}
-                >
-                  {CONTACT_INQUIRY_TYPES.map((type) => (
-                    <option key={type} value={type} className="bg-obsidian-base text-white">
-                      {INQUIRY_TYPE_LABELS[type]}
-                    </option>
-                  ))}
-                </select>
+            {mode === 'hiring' ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="contact-company"
+                    className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
+                  >
+                    Company / Team
+                  </label>
+                  <input
+                    id="contact-company"
+                    name="company"
+                    autoComplete="organization"
+                    maxLength={120}
+                    value={formState.company}
+                    onChange={(event) => updateField('company', event.target.value)}
+                    placeholder="Company name or team (optional)"
+                    className={getFieldClass('company')}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="contact-timeline"
+                    className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
+                  >
+                    Timeline *
+                  </label>
+                  <select
+                    id="contact-timeline"
+                    name="timeline"
+                    value={formState.timeline}
+                    onChange={(event) =>
+                      updateField('timeline', event.target.value as InquiryPayload['timeline'])
+                    }
+                    className={getFieldClass('timeline')}
+                  >
+                    {CONTACT_TIMELINES.map((timeline) => (
+                      <option key={timeline} value={timeline} className="bg-obsidian-base text-white">
+                        {TIMELINE_LABELS[timeline]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="contact-timeline"
-                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
-                >
-                  Timeline *
-                </label>
-                <select
-                  id="contact-timeline"
-                  name="timeline"
-                  value={formState.timeline}
-                  onChange={(event) =>
-                    updateField('timeline', event.target.value as InquiryPayload['timeline'])
-                  }
-                  className={getFieldClass('timeline')}
-                >
-                  {CONTACT_TIMELINES.map((timeline) => (
-                    <option key={timeline} value={timeline} className="bg-obsidian-base text-white">
-                      {TIMELINE_LABELS[timeline]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="contact-inquiry-type"
+                      className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
+                    >
+                      Engagement type *
+                    </label>
+                    <select
+                      id="contact-inquiry-type"
+                      name="inquiryType"
+                      value={formState.inquiryType}
+                      onChange={(event) =>
+                        updateField(
+                          'inquiryType',
+                          event.target.value as InquiryPayload['inquiryType']
+                        )
+                      }
+                      className={getFieldClass('inquiryType')}
+                    >
+                      {CONSULTING_INQUIRY_TYPES.map((type) => (
+                        <option key={type} value={type} className="bg-obsidian-base text-white">
+                          {INQUIRY_TYPE_LABELS[type]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="contact-timeline"
+                      className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
+                    >
+                      Timeline *
+                    </label>
+                    <select
+                      id="contact-timeline"
+                      name="timeline"
+                      value={formState.timeline}
+                      onChange={(event) =>
+                        updateField('timeline', event.target.value as InquiryPayload['timeline'])
+                      }
+                      className={getFieldClass('timeline')}
+                    >
+                      {CONTACT_TIMELINES.map((timeline) => (
+                        <option
+                          key={timeline}
+                          value={timeline}
+                          className="bg-obsidian-base text-white"
+                        >
+                          {TIMELINE_LABELS[timeline]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <label
-                htmlFor="contact-scope"
-                className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
-              >
-                System domain *
-              </label>
-              <select
-                id="contact-scope"
-                name="scope"
-                value={formState.scope}
-                onChange={(event) =>
-                  updateField('scope', event.target.value as InquiryPayload['scope'])
-                }
-                className={getFieldClass('scope')}
-              >
-                {CONTACT_SCOPES.map((scope) => (
-                  <option key={scope} value={scope} className="bg-obsidian-base text-white">
-                    {scope}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="contact-scope"
+                    className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
+                  >
+                    System domain *
+                  </label>
+                  <select
+                    id="contact-scope"
+                    name="scope"
+                    value={formState.scope}
+                    onChange={(event) =>
+                      updateField('scope', event.target.value as InquiryPayload['scope'])
+                    }
+                    className={getFieldClass('scope')}
+                  >
+                    {CONTACT_SCOPES.map((scope) => (
+                      <option key={scope} value={scope} className="bg-obsidian-base text-white">
+                        {scope}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="space-y-2">
-              <div className="flex items-baseline justify-between gap-3">
-                <label
-                  htmlFor="contact-stakes"
-                  className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
-                >
-                  Operational or business impact *
-                </label>
-                <span className="text-2xs font-mono text-zinc-400">
-                  {formState.stakes.length}/240
-                </span>
-              </div>
-              <input
-                id="contact-stakes"
-                name="stakes"
-                required
-                minLength={5}
-                maxLength={240}
-                aria-invalid={Boolean(fieldErrors.stakes) || undefined}
-                value={formState.stakes}
-                onChange={(event) => updateField('stakes', event.target.value)}
-                placeholder="What is at risk if this remains unresolved?"
-                aria-describedby={
-                  fieldErrors.stakes
-                    ? 'contact-stakes-error contact-stakes-hint'
-                    : 'contact-stakes-hint'
-                }
-                className={getFieldClass('stakes')}
-              />
-              {fieldErrors.stakes ? (
-                <p id="contact-stakes-error" className="font-mono text-xs text-red-300">
-                  {fieldErrors.stakes}
-                </p>
-              ) : null}
-              <p id="contact-stakes-hint" className="text-xs leading-5 text-zinc-400">
-                A sentence is enough. This helps establish scope before the first conversation.
-              </p>
-            </div>
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <label
+                      htmlFor="contact-stakes"
+                      className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
+                    >
+                      Operational or business impact *
+                    </label>
+                    <span className="text-2xs font-mono text-zinc-400">
+                      {formState.stakes.length}/240
+                    </span>
+                  </div>
+                  <input
+                    id="contact-stakes"
+                    name="stakes"
+                    required
+                    minLength={5}
+                    maxLength={240}
+                    aria-invalid={Boolean(fieldErrors.stakes) || undefined}
+                    value={formState.stakes}
+                    onChange={(event) => updateField('stakes', event.target.value)}
+                    placeholder="What is at risk if this remains unresolved?"
+                    aria-describedby={
+                      fieldErrors.stakes
+                        ? 'contact-stakes-error contact-stakes-hint'
+                        : 'contact-stakes-hint'
+                    }
+                    className={getFieldClass('stakes')}
+                  />
+                  {fieldErrors.stakes ? (
+                    <p id="contact-stakes-error" className="font-mono text-xs text-red-300">
+                      {fieldErrors.stakes}
+                    </p>
+                  ) : null}
+                  <p id="contact-stakes-hint" className="text-xs leading-5 text-zinc-400">
+                    A sentence is enough. This helps establish scope before the first conversation.
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-3">
@@ -450,7 +621,7 @@ export function ContactSection(): React.JSX.Element {
                   htmlFor="contact-message"
                   className="block font-mono text-xs tracking-wider text-zinc-300 uppercase"
                 >
-                  Constraints and objectives *
+                  {mode === 'hiring' ? 'Role and team context *' : 'Constraints and objectives *'}
                 </label>
                 <span className="text-2xs font-mono text-zinc-400">
                   {formState.message.length}/500
@@ -467,7 +638,11 @@ export function ContactSection(): React.JSX.Element {
                 aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
                 value={formState.message}
                 onChange={(event) => updateField('message', event.target.value)}
-                placeholder="Outline the system, constraints, desired outcome, or role..."
+                placeholder={
+                  mode === 'hiring'
+                    ? 'Share the role, team scope, location or remote policy, and next step...'
+                    : 'Outline the system, constraints, and desired outcome...'
+                }
                 className={`${getFieldClass('message')} min-h-32 resize-y`}
               />
               {fieldErrors.message ? (
@@ -500,7 +675,11 @@ export function ContactSection(): React.JSX.Element {
               disabled={status === 'SUBMITTING'}
               className="min-h-cta border-accent-cyan bg-accent-cyan text-obsidian-base hover:border-accent-cyanHover hover:bg-accent-cyanHover focus-visible:ring-accent-cyan focus-visible:ring-offset-obsidian-surface inline-flex w-full items-center justify-center border px-6 py-3 font-mono text-xs font-bold tracking-wider uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-wait disabled:opacity-60 sm:text-sm"
             >
-              {status === 'SUBMITTING' ? 'SENDING INQUIRY…' : 'SEND INQUIRY ↗'}
+              {status === 'SUBMITTING'
+                ? 'SENDING INQUIRY…'
+                : mode === 'hiring'
+                  ? 'SEND ROLE INQUIRY ↗'
+                  : 'SEND INQUIRY ↗'}
             </button>
           </form>
         </div>

@@ -121,6 +121,48 @@ body {
     .activity-detail-grid {
       grid-template-columns: minmax(0, 1fr) minmax(220px, 0.7fr);
     }
+
+    .work-detail-grid {
+      grid-template-columns: minmax(0, 1fr) 260px;
+    }
+
+    .writing-featured-grid {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+    }
+  }
+
+  .writing-index-row {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+  }
+
+  @media (min-width: 640px) {
+    .writing-list-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .writing-index-row {
+      grid-template-columns: 2.5rem minmax(0, 1fr) 9rem;
+    }
+  }
+
+  /* Stable minimum height for dual-layer project panels to prevent CLS on toggle */
+  .card-panel-stable {
+    min-height: 11.5rem;
+  }
+
+  /* MDX rehype-pretty-code block typography without arbitrary Tailwind brackets */
+  .mdx-code-pre {
+    font-size: 0.8125rem;
+    line-height: 1.5rem;
+  }
+
+  .mdx-code-pre > code {
+    display: grid;
+  }
+
+  .mdx-code-pre [data-line] {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   /* Command palette panel container */

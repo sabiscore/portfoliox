@@ -116,12 +116,45 @@ test.describe('Current portfolio interactions', () => {
     await form.locator('#contact-name').fill('A');
     await form.locator('#contact-email').fill('not-an-email');
     await form.locator('#contact-message').fill('short');
-    await form.getByRole('button', { name: /SEND INQUIRY/i }).click();
+    await form.getByRole('button', { name: /SEND .*INQUIRY/i }).click();
 
     await expect(form.getByRole('alert')).toContainText('Check the form');
   });
 
-  test('contact form displays its acknowledgement after a successful dispatch', async ({
+  test('contact form supports quick hiring dispatch without consulting stakes', async ({
+    page,
+  }) => {
+    await gotoHome(page);
+    await page.route('**/api/contact', async (route) => {
+      const payload = route.request().postDataJSON() as Record<string, unknown>;
+      expect(payload).toMatchObject({
+        name: 'Ada Okafor',
+        email: 'recruiter@example.com',
+        company: 'Fintech Co',
+        inquiryType: 'job',
+        timeline: 'month',
+      });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+
+    const form = page.locator('#contact form');
+    await form.locator('#contact-name').fill('Ada Okafor');
+    await form.locator('#contact-email').fill('recruiter@example.com');
+    await form.locator('#contact-company').fill('Fintech Co');
+    await form.locator('#contact-timeline').selectOption('month');
+    await form.locator('#contact-message').fill(
+      'Hiring for a Staff Backend Engineer role on our payments platform.'
+    );
+    await form.getByRole('button', { name: /SEND ROLE INQUIRY/i }).click();
+
+    await expect(form.getByRole('status')).toContainText('Message sent');
+  });
+
+  test('contact form displays its acknowledgement after a successful consulting dispatch', async ({
     page,
   }) => {
     await gotoHome(page);
@@ -142,6 +175,7 @@ test.describe('Current portfolio interactions', () => {
       });
     });
 
+    await page.locator('#contact').getByRole('button', { name: /Architecture & Consulting/i }).click();
     const form = page.locator('#contact form');
     await form.locator('#contact-name').fill('Ada Okafor');
     await form.locator('#contact-email').fill('ada@example.com');
@@ -169,6 +203,7 @@ test.describe('Current portfolio interactions', () => {
       });
     });
 
+    await page.locator('#contact').getByRole('button', { name: /Architecture & Consulting/i }).click();
     const form = page.locator('#contact form');
     await form.locator('#contact-name').fill('Ada Okafor');
     await form.locator('#contact-email').fill('ada@example.com');

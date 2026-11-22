@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import type { ReactNode } from 'react';
 
+import { DeferredCommandPalette } from '@/components/DeferredCommandPalette';
 import { Providers } from './providers';
 import { SITE_URL } from '@/lib/config';
 import './globals.css';
@@ -87,7 +88,10 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <DeferredCommandPalette />
+        </Providers>
       </body>
     </html>
   );

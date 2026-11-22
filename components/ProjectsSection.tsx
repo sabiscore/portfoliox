@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 
+import {
+  FailureFlowStepper,
+  ProjectCardNarrative,
+  type FlowStage,
+} from '@/components/ProjectCardInteractive';
 import { getWorkCases } from '@/lib/content';
 import { STATUS_TONE, WORK_CASE_META, WORK_CASE_ORDER, type EvidenceStatus } from '@/lib/work-meta';
 
@@ -9,11 +14,18 @@ interface ProjectLedgerEntry {
   domain: string;
   status: EvidenceStatus;
   title: string;
-  summary: string;
+  ownership: string;
+  indexHook: string;
+  consumerSummary: string;
+  problemSolved: string;
+  verifiableProof: string;
   constraint: string;
   decision: string;
+  chosen: string;
+  over: string;
   implementationNote: string;
   evidence: string;
+  flowStages: readonly FlowStage[];
   architectureNotes: readonly string[];
   contextualStack: readonly {
     primitive: string;
@@ -28,49 +40,51 @@ interface ProjectLedgerEntry {
 
 const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
   {
-    slug: 'taxbridge',
-    domain: 'COMPLIANCE PLATFORM · FINTECH',
-    status: 'ACTIVE BUILD',
-    title: 'TaxBridge',
-    summary:
-      'A tax workflow platform built around shared API contracts, tenant-scoped data access, background processing, and offline-first mobile sync.',
-    constraint:
-      'SME filings must preserve organization context and avoid duplicate work when mobile connectivity or upstream fiscal services are unreliable.',
-    decision:
-      'The architecture combines PostgreSQL row-level security, transaction-scoped organization context, idempotent background jobs, and a local mobile sync queue.',
-    implementationNote:
-      'Tenant scope, retry semantics, and audit history are explicit design concerns. NRS DigiTax integration and tenant-policy validation remain in progress.',
-    evidence:
-      'Active build. Provider certification and end-to-end fiscalization behavior are not presented as completed.',
-    architectureNotes: [
-      'Database access is designed to bind tenant context within a transaction; policy configuration and transaction lifecycle require integration validation.',
-      'Idempotent queue keys and bounded retry handling isolate upstream fiscalization failures.',
-      'The Expo client uses a local SQLite queue to preserve pending operations when connectivity is unavailable.',
-    ],
-    contextualStack: [
-      { primitive: 'Fastify 5', role: 'API contracts' },
-      { primitive: 'PostgreSQL', role: 'Tenant-scoped data' },
-      { primitive: 'BullMQ + Redis', role: 'Background jobs' },
-      { primitive: 'Expo + SQLite', role: 'Offline sync' },
-    ],
-    caseStudyHref: '/work/taxbridge',
-    sourceHref: 'https://github.com/scardubu/taxbridge',
-  },
-  {
     slug: 'sabiscore',
     domain: 'QUANTITATIVE ML · DATA PLATFORM',
     status: 'PUBLIC DEMO',
     title: 'SabiScore',
-    summary:
-      'A probabilistic football forecasting and market-comparison product spanning data ingestion, feature engineering, ensemble inference, and a research-facing web interface.',
+    ownership: 'End-to-end architect & builder',
+    indexHook: 'Live football match forecasting compared against betting odds',
+    consumerSummary:
+      'Predicts football match outcomes and compares them against live betting odds in a public web dashboard — helping analysts spot mispriced markets instead of relying on guesswork.',
+    problemSolved:
+      'Forecasting dashboards break silently when upstream sports feeds lag, memory spikes, or models go stale mid-season.',
+    verifiableProof:
+      'Live web app at sabiscore.app backed by memory-bounded Polars pipelines, model-versioned Redis caching, and an explicit fallback path.',
     constraint:
       'Prediction quality must remain legible as market data, model versions, and upstream feed quality change.',
     decision:
       'Out-of-core Polars and DuckDB pipelines, model-aware cache namespaces, ensemble evaluation, and an explicit lower-confidence fallback path.',
+    chosen: 'Polars + DuckDB out-of-core features with versioned Redis cache',
+    over: 'In-memory pandas joins and unversioned REST polling',
     implementationNote:
       'The engineering record documents calibration workflows and market comparison. Private uptime, latency, memory, and model-evaluation reports are not reproduced as public benchmarks.',
     evidence:
-      'Public product demo. Operational SLOs and measured predictive performance are not asserted on this page.',
+      'Public live demo available. Operational SLOs and private backtest reports are not asserted as public benchmarks here.',
+    flowStages: [
+      {
+        code: '01',
+        label: 'Feature ingest',
+        boundary: 'Out-of-core Polars + DuckDB joins',
+        failurePrevented:
+          'Streams rolling fixture features within explicit memory ceilings instead of crashing workers on large historical windows.',
+      },
+      {
+        code: '02',
+        label: 'Versioned serving',
+        boundary: 'Model-tagged Redis cache namespaces',
+        failurePrevented:
+          'Prevents stale forecasts from outliving a model retrain by scoping cache keys to the active model version.',
+      },
+      {
+        code: '03',
+        label: 'Graceful fallback',
+        boundary: 'Labeled lower-confidence baseline path',
+        failurePrevented:
+          'Returns a clearly marked baseline estimate instead of opaque errors or silent staleness when upstream feeds degrade.',
+      },
+    ],
     architectureNotes: [
       'Columnar streaming through Polars lazy frames and DuckDB is used for rolling feature joins under explicit resource constraints.',
       'Shin de-vigging is used to remove bookmaker overround before market comparison.',
@@ -86,20 +100,111 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
     demoHref: 'https://sabiscore.app',
   },
   {
+    slug: 'taxbridge',
+    domain: 'COMPLIANCE PLATFORM · FINTECH',
+    status: 'ACTIVE BUILD',
+    title: 'TaxBridge',
+    ownership: 'End-to-end architect & builder',
+    indexHook: 'Offline-capable tax filing backend for Nigerian SMEs',
+    consumerSummary:
+      'Tax filing software for Nigerian small businesses that keeps working offline and protects against duplicate filings when mobile internet or tax portals fail.',
+    problemSolved:
+      'Flaky mobile connectivity and slow government portals routinely cause duplicate submissions and missing audit trails for small business accountants.',
+    verifiableProof:
+      'Public source repository demonstrating PostgreSQL Row-Level Security tenant isolation, replay-safe BullMQ queues, and local SQLite mobile sync.',
+    constraint:
+      'SME filings must preserve organization context and avoid duplicate work when mobile connectivity or upstream fiscal services are unreliable.',
+    decision:
+      'The architecture combines PostgreSQL row-level security, transaction-scoped organization context, idempotent background jobs, and a local mobile sync queue.',
+    chosen: 'Database-layer PostgreSQL RLS + idempotent BullMQ replay',
+    over: 'Application-only tenant filters and naive retry loops',
+    implementationNote:
+      'Tenant scope, retry semantics, and audit history are explicit design concerns. NRS DigiTax integration and tenant-policy validation remain in progress.',
+    evidence:
+      'Public source repository in active build; NRS DigiTax certification and end-to-end fiscalization remain in progress.',
+    flowStages: [
+      {
+        code: '01',
+        label: 'Offline capture',
+        boundary: 'Local Expo + SQLite submission queue',
+        failurePrevented:
+          'Preserves draft and pending filings on-device when mobile networks drop mid-session.',
+      },
+      {
+        code: '02',
+        label: 'Tenant isolation',
+        boundary: 'Transaction-scoped PostgreSQL RLS',
+        failurePrevented:
+          'Binds organization context at the database engine so a missed application filter cannot expose another business.',
+      },
+      {
+        code: '03',
+        label: 'Safe replay',
+        boundary: 'Idempotent BullMQ + Redis workers',
+        failurePrevented:
+          'Deduplicates retries against upstream fiscal providers so network timeouts do not trigger double filings.',
+      },
+    ],
+    architectureNotes: [
+      'Database access is designed to bind tenant context within a transaction; policy configuration and transaction lifecycle require integration validation.',
+      'Idempotent queue keys and bounded retry handling isolate upstream fiscalization failures.',
+      'The Expo client uses a local SQLite queue to preserve pending operations when connectivity is unavailable.',
+    ],
+    contextualStack: [
+      { primitive: 'Fastify 5', role: 'API contracts' },
+      { primitive: 'PostgreSQL RLS', role: 'Tenant isolation' },
+      { primitive: 'BullMQ + Redis', role: 'Replay-safe jobs' },
+      { primitive: 'Expo + SQLite', role: 'Offline sync' },
+    ],
+    caseStudyHref: '/work/taxbridge',
+    sourceHref: 'https://github.com/scardubu/taxbridge',
+  },
+  {
     slug: 'yap-engine',
     domain: 'AI WORKFLOWS · MEDIA PIPELINE',
     status: 'PUBLIC SOURCE',
-    title: 'YapCommerce / Yap Engine',
-    summary:
-      'A stage-oriented media and agent workflow combining local model routing, schema-constrained outputs, CPU-aware synthesis, and restartable tasks.',
+    title: 'The Yap Engine',
+    ownership: 'End-to-end architect & builder',
+    indexHook: 'Resumable local-AI pipeline from creative brief to video',
+    consumerSummary:
+      'Turns a short creative brief into a scripted, voiced, and assembled short-form video using checkpointed AI stages that resume cleanly after crashes instead of starting over.',
+    problemSolved:
+      'Long multi-step AI media pipelines waste compute and fail silently whenever an API times out or a CPU-constrained worker restarts.',
+    verifiableProof:
+      'Open-source workflow engine with content-hashed stage checkpoints, schema-validated model outputs, local GGUF routing, and deterministic FFmpeg assembly.',
     constraint:
       'Long-running generation stages can be interrupted by provider limits, worker restarts, or resource pressure.',
     decision:
       'Local model routing, stage-level checkpoints, content hashes, schema validation, and deterministic media assembly.',
+    chosen: 'Content-hashed stage checkpoints with task-specific local models',
+    over: 'Single monolithic generation calls that restart from zero on failure',
     implementationNote:
       'The project documents restart boundaries and intermediate artifact reuse. Throughput, availability, and cost SLOs are not claimed.',
     evidence:
-      'Public source and architecture record. Deployment-specific performance depends on hardware and model configuration.',
+      'Public source and architecture record; runtime throughput depends on host CPU/GPU and model configuration.',
+    flowStages: [
+      {
+        code: '01',
+        label: 'Local routing',
+        boundary: 'Task-specific GGUF + schema contracts',
+        failurePrevented:
+          'Validates script and storyboard structure between steps before media rendering begins.',
+      },
+      {
+        code: '02',
+        label: 'Checkpoints',
+        boundary: 'Content-hashed intermediate artifacts',
+        failurePrevented:
+          'Resumes interrupted jobs from the failed stage instead of replaying completed inference or audio synthesis.',
+      },
+      {
+        code: '03',
+        label: 'Assembly',
+        boundary: 'Deterministic Kokoro TTS + FFmpeg export',
+        failurePrevented:
+          'Isolates media synthesis and rendering under explicit Redis queue and timeout limits.',
+      },
+    ],
     architectureNotes: [
       'Media processing separates synthesis, assembly, and validation into reviewable stages.',
       'Local model routing and schema validation keep model output handling explicit.',
@@ -107,10 +212,9 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
     ],
     contextualStack: [
       { primitive: 'Local GGUF', role: 'Model routing' },
-      { primitive: 'Fastify + TypeScript', role: 'Workflow API' },
-      { primitive: 'FFmpeg', role: 'Media assembly' },
+      { primitive: 'Fastify + Redis', role: 'API and queue state' },
       { primitive: 'Kokoro TTS', role: 'Speech synthesis' },
-      { primitive: 'Redis', role: 'Queue state' },
+      { primitive: 'FFmpeg', role: 'Media assembly' },
     ],
     caseStudyHref: '/work/yap-engine',
     sourceHref: 'https://github.com/sabiscore/the-yap-engine',
@@ -120,16 +224,47 @@ const SELECTED_PROJECTS: readonly ProjectLedgerEntry[] = [
     domain: 'PUBLIC SECTOR · DATA ENGINEERING',
     status: 'PRIVATE CASE STUDY',
     title: 'UBEC Data Pipeline',
-    summary:
-      'A state-partitioned data ingestion and validation workflow for federal education reporting, described at a non-sensitive architectural level.',
+    ownership: 'Senior Data & Systems Engineer · UBEC HQ',
+    indexHook: 'State-isolated federal education reporting across 36 states',
+    consumerSummary:
+      'Collects, cleans, and validates education reporting data across 36 Nigerian state offices so late or broken files from one state never stall national reporting.',
+    problemSolved:
+      'Federal education reporting previously stalled whenever inconsistent state spreadsheets or delayed submissions broke shared manual reconciliation.',
+    verifiableProof:
+      'Partitioned Python and Apache Airflow architecture with canonical schema checks, probabilistic record linkage, and auditable exception logs.',
     constraint:
       'Incomplete or inconsistent submissions need to remain identifiable without blocking independent reporting work.',
     decision:
       'Partitioned ingestion tasks, canonical schemas, validation stages, and traceable exception records.',
+    chosen: 'Per-state Airflow partitions with probabilistic record linkage',
+    over: 'All-or-nothing national batch imports and exact-match deduplication',
     implementationNote:
       'The case study describes the data workflow at a high level. Confidential outcomes, datasets, and operational figures are not published.',
     evidence:
-      'Private engagement. No confidential artifacts or unverified performance claims are included.',
+      'Private federal engagement documented at a non-sensitive architectural level; confidential records excluded.',
+    flowStages: [
+      {
+        code: '01',
+        label: 'State partitions',
+        boundary: 'Independent per-state Airflow DAG tasks',
+        failurePrevented:
+          'Allows 35 completed state reports to process cleanly while one delayed or broken submission stays visibly isolated.',
+      },
+      {
+        code: '02',
+        label: 'Schema gate',
+        boundary: 'Canonical normalization + record linkage',
+        failurePrevented:
+          'Resolves inconsistent ministry column headers and duplicate school names before aggregation.',
+      },
+      {
+        code: '03',
+        label: 'Audit ledger',
+        boundary: 'PostgreSQL traceable exception records',
+        failurePrevented:
+          'Preserves row-level lineage for every rejected or incomplete entry so analysts can remediate without silent drops.',
+      },
+    ],
     architectureNotes: [
       'State-partitioned ingestion isolates upstream formatting anomalies to individual staging areas.',
       'Validation and exception records preserve traceability for rejected or incomplete rows.',
@@ -214,7 +349,7 @@ async function MoreCaseStudies(): Promise<JSX.Element | null> {
                     ↗
                   </span>
                 </span>
-                <span className="mt-2 line-clamp-3 flex-1 text-sm leading-6 text-zinc-400">
+                <span className="mt-2 flex-1 text-sm leading-6 text-zinc-400">
                   {entry.summary}
                 </span>
                 {meta ? (
@@ -256,8 +391,8 @@ export function ProjectsSection(): JSX.Element {
               Built around real constraints.
             </h2>
             <p className="text-base leading-relaxed text-zinc-300 sm:text-lg">
-              Each project explains the operating constraint and architectural decisions, then
-              states whether its supporting evidence is public, private, or still in progress.
+              Four core systems — each starting in plain English with an on-demand architectural
+              view, clearly labeled as live demo, open source, active build, or private record.
             </p>
           </div>
 
@@ -270,22 +405,33 @@ export function ProjectsSection(): JSX.Element {
                 <li key={project.slug}>
                   <a
                     href={`#project-${project.slug}`}
-                    className="group focus-visible:ring-accent-cyan flex min-h-11 items-center justify-between gap-3 px-4 py-2.5 font-mono text-xs transition-colors hover:bg-white/5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                    className="group focus-visible:ring-accent-cyan flex min-h-touch items-center justify-between gap-3 border-l-2 border-l-transparent px-4 py-2.5 transition-colors hover:border-l-accent-cyan hover:bg-white/5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                   >
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span aria-hidden="true" className="text-accent-cyan/80 shrink-0">
-                        {projectCode(index)}
+                    <span className="min-w-0">
+                      <span className="flex min-w-0 items-center gap-2.5 font-mono text-xs">
+                        <span aria-hidden="true" className="text-accent-cyan/80 shrink-0">
+                          {projectCode(index)}
+                        </span>
+                        <span className="group-hover:text-accent-cyan truncate font-semibold text-zinc-100">
+                          {project.title}
+                        </span>
                       </span>
-                      <span className="group-hover:text-accent-cyan truncate text-zinc-100">
-                        {project.title}
+                      <span className="mt-0.5 block truncate pl-9 font-sans text-xs text-zinc-400">
+                        {project.indexHook}
                       </span>
                     </span>
-                    <span className="text-2xs flex shrink-0 items-center gap-1.5 tracking-wider text-zinc-400 uppercase">
+                    <span className="text-2xs flex shrink-0 items-center gap-1.5 font-mono tracking-wider text-zinc-400 uppercase">
                       <span
                         aria-hidden="true"
                         className={`h-1.5 w-1.5 rounded-full ${STATUS_TONE[project.status].dot}`}
                       />
-                      {project.status}
+                      <span className="hidden sm:inline">{project.status}</span>
+                      <span
+                        aria-hidden="true"
+                        className="text-accent-cyan motion-safe:transition-transform motion-safe:duration-150 motion-safe:group-hover:translate-x-0.5"
+                      >
+                        ›
+                      </span>
                     </span>
                   </a>
                 </li>
@@ -330,26 +476,19 @@ export function ProjectsSection(): JSX.Element {
                     >
                       {project.title}
                     </h3>
-                    <p className="mt-2.5 max-w-prose text-sm leading-6 text-zinc-300 sm:text-base sm:leading-7">
-                      {project.summary}
-                    </p>
 
-                    <dl className="mt-5 space-y-3.5 border-t border-white/10 pt-4">
-                      <div>
-                        <dt className="text-2xs tracking-domain text-accent-cyan font-mono font-bold uppercase">
-                          Constraint
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-zinc-300">
-                          {project.constraint}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-2xs tracking-domain text-accent-cyan font-mono font-bold uppercase">
-                          Architecture decision
-                        </dt>
-                        <dd className="mt-1 text-sm leading-6 text-zinc-300">{project.decision}</dd>
-                      </div>
-                    </dl>
+                    <ProjectCardNarrative
+                      title={project.title}
+                      ownership={project.ownership}
+                      consumerSummary={project.consumerSummary}
+                      problemSolved={project.problemSolved}
+                      verifiableProof={project.verifiableProof}
+                      constraint={project.constraint}
+                      decision={project.decision}
+                      chosen={project.chosen}
+                      over={project.over}
+                      evidence={project.evidence}
+                    />
                   </div>
 
                   <div className={`min-w-0 ${wide ? 'mt-5 lg:mt-0' : 'mt-5'}`}>
@@ -358,15 +497,6 @@ export function ProjectsSection(): JSX.Element {
                         wide ? 'lg:border-t-0 lg:pt-0' : ''
                       }`}
                     >
-                      <p className="text-2xs tracking-domain font-mono font-semibold text-zinc-400 uppercase">
-                        Evidence boundary
-                      </p>
-                      <p className="mt-1 border-l-2 border-white/15 pl-3 text-xs leading-5 text-zinc-300">
-                        {project.evidence}
-                      </p>
-                    </div>
-
-                    <div className="mt-4">
                       <p className="text-2xs tracking-domain font-mono font-semibold text-zinc-400 uppercase">
                         Runtime and data stack
                       </p>
@@ -402,6 +532,10 @@ export function ProjectsSection(): JSX.Element {
                       </summary>
 
                       <div className="border-accent-cyan/25 bg-obsidian-base mt-3 border p-4">
+                        <FailureFlowStepper
+                          projectTitle={project.title}
+                          stages={project.flowStages}
+                        />
                         <p className="text-2xs tracking-domain font-mono font-semibold text-zinc-400 uppercase">
                           Implementation note
                         </p>

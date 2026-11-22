@@ -150,7 +150,7 @@ test.describe('Production portfolio smoke tests', () => {
     await expect(page.locator('#deployments')).toHaveCount(0);
   });
 
-  test('contact section exposes the canonical email and labelled brief form', async ({ page }) => {
+  test('contact section exposes the canonical email and dual-mode hiring and consulting form', async ({ page }) => {
     await goto(page);
 
     const section = page.locator('section#contact[aria-labelledby="contact-section-heading"]');
@@ -159,8 +159,12 @@ test.describe('Production portfolio smoke tests', () => {
     await expect(section.locator(`a[href="mailto:${CONTACT_EMAIL}"]`)).toBeVisible();
     await expect(section.locator('#contact-name')).toHaveAccessibleName(/^NAME/i);
     await expect(section.locator('#contact-email')).toHaveAccessibleName(/^EMAIL/i);
-    await expect(section.locator('#contact-inquiry-type')).toHaveAccessibleName(/ENGAGEMENT TYPE/i);
+    await expect(section.locator('#contact-company')).toHaveAccessibleName(/COMPANY \/ TEAM/i);
     await expect(section.locator('#contact-timeline')).toHaveAccessibleName(/TIMELINE/i);
+    await expect(section.locator('#contact-message')).toHaveAccessibleName(/ROLE AND TEAM CONTEXT/i);
+
+    await section.getByRole('button', { name: /Architecture & Consulting/i }).click();
+    await expect(section.locator('#contact-inquiry-type')).toHaveAccessibleName(/ENGAGEMENT TYPE/i);
     await expect(section.locator('#contact-scope')).toHaveAccessibleName(/SYSTEM DOMAIN/i);
     await expect(section.locator('#contact-stakes')).toHaveAccessibleName(/OPERATIONAL OR BUSINESS IMPACT/i);
     await expect(section.locator('#contact-message')).toHaveAccessibleName(/CONSTRAINTS AND OBJECTIVES/i);

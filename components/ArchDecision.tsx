@@ -17,17 +17,17 @@ export function ArchDecision({
 }: ArchDecisionProps) {
   return (
     <figure
-      className={`my-6 rounded-xl border border-white/10 bg-zinc-950/90 p-5 ${className}`}
+      className={`my-6 border border-white/10 border-t-2 border-t-accent-cyan/60 bg-obsidian-surface p-5 ${className}`.trim()}
     >
       {title && (
-        <figcaption className="mb-4 border-b border-white/10 pb-3 text-sm font-semibold tracking-tight text-zinc-100">
+        <figcaption className="mb-4 border-b border-white/10 pb-3 font-display text-base font-semibold tracking-tight text-white">
           {title}
         </figcaption>
       )}
 
       <dl className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-3">
-          <dt className="inline-flex w-fit shrink-0 items-center rounded border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 font-mono text-xs font-semibold uppercase tracking-wider text-emerald-300">
+          <dt className="inline-flex w-fit shrink-0 items-center border border-accent-emerald/35 bg-accent-emerald/10 px-2 py-0.5 font-mono text-2xs font-semibold uppercase tracking-wider text-accent-emerald">
             Chosen
             <span className="sr-only">: </span>
           </dt>
@@ -37,7 +37,7 @@ export function ArchDecision({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:gap-3">
-          <dt className="inline-flex w-fit shrink-0 items-center rounded border border-white/15 bg-zinc-900 px-2 py-0.5 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-400">
+          <dt className="inline-flex w-fit shrink-0 items-center border border-white/15 bg-obsidian-base px-2 py-0.5 font-mono text-2xs font-semibold uppercase tracking-wider text-zinc-300">
             Over
             <span className="sr-only">: </span>
           </dt>
@@ -46,7 +46,7 @@ export function ArchDecision({
 
         {rationale && (
           <div className="border-t border-white/10 pt-3">
-            <dt className="font-mono text-xs uppercase tracking-wider text-cyan-400">
+            <dt className="font-mono text-2xs font-semibold uppercase tracking-domain text-accent-cyan">
               Rationale
               <span className="sr-only">: </span>
             </dt>
@@ -58,7 +58,7 @@ export function ArchDecision({
 
         {tradeoff && (
           <div className="border-t border-white/10 pt-3">
-            <dt className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+            <dt className="font-mono text-2xs font-semibold uppercase tracking-domain text-zinc-400">
               Accepted Trade-off
               <span className="sr-only">: </span>
             </dt>

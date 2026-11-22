@@ -26,6 +26,11 @@ export interface WorkCaseMeta {
   tags: string[];
 }
 
+export interface ContentHeading {
+  id: string;
+  text: string;
+}
+
 interface WritingFrontmatter {
   title: string;
   date: string;
@@ -57,6 +62,38 @@ function calculateReadingTime(content: string) {
 
 function isSafeContentSlug(slug: string): boolean {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+}
+
+/**
+ * Matches github-slugger (used by rehype-slug) so sidebar outline links resolve
+ * to the exact rendered H2 anchor IDs without adding a runtime dependency.
+ */
+export function slugifyHeading(text: string): string {
+  return text
+    .replace(/`([^`]+)`/g, '$1')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/ /g, '-');
+}
+
+export function extractMarkdownHeadings(markdown: string): ContentHeading[] {
+  const withoutCodeBlocks = markdown.replace(/```[\s\S]*?```/g, '');
+  const counts = new Map<string, number>();
+  const headings: ContentHeading[] = [];
+
+  for (const match of withoutCodeBlocks.matchAll(/^##\s+(.+)$/gm)) {
+    const rawText = match[1]?.trim() ?? '';
+    if (!rawText) continue;
+    const cleanText = rawText.replace(/`([^`]+)`/g, '$1');
+    const base = slugifyHeading(rawText) || 'section';
+    const seen = counts.get(base) ?? 0;
+    counts.set(base, seen + 1);
+    const id = seen === 0 ? base : `${base}-${seen}`;
+    headings.push({ id, text: cleanText });
+  }
+
+  return headings;
 }
 
 export async function getWritingPosts(): Promise<WritingPost[]> {
@@ -106,10 +143,13 @@ export async function getWritingPost(slug: string) {
     components: getMDXComponents({}),
   });
 
+  const body = matter(source).content;
+
   return {
     frontmatter,
     content,
-    readingTime: calculateReadingTime(matter(source).content),
+    headings: extractMarkdownHeadings(body),
+    readingTime: calculateReadingTime(body),
   };
 }
 
@@ -155,8 +195,11 @@ export async function getWorkCase(slug: string) {
     components: getMDXComponents({}),
   });
 
+  const body = matter(source).content;
+
   return {
     frontmatter,
     content,
+    headings: extractMarkdownHeadings(body),
   };
 }

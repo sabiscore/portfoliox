@@ -24,6 +24,8 @@ const identityStyles = read('components/identityCardStyles.ts');
 const copyEmail = read('components/CopyEmail.tsx');
 const portraitShader = read('components/cinematic/HeroPortraitShader.tsx');
 const projects = read('components/ProjectsSection.tsx');
+const projectCardInteractive = read('components/ProjectCardInteractive.tsx');
+const productionPatterns = read('components/ProductionPatterns.tsx');
 const skills = read('components/SkillsSection.tsx');
 const contact = read('components/ContactSection.tsx');
 const footer = read('components/Footer.tsx');
@@ -128,6 +130,8 @@ const tokenScopedFiles = [
   ['components/CopyEmail.tsx', copyEmail],
   ['components/cinematic/HeroPortraitShader.tsx', portraitShader],
   ['components/ProjectsSection.tsx', projects],
+  ['components/ProjectCardInteractive.tsx', projectCardInteractive],
+  ['components/ProductionPatterns.tsx', productionPatterns],
   ['components/SkillsSection.tsx', skills],
   ['components/Liveactivitybar.tsx', telemetry],
   ['components/ContactSection.tsx', contact],

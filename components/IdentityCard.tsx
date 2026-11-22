@@ -74,7 +74,7 @@ export function IdentityCard({
           ENGINEERING PROFILE
         </p>
         <span className="shrink-0 border border-white/15 bg-obsidian-base px-2 py-1 font-mono text-2xs tracking-wider text-zinc-300">
-          LAGOS, NG
+          LAGOS · REMOTE
         </span>
       </div>
 
@@ -126,12 +126,15 @@ export function IdentityCard({
       {children ? <div className={IDENTITY_CARD_LEDGER_SLOT_CLASSNAME}>{children}</div> : null}
 
       <div className={IDENTITY_CARD_FOOTER_CLASSNAME}>
+        <p className="mb-3 font-mono text-micro tracking-wide text-zinc-300">
+          Staff / Principal roles · Scoped architecture &amp; reliability reviews
+        </p>
         <div className="flex items-center gap-2.5">
           <CopyEmail
             email={CONTACT_EMAIL}
             variant="primary"
             label="COPY EMAIL ADDRESS"
-            copiedLabel="COPIED TO CLIPBOARD"
+            copiedLabel="COPIED ✓"
             onStatusChange={setCopyStatus}
           />
           <a
@@ -141,7 +144,7 @@ export function IdentityCard({
             aria-label="Open résumé PDF in a new tab"
             className={IDENTITY_CARD_CV_CTA_CLASSNAME}
           >
-            <span>CV.PDF</span>
+            <span>RÉSUMÉ</span>
             <span
               aria-hidden="true"
               className="text-zinc-400 motion-safe:transition-transform motion-safe:duration-150 group-hover/cv:text-accent-cyan motion-safe:group-hover/cv:-translate-y-0.5 motion-safe:group-hover/cv:translate-x-0.5"

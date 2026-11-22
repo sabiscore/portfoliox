@@ -24,23 +24,23 @@ export const STATUS_TONE: Record<EvidenceStatus, { chip: string; dot: string; he
     hex: '#fcd34d',
   },
   'PUBLIC DEMO': {
-    chip: 'border-[#00D9FF]/40 bg-[#00D9FF]/10 text-[#00D9FF]',
-    dot: 'bg-[#00D9FF]',
+    chip: 'border-accent-cyan/40 bg-accent-cyan/10 text-accent-cyan',
+    dot: 'bg-accent-cyan',
     hex: '#00D9FF',
   },
   'PUBLIC SOURCE': {
-    chip: 'border-[#00FF66]/35 bg-[#00FF66]/10 text-[#00FF66]',
-    dot: 'bg-[#00FF66]',
+    chip: 'border-accent-emerald/35 bg-accent-emerald/10 text-accent-emerald',
+    dot: 'bg-accent-emerald',
     hex: '#00FF66',
   },
   'PRIVATE CASE STUDY': {
-    chip: 'border-white/15 bg-white/[0.03] text-zinc-300',
+    chip: 'border-white/15 bg-white/5 text-zinc-300',
     dot: 'bg-zinc-400',
     hex: '#a1a1aa',
   },
   'SCOPED ENGAGEMENT': {
-    chip: 'border-[#00D9FF]/30 bg-white/[0.03] text-zinc-200',
-    dot: 'bg-[#00D9FF]',
+    chip: 'border-accent-cyan/30 bg-white/5 text-zinc-200',
+    dot: 'bg-accent-cyan',
     hex: '#00D9FF',
   },
 };
@@ -70,7 +70,7 @@ export const WORK_CASE_META: Record<string, WorkCaseRecordMeta> = {
   },
   'yap-engine': {
     slug: 'yap-engine',
-    title: 'YapCommerce / Yap Engine',
+    title: 'The Yap Engine',
     domain: 'AI WORKFLOWS · MEDIA PIPELINE',
     status: 'PUBLIC SOURCE',
     tagline:
@@ -117,18 +117,44 @@ export const WORK_CASE_META: Record<string, WorkCaseRecordMeta> = {
     domain: 'ML INFRASTRUCTURE · ADVISORY',
     status: 'SCOPED ENGAGEMENT',
     tagline:
-      'Deliverable-led ML infrastructure engagements — incident remediation, inference optimisation, audit-traceable documentation, and production pipeline reviews.',
+      'Scoped ML infrastructure engagements covering incident remediation, inference optimization, and audit-ready production pipeline documentation.',
     evidence:
       'Deliverable-led consulting scope. Client-system evidence remains subject to engagement disclosure boundaries.',
   },
 };
 
 export const WORK_CASE_ORDER: readonly string[] = [
-  'taxbridge',
   'sabiscore',
+  'taxbridge',
   'yap-engine',
   'ubec',
   'swarmxq',
   'hashablanca',
   'ml-consulting',
 ];
+
+/**
+ * Verified bidirectional mapping between engineering notes (/writing/[slug])
+ * and system case studies (/work/[slug]), grounded in explicit article content.
+ */
+export const WRITING_TO_WORK_SLUGS: Readonly<Record<string, readonly string[]>> = {
+  'building-sabiscore': ['sabiscore'],
+  'production-ml-reliability': ['sabiscore'],
+  'taxbridge-compliance-architecture': ['taxbridge'],
+  'swarmxq-agent-orchestration': ['swarmxq'],
+  'building-lagos-running-globally': ['sabiscore', 'taxbridge', 'swarmxq'],
+  'zero-downtime-design': [],
+};
+
+export function getRelatedWorkForWriting(writingSlug: string): WorkCaseRecordMeta[] {
+  const workSlugs = WRITING_TO_WORK_SLUGS[writingSlug] ?? [];
+  return workSlugs
+    .map((slug) => WORK_CASE_META[slug])
+    .filter((entry): entry is WorkCaseRecordMeta => Boolean(entry));
+}
+
+export function getRelatedWritingSlugsForWork(workSlug: string): string[] {
+  return Object.entries(WRITING_TO_WORK_SLUGS)
+    .filter(([, workSlugs]) => workSlugs.includes(workSlug))
+    .map(([writingSlug]) => writingSlug);
+}
